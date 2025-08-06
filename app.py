@@ -5,7 +5,7 @@ from psycopg2 import OperationalError
 def create_connection():
     try:
         # Connect to PSQL database
-        connection = psycopg2.connector.connect(
+        connection = psycopg2.connect(
             host='localhost',          # PSQL host
             user='postgres',      # PSQL username
             password='Admin@123',  # PSQL password

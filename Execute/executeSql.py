@@ -1,0 +1,93 @@
+from route import psycopg2
+from Execute import responses,middleware
+#for Selecting All record
+def ExecuteAll(query,data):
+    try:
+        cur = psycopg2.connection.cursor()
+        cur.execute(query,data)
+        result = cur.fetchall()
+        psycopg2.connection.commit()
+        cur.close()
+        return result
+    except Exception as e:
+                print("Error in ExecuteAll=============================",e)
+                return middleware.exe_msgs(responses.execution_501,str(e.args),'1023300')
+
+#for selecting one record
+def ExecuteReturn(query,data):
+    try:
+        cur = psycopg2.connection.cursor()
+        cur.execute(query,data)
+        result = cur.fetchone()
+        psycopg2.connection.commit()
+        cur.close()
+        return result
+    except Exception as e:
+                print("Error in ExecuteReturn============================",e)
+                return middleware.exe_msgs(responses.execution_501,str(e.args),'1022300')
+
+
+#for executing one record with no return data
+def ExecuteOne(query,data):
+    try:
+        cur = psycopg2.connection.cursor()
+        cur.execute(query,data)
+        result=responses.execution_200
+        psycopg2.connection.commit()
+        cur.close()
+        return result
+    except Exception as e:
+                print("Error in ExecuteOne==============================",e)
+                return middleware.exe_msgs(responses.execution_501,str(e.args),'1020300')
+    
+
+#for executing many record with no return data
+def ExecuteMany(query,data):
+    try:
+        cur = psycopg2.connection.cursor()
+        cur.executemany(query,data)
+        result=responses.execution_200
+        psycopg2.connection.commit()
+        cur.close()
+        return result
+    except Exception as e:
+                print("Error in ExecuteMany==============================",e)
+                return middleware.exe_msgs(responses.execution_501,str(e.args),'1020300')
+
+#for returning Inserted Id
+def ExecuteReturnId(query,data):
+    try:
+        cur = psycopg2.connection.cursor()
+        cur.execute(query,data)
+        id=psycopg2.connection.insert_id()
+        result = id
+        psycopg2.connection.commit()
+        cur.close()
+        return result
+    except Exception as e:
+                print("Error in ExecuteReturnId=============================",e)
+                return middleware.exe_msgs(responses.execution_501,str(e.args),'1022300')
+
+
+
+def ExecuteAllNew(query,data):
+    try:
+        cur = psycopg2.connection.cursor()
+        cur.execute(query,data)
+        results = cur.fetchall()
+        if len(results) == 0:
+            #return middleware.exe_msgs(responses.getAll_200,"No Record Found",'1023300')
+            payload = []
+            return payload
+        row_headers=[x[0] for x in cur.description] #this will extract row headers
+        psycopg2.connection.commit()
+        cur.close()
+        payload = []
+        for result in results:
+            payload.append(dict(zip(row_headers,result)))
+        return payload
+    except Exception as e:
+        print("Error in ExecuteAll=============================",e)
+        return middleware.exe_msgs(responses.execution_501,str(e.args),'1023300')
+
+

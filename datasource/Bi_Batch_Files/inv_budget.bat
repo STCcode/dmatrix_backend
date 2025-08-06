@@ -1,0 +1,1 @@
+start E:\working-directory\BITOOL_DONE\logstash-6.4.0\bin\logstash -f E:\working-directory\BITOOL_DONE\datasource\ConfFiles\inv_budget.conf

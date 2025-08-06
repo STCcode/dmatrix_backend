@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		<meta charset="utf-8" />
+		<title>SmartLytic Main</title>
+	
+		<meta name="description" content="overview &amp; stats" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+	
+		<!-- bootstrap & fontawesome -->
+		<link rel="stylesheet" href="{{url_for('static',filename='assets/css/bootstrap.min.css')}}" />
+		<link rel="stylesheet" href="{{url_for('static',filename='assets/font-awesome/4.5.0/css/font-awesome.min.css')}}" />
+	
+		<!-- page specific plugin styles -->
+	
+		<!-- text fonts -->
+		<link rel="stylesheet" href="{{url_for('static',filename='assets/css/fonts.googleapis.com.css')}}" />
+	
+		<!-- ace styles -->
+	
+		<link rel="stylesheet" href="{{url_for('static',filename='assets/css/ace.min.css')}}" class="ace-main-stylesheet" id="main-ace-style" />
+	
+		<!--[if lte IE 9]>
+				<link rel="stylesheet" href="assets/css/ace-part2.min.css" class="ace-main-stylesheet" />
+			<![endif]-->
+		<link rel="stylesheet" href="{{url_for('static',filename='assets/css/ace-skins.min.css')}}" />
+		<link rel="stylesheet" href="{{url_for('static',filename='assets/css/ace-rtl.min.css')}}" />
+	
+	
+		<!-- Notification files -->
+	
+		<link rel="stylesheet" href="{{url_for('static',filename='assets/css/notification.css')}}" />
+		<!--[if lte IE 9]>
+			  <link rel="stylesheet" href="assets/css/ace-ie.min.css" />
+			<![endif]-->
+	
+		<!-- inline styles related to this page -->
+	
+		<!-- ace settings handler -->
+		<script src="{{url_for('static',filename='assets/js/ace-extra.min.js')}}"></script>
+	
+	
+		<link rel="stylesheet" href="{{url_for('static',filename='assets/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css')}}">
+		<link rel="stylesheet" href="{{url_for('static',filename='assets/custom_css.css')}}">
+		<link href="{{url_for('static',filename='assets/css/jquery.multiselect.css')}}" rel="stylesheet" type="text/css">
+		<link rel="stylesheet" href="{{url_for('static',filename='dist/css/AdminLTE.min.css')}}">
+		<!-- 
+			<script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.1/Chart.min.js'></script> -->
+	
+	
+	
+		<script src="{{url_for('static',filename='js/Chart2.7.js')}}"></script>
+	
+	
+		<!-- Bundle: Easiest to use, supports all browsers -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@2.6.0/dist/pptxgen.bundle.js"></script>
+	
+		<!-- Individual files: Add only what's needed to avoid clobbering loaded libraries -->
+		<script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@2.6.0/libs/jquery.min.js"></script>
+	
+		<!-- <script src="{{url_for('static',filename='assets/js/bootstrap.min.js')}}"></script> // added by me -->
+	
+		<script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@2.6.0/libs/jszip.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@2.6.0/dist/pptxgen.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
+	
+		<link rel="stylesheet" href="{{url_for('static',filename='css-loader-master/dist/css-loader.css')}}" />
+		<!-- 
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js"></script> -->
+		<!-- HTML5shiv and Respond.js for IE8 to support HTML5 elements and media queries -->
+	
+	
+		<style>
+	
+		</style>
+		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.11/c3.min.css">
+		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.13.0/pivot.min.css">
+	
+		<!-- <link href="{{url_for('static',filename='vakata-jstree-bc5187e/dist/themes/style.min.css')}}">
+		</link> -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+	
+		<link rel="stylesheet" href="{{url_for('static',filename='assets/custom_css.css')}}">
+	
+	
+	
+	
+		<!--[if lte IE 8]>
+			<script src="assets/js/html5shiv.min.js"></script>
+			<script src="assets/js/respond.min.js"></script>
+			<![endif]-->
+	</head>
+
+<body>
+
+
+	<div class="main-container ace-save-state" id="main-container">
+
+		<div class="main-content">
+			<div class="main-content-inner">
+
+
+
+				<div class="page-content">
+
+
+					<section class='content'>
+						<div id="layoutPage"></div>
+						<div id="scriptDiv"></div>
+					
+					
+					</section>
+					
+
+				</div><!-- /.page-content -->
+			</div>
+		</div><!-- /.main-content -->
+
+		<!-- <div class="footer">
+				<div class="footer-inner">
+					<div class="footer-content">
+						<span class="bigger-120">
+							<span class="blue bolder">Apponext Inc.</span>
+							 &copy; 2018-2019
+						</span>
+
+						&nbsp; &nbsp;
+						<span class="action-buttons">
+							<a href="#">
+								<i class="ace-icon fa fa-twitter-square light-blue bigger-150"></i>
+							</a>
+
+							<a href="#">
+								<i class="ace-icon fa fa-facebook-square text-primary bigger-150"></i>
+							</a>
+
+							<a href="#">
+								<i class="ace-icon fa fa-rss-square orange bigger-150"></i>
+							</a>
+						</span>
+					</div>
+				</div>
+			</div> -->
+
+		<a href="#" id="btn-scroll-up" class="btn-scroll-up btn btn-sm btn-inverse">
+			<i class="ace-icon fa fa-angle-double-up icon-only bigger-110"></i>
+		</a>
+	</div><!-- /.main-container -->
+
+    <!-- /.main-container -->
+
+    <!-- basic scripts -->
+
+    <!--[if !IE]> -->
+    <script src="{{url_for('static',filename='assets/js/jquery-2.1.4.min.js')}}"></script>
+    <!-- <![endif]-->
+
+    <!--[if IE]>
+<script src="assets/js/jquery-1.11.3.min.js"></script>
+<![endif]-->
+    <script type="text/javascript">
+        if ('ontouchstart' in document.documentElement) document.write("<script src={{url_for('static',filename='assets/js/jquery.mobile.custom.min.js')}}>" + "<" + "/script>");
+    </script>
+    <!-- <script src="{{url_for('static',filename='assets/js/bootstrap.min.js')}}"></script> -->
+
+    <script src="{{url_for('static',filename='js/xolor-master/dist/xolor.umd.js')}}"></script>
+
+
+
+    <!-- page specific plugin scripts -->
+
+    <!--[if lte IE 8]>
+		  <script src="assets/js/excanvas.min.js"></script>
+		<![endif]-->
+    <script src="{{url_for('static',filename='assets/js/jquery-ui.custom.min.js')}}"></script>
+    <script src="{{url_for('static',filename='assets/js/jquery.ui.touch-punch.min.js')}}"></script>
+    <script src="{{url_for('static',filename='assets/js/jquery.easypiechart.min.js')}}"></script>
+    <script src="{{url_for('static',filename='assets/js/jquery.sparkline.index.min.js')}}"></script>
+    <script src="{{url_for('static',filename='assets/js/jquery.flot.min.js')}}"></script>
+    <script src="{{url_for('static',filename='assets/js/jquery.flot.pie.min.js')}}"></script>
+    <script src="{{url_for('static',filename='assets/js/jquery.flot.resize.min.js')}}"></script>
+
+
+
+    <!-- <script src="http://phuonghuynh.github.io/js/bower_components/jquery/dist/jquery.min.js"></script> -->
+    <!-- <script src="http://phuonghuynh.github.io/js/bower_components/d3/d3.min.js"></script> -->
+    <!-- d3 Bubble-chart js Plugins -->
+    <!-- <script src="http://phuonghuynh.github.io/js/bower_components/d3-transform/src/d3-transform.js"></script> -->
+    <script src="{{url_for('static',filename='js/jquery3.1.min.js')}}"></script>
+    <script src="{{url_for('static',filename='assets/js/jquery.multiselect.js')}}"></script>
+    <!-- <script src="{{url_for('static',filename='js/multiselect.js')}}"></script> -->
+    <script src="{{url_for('static',filename='javascript/multiselectActions.js')}}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+    <!-- <script src="{{url_for('static',filename='vakata-jstree-bc5187e/dist/jstree.min.js')}}"></script> -->
+
+    <!-- Notification js file -->
+    <script src="{{url_for('static',filename='js/notification.js')}}"></script>
+
+
+
+    <link rel="stylesheet" href="{{url_for('static',filename='assets/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css')}}">
+
+    <script src="{{url_for('static',filename='assets/bower_components/datatables.net/js/jquery.dataTables.min.js')}}"></script>
+    <script src="{{url_for('static',filename='assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js')}}"></script>
+    <script src="{{url_for('static',filename='js/turnjs4/lib/turn.min.js')}}"></script>
+
+    <script type="text/javascript" src="{{url_for('static',filename='js/jquery-ui.min.js')}}"></script>
+    <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+	 -->
+    <script type="text/javascript" src="{{url_for('static',filename='js/jquery.ui.touch-punch.min.js')}}"></script>
+    <script type="text/javascript" src="{{url_for('static',filename='js/c3.min.js')}}"></script>
+    <script type="text/javascript" src="{{url_for('static',filename='js/pivot.min.js')}}"></script>
+    <!-- <script type="text/javascript"
+		src="{{url_for('static',filename='js/c3_renderers.min.js')}}"></script>
+	 -->
+    <script type="text/javascript" src="{{url_for('static',filename='js/tips_data.min.js')}}"></script>
+
+    <!-- <script src="http://d3js.org/d3.v3.min.js" language="JavaScript"></script> -->
+
+    <script src="{{url_for('static',filename='assets/bower_components/bootstrap/dist/js/bootstrap.min.js')}}"></script>
+
+    <script src="{{url_for('static',filename='js/d3.v4.min.js')}}"></script>
+
+    <script src="{{url_for('static',filename='js/chartjs-plugin-labels.js')}}"></script>
+
+    <script src="{{url_for('static',filename='js/liquidFillGauge.js')}}"></script>
+    <script src="{{url_for('static',filename='js/d3-scale-chromatic.v1.min.js')}}"></script>
+    <script src="{{url_for('static',filename='js/queue.v1.min.js')}}"></script>
+    <script src="{{url_for('static',filename='js/topojson.v1.min.js')}}"></script>
+    <script src="{{url_for('static',filename='js/d3-tip.min.js')}}"></script>
+
+
+
+
+    <!-- <script src="http://phuonghuynh.github.io/js/bower_components/jquery/dist/jquery.min.js"></script> -->
+    <!-- <script src="http://phuonghuynh.github.io/js/bower_components/d3/d3.min.js"></script> -->
+    <!-- d3 Bubble-chart js Plugins -->
+    <!-- <script
+		src="{{url_for('static',filename='d3-tip.js')}}"></script> -->
+    <!-- <script src="http://phuonghuynh.github.io/js/bower_components/d3-transform/src/d3-transform.js"></script> -->
+
+    <!-- ace scripts -->
+
+    <script src="{{url_for('static',filename='assets/js/ace-elements.min.js')}}"></script>
+	<script src="{{url_for('static',filename='assets/js/ace.min.js')}}"></script>
+	<script type="text/javascript" src="static/javascript/EmailcreateDashboard.js"></script>
+
+</body>
+
+</html>

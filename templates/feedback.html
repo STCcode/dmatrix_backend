@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<meta charset="utf-8" />
+	<title>SmartLytic Login</title>
+
+	<meta name="description" content="User login page" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+
+
+
+
+
+	<!-- ace styles -->
+	<link rel="stylesheet" href="{{url_for('static',filename='assets/css/ace.min.css')}}" />
+
+	<!--[if lte IE 9]>
+			<link rel="stylesheet" href="assets/css/ace-part2.min.css" />
+		<![endif]-->
+	<link rel="stylesheet" href="{{url_for('static',filename='assets/css/ace-rtl.min.css')}}">
+
+	<!-- Bootstrap 3.3.7 -->
+	<link rel="stylesheet"
+		href="{{url_for('static',filename='assets/bower_components/bootstrap/dist/css/bootstrap.min.css')}}">
+	<!-- Font Awesome -->
+	<link rel="stylesheet"
+		href="{{url_for('static',filename='assets/bower_components/font-awesome/css/font-awesome.min.css')}}">
+	<!-- Ionicons -->
+	<link rel="stylesheet"
+		href="{{url_for('static',filename='assets/bower_components/Ionicons/css/ionicons.min.css')}}">
+	<!-- Theme style -->
+	<link rel="stylesheet" href="{{url_for('static',filename='dist/css/AdminLTE.min.css')}}">
+
+	<link rel="stylesheet"
+		href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+
+	<link rel="stylesheet" href="{{url_for('static',filename='assets/custom_css.css')}}">
+	<script src="{{url_for('static',filename='javascript/chklicence.js')}}"></script>
+
+
+
+</head>
+
+<body class="login-layout light-login">
+	<div class="main-container">
+		<div class="main-content">
+			<div class="row">
+				<div class="col-sm-10 col-sm-offset-1">
+					<div class="login-container">
+						<div class="center">
+							<h1>
+								<!-- 	<i class="ace-icon fa fa-leaf green"></i> -->
+								<span class="red">Smart</span>
+								<span class="white" id="id-text2">Lytic</span>
+							</h1>
+							<!-- 
+								<h4 class="blue" id="id-company-text">&copy; Company Name</h4> -->
+						</div>
+
+						<div class="space-6"></div>
+
+						<div class="position-relative">
+							<div id="login-box" class="login-box visible widget-box no-border">
+								<div class="widget-body">
+									<div class="widget-main">
+											<div style='color:red;'  id="Smess">{{obj}}</div>
+											<div style='color:red;' id="mess">{{obj}}</div>
+										<h3 class="header blue lighter bigger">
+											<i class="ace-icon fa fa-coffee green"></i>
+											Please upload your Key and Licence 
+										</h3>
+
+										<div class="space-6"></div>
+										
+										<form action="/verifykeyandlicence"  method="POST" target="myFrame" enctype="multipart/form-data" name="formlicenceveriFile" id="formlicenceveriFile">
+											<fieldset>
+												<label class="block clearfix">
+													<span class="block input-icon input-icon-right">
+														<input type="file" id="inputkeyfile" name='inputkeyfile' required>
+														<i class="ace-icon fa fa-key"></i>
+													</span>
+												</label>
+                                                <div class="space"></div>
+												<label class="block clearfix">
+													<span class="block input-icon input-icon-right">
+														<input type="file" id="inputlicencefile" name='inputlicencefile' required>
+														<i class="ace-icon fa fa-certificate"></i>
+													</span>
+												</label>
+
+												<div class="space"></div>
+												
+
+												<div class="clearfix">
+													<button type="submit" class="width-35 pull-right btn btn-sm btn-primary">
+														<i class="ace-icon fa fa-key"></i>
+														<span class="bigger-110" id='btnLogin' name='btnLogin' >Submit</span>
+													</button>
+												</div>
+
+												<div class="space-4"></div>
+											</fieldset>
+										</form>
+
+
+									</div><!-- /.widget-body -->
+								</div><!-- /.login-box -->
+							</div><!-- /.position-relative -->
+
+
+						</div>
+					</div><!-- /.col -->
+				</div><!-- /.row -->
+			</div><!-- /.main-content -->
+		</div><!-- /.main-container -->
+
+		<!-- jQuery 3 -->
+		<script src="{{url_for('static',filename='assets/bower_components/jquery/dist/jquery.min.js')}}"></script>
+		<!-- Bootstrap 3.3.7 -->
+		<script
+			src="{{url_for('static',filename='assets/bower_components/bootstrap/dist/js/bootstrap.min.js')}}"></script>
+		<!-- <![endif]-->
+
+		<!--[if IE]>
+			<script src="assets/js/jquery-1.11.3.min.js"></script>
+		<![endif]-->
+		<script type="text/javascript">
+			if ('ontouchstart' in document.documentElement) document.write("<script src='assets/js/jquery.mobile.custom.min.js'>" + "<" + "/script>");
+		</script>
+
+
+<iframe id="myFrame" name="myFrame" height="50%" width="50%"  style="display: none;" onload="onloadFunc()"></iframe>
+</body>
+
+</html>

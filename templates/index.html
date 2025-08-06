@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<meta charset="utf-8" />
+	<title>GCL Login</title>
+
+	<meta name="description" content="User login page" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <!-- Latest compiled and minified CSS -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css"> -->
+    <link rel="stylesheet" href="{{url_for('static',filename='assets/css/bootstrap.min.css')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename='assets/css/css-loader.css')}}">
+    <style>
+/* 
+        .form-control{
+            border: 1px solid rgb(218, 218, 218);
+            padding: 5px;
+            width: 100px;
+            border-radius: 3px;
+            
+        } */
+ 
+
+        .login,
+        .image {
+            min-height: 100vh;
+        }
+        .p-5 {
+        padding: 2rem !important;
+}
+        
+        .bg-image {
+            background-image: url("{{url_for('static',filename='assets/img/5031659.jpg')}}");
+            background-size: cover;
+            background-position: center center;
+            /* height: 100px; */
+        }
+        /*  */
+     
+
+    .card {
+        background: rgba(255, 255, 255, 0.85); /* Slight transparency for a clean look */
+        backdrop-filter: blur(10px); /* Glassmorphism effect */
+    }
+        /*  */
+        
+        .mybtn {
+            background-color: #191512 !important;
+            border-color: #191512 !important;
+            color: white !important;
+        }
+        
+        .ta {
+            text-align: center;
+        }
+        
+        .fpset {
+            margin-top: 50px;
+        }
+        
+        @media (min-width: 1200px) {
+            .col-xl-7 {
+                flex: 0 0 100% !important;
+                max-width: 100% !important;
+            }
+        }
+        
+        a:hover {
+            color: #80bdff;
+            text-decoration: underline;
+        }
+        
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            font-size: 13px;
+        }
+        
+        .colr {
+            color: rgb(0, 0, 0);
+            text-decoration: none !important;
+        }
+        
+        .colr:hover {
+            color: #acacac;
+            text-decoration: underline;
+        }
+        
+        .pset {
+            margin-bottom: 0rem !important;
+            margin-bottom: 0rem !important;
+            position: relative;
+            top: 100px;
+            font-size: 11px !important;
+            text-align: center;
+        }
+        
+        .form-error {
+            position: relative;
+            left: 25px;
+            font-size: 13px;
+            color: red;
+            top: 5px;
+        }
+        
+        .bg-light {
+            background-color: #ffffff !important;
+        }
+        
+        .shadow-sm {
+            box-shadow: 2px 2px 8px #d4d4d4 !important;
+        }
+        .img_1{
+            width: 100%;
+            margin-bottom: 40px;
+        }
+        ::-webkit-input-placeholder {
+   font-style: italic;
+}
+:-moz-placeholder {
+   font-style: italic;  
+}
+::-moz-placeholder {
+   font-style: italic;  
+}
+:-ms-input-placeholder {  
+   font-style: italic; 
+}
+    </style>
+</head>
+
+<body>
+
+    <div id="loader" class="loader loader-bar" data-rounded data-text="Loading"></div>
+    <div class="container-fluid">
+        <div class="row no-gutter">
+            <!-- The image half -->
+            <div class="col-md-8 d-none d-md-flex bg-image"></div>
+
+
+            <!-- The content half -->
+            <div class="col-md-4 bg-light">
+                <div class="login d-flex align-items-center py-5">
+                    <!-- Demo content-->
+                    <div class="container">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-10 col-xl-7">
+                                <div class="card shadow-sm border-0">
+                                    <div class="card-body p-5">
+                                        <h3 class="text-center mb-4">
+                                            <!-- <img src="../assets/img/logo.png" alt="ultratech india"> -->
+                        
+                                            <!-- <img class="img_1" src="{{url_for('static',filename='assets/img/goa-carbon-logo.png')}}" alt="ultratech india"> -->
+                                            <img class="img_1 mb-3" src="{{url_for('static',filename='assets/img/goa-carbon-logo.png')}}" alt="pil" >
+                                        </h3>
+                                        <p class="text-muted text-center mb-4">Welcome! Please login to your account.</p>
+                                        <form class="form" id="form-login" name="form-login" onsubmit="return false;">
+                                            <div class="form-group mb-3">
+                                                <input id="emailid" name="emailid" type="text" placeholder="Enter Email" required="" autofocus="true" 
+                                                    class="form-control border px-4" data-validation="required" 
+                                                    onkeydown="chk_cps(event)" tabindex="0">
+                                            </div>
+                                            <div class="form-group mb-3">
+                                                <input id="pass" name="pass" type="password" placeholder="Enter Password" required="" 
+                                                    class="form-control border px-4" data-validation="required" 
+                                                    onkeydown="chk_cps(event)">
+                                            </div>
+                                            <p id="inputUid_error" class="text-danger"></p>
+                                            <button id="login_btn" type="submit" 
+                                                class="btn btn-dark btn-block text-uppercase mb-2 shadow-sm">Sign in</button>
+                                        </form>
+                                        <!-- Optional footer -->
+                                        <div class="text-center mt-4">
+                                            <p class="ta fpset" onclick="forgetpassword();" style="cursor: pointer;">Forgot Password?</p>
+                                        </div>
+                                        <!-- Footer text -->
+                                        <p class="text-center mt-4 pset">
+                                            <small>Developed & Designed by 
+                                                <a class="colr" target="_blank" href="https://www.kosqu.com" 
+                                                    style="font-family: 'SF Orson Casual Heavy', sans-serif !important; font-size: 14px;">kosqu</a>
+                                            </small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <!-- End -->
+
+                </div>
+            </div>
+            <!-- End -->
+
+        </div>
+
+
+    </div>
+    
+    <script src="{{url_for('static',filename='vendor/jquery/jquery-1.11.1.min.js')}}"></script>
+    <script src="{{url_for('static',filename='assets/js/jquery.min.js')}}"></script>
+    <script src="{{url_for('static',filename='assets/js/jquery_form-validation.js')}}"></script>
+    <script src="{{url_for('static',filename='assets/js/code-format.js')}}"></script>
+
+    <script>
+        // $('#form-login').show();
+        // $('#form-forgetpass').hide();
+        $.validate({
+            modules: 'html5'
+        });
+
+        // forgetpassword=()=>{
+        // $('#form-forgetpass').show();
+        // $('#form-login').hide();
+        // }
+
+        // login=()=>{
+        // $('#form-forgetpass').hide();
+        // $('#form-login').show();
+        // }
+    </script>
+    <script src="{{url_for('static',filename='assets/javascript/login.js')}}"></script>
+</body>
+
+</html>

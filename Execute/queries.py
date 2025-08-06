@@ -132,7 +132,7 @@ def login_user(data):
 # postgres query
 def save_user(data):
     try:
-        sql = " INSERT INTO tbl_user (name, email, password, created_by, created_at, updated_at) VALUES (%s, %s, md5(%s), %s, %s, %s)"
+        sql = " INSERT INTO tbl_user (name, email, password, created_by, created_date, updated_date) VALUES (%s, %s, md5(%s), %s, %s, %s)"
         msg = executeSql.ExecuteReturnId(sql, data)
         return msg
     except Exception as e:

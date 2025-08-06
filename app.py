@@ -1,16 +1,25 @@
 import psycopg2
 from psycopg2 import OperationalError
+import os
+from dotenv import load_dotenv
+
+
+# Load .env file (only in development)
+load_dotenv()
 
 # Function to create a database connection
 def create_connection():
     try:
-        # Connect to PSQL database
-        connection = psycopg2.connect(
-            host='localhost',          # PSQL host
-            user='postgres',      # PSQL username
-            password='Admin@123',  # PSQL password
-            database='db_dmatrix'  # PSQL database name
-        )
+        # # Connect to PSQL database
+        # connection = psycopg2.connect(
+        #     host='localhost',          # PSQL host
+        #     user='postgres',      # PSQL username
+        #     password='Admin@123',  # PSQL password
+        #     database='db_dmatrix'  # PSQL database name
+        # )
+
+          # Connect using DATABASE_URL from .env or Render
+        connection = psycopg2.connect(os.getenv("DATABASE_URL"))
         
         if connection.is_connected():
             print("Connected to the database")

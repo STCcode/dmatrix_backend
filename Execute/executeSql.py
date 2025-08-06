@@ -18,7 +18,6 @@ def ExecuteAll(query, data):
     except Exception as e:
         print("Error in ExecuteAll=============================", e)
         return middleware.exe_msgs(responses.execution_501, str(e.args), '1023300')
-    
 # def ExecuteAll(query,data):
 #     try:
 #         cur = psycopg2.connection.cursor()

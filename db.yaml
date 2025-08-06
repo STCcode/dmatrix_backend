@@ -1,4 +1,6 @@
 
+
+
 def get_db_connection():
     result = urlparse.urlparse(os.environ['DATABASE_URL'])
 

@@ -1,17 +1,35 @@
 from route import psycopg2
 from Execute import responses,middleware
+from psycopg2.extensions import connection as _connection
+from route import get_db_connection
+from Execute import responses, middleware
 #for Selecting All record
-def ExecuteAll(query,data):
+
+def ExecuteAll(query, data):
     try:
-        cur = psycopg2.connection.cursor()
-        cur.execute(query,data)
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(query, data)
         result = cur.fetchall()
-        psycopg2.connection.commit()
+        conn.commit()
         cur.close()
+        conn.close()
         return result
     except Exception as e:
-                print("Error in ExecuteAll=============================",e)
-                return middleware.exe_msgs(responses.execution_501,str(e.args),'1023300')
+        print("Error in ExecuteAll=============================", e)
+        return middleware.exe_msgs(responses.execution_501, str(e.args), '1023300')
+    
+# def ExecuteAll(query,data):
+#     try:
+#         cur = psycopg2.connection.cursor()
+#         cur.execute(query,data)
+#         result = cur.fetchall()
+#         psycopg2.connection.commit()
+#         cur.close()
+#         return result
+#     except Exception as e:
+#                 print("Error in ExecuteAll=============================",e)
+#                 return middleware.exe_msgs(responses.execution_501,str(e.args),'1023300')
 
 #for selecting one record
 def ExecuteReturn(query,data):

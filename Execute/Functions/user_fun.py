@@ -72,24 +72,16 @@ def save_user():
         if request.method == 'POST':
             formData = request.get_json()
 
-            required_fields = ['s_name', 's_email', 's_password', 's_created_by']
-            missing = [f for f in required_fields if f not in formData]
+            # required_fields = ['name', 'email', 'password', 'created_by']
+            # missing = [f for f in required_fields if f not in formData]
 
-            if missing:
-                return make_response(
-                    middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
-                    400
-                )
+            # if missing:
+            #     return make_response(
+            #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
+            #         400
+            #     )
 
-            formlist = (
-                formData['s_name'],
-                formData['s_email'],
-                formData['s_password'],
-                formData['s_created_by'],
-                formData['s_created_by'],  # updated_by = created_by (initially)
-                datetime.now(),
-                datetime.now()
-            )
+            formlist = (formData['name'],formData['email'],formData['password'],formData['created_by'], datetime.now(),datetime.now())
 
             insert_id = queries.save_user(formlist)
 

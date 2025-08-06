@@ -55,7 +55,7 @@ def fetch_data():
     if connection:
         try:
             cursor = connection.cursor()
-            cursor.execute("SELECT * FROM tbl_users")  # Replace with your actual table name
+            cursor.execute("SELECT * FROM tbl_user")  # Replace with your actual table name
             
             # Fetch all results from the executed query
             result = cursor.fetchall()

@@ -1,3 +1,5 @@
+
+# import route import app
 import psycopg2
 from psycopg2 import OperationalError
 import os
@@ -71,3 +73,5 @@ def fetch_data():
 # Run the function to fetch data
 if __name__ == "__main__":
     fetch_data()
+    # port = int(os.environ.get("PORT", 5000))
+    # app.run(host="0.0.0.0", port=port)

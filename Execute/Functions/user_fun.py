@@ -81,7 +81,7 @@ def save_user():
             #         400
             #     )
 
-            formlist = (formData['name'],formData['email'],formData['password'],formData['created_by'], datetime.now(),datetime.now()
+            formlist = (formData['name'],formData['email'],formData['password'], datetime.now(),datetime.now()
             )
 
             insert_id = queries.save_user(formlist)

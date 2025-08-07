@@ -43,28 +43,6 @@ def getAlluser():
             print("Error in getting role data=============================", e)
             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)
 
-
-
-# def saveuser():
-#         try:
-#                 if request.method == 'POST':
-                        
-#                         formData = request.get_json()
-                
-#                         formlist=(formData['s_login_id'],formData['s_email'],formData['s_password'],formData['s_dep'],formData['s_contact_no'],formData['s_active'],formData['s_role'],formData['s_created_by'])
-#                         id= queries.saveuser(formlist)
-#                         if type(id).__name__  != "int":
-#                                 if id.json:
-#                                         result=id
-#                                         status=500
-#                         else:
-#                                 result=middleware.exs_msgs(id,responses.insert_200,'1020200')
-#                                 status=200
-#                         return make_response(result,status)
-#         except Exception as e:
-#                 print("Error in adding area data=================================",e)
-#                 return  make_response(middleware.exe_msgs(responses.insert_501,str(e.args),'1020500'),500)
-
 # postgres query
 
 def save_user():
@@ -179,6 +157,41 @@ def getAllUserById():
         except Exception as e:
             print("Error in getting area data=============================", e)
             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)
+        
+#========================================Action Table Start ====================================================
+def action_table():
+    try:
+        if request.method == 'POST':
+            formData = request.get_json()
+
+            # required_fields = ['scrip_code', 'mode', 'order_type', 'scrip_name',isin, order_number, folio_number, nav, stt, unit, redeem_amount, purchase_amount, cgst, sgst, igst, ugst, stamp_duty, cess_value, net_amount]
+            # missing = [f for f in required_fields if f not in formData]
+
+            # if missing:
+            #     return make_response(
+            #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
+            #         400
+            #     )
+
+            formlist = (formData['scrip_code'],formData[' mode'],formData['order_type'],formData['scrip_name'],formData['isin'],formData['order_name'],formData['folio_number'],formData['nav'],formData['stt'],formData['unit'],formData['redeem_amount'],formData['purchase_amount'],formData['cgst'],formData['sgst'],formData['igst'],formData['ugst'],formData['stamp_duty'],formData['cess_value'],formData['net_amount'], datetime.now(),datetime.now()
+            )
+
+            insert_id = queries.action_table(formlist)
+
+            if type(insert_id).__name__ != "int":
+                return make_response(insert_id, 500)
+
+            result = middleware.exs_msgs(insert_id, responses.insert_200, '1020200')
+            return make_response(result, 200)
+
+    except Exception as e:
+        print("Error in save_user:", e)
+        return make_response(
+            middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
+            500
+        )
+
+#========================================Action Table End ======================================================
 
 
             

@@ -79,10 +79,11 @@ app.add_url_rule('/wcare/getAllUserById',view_func=user_fun.getAllUserById,metho
 app.add_url_rule('/wcare/updateuser',view_func=user_fun.updateuser,methods=['GET','POST'])
 app.add_url_rule('/wcare/deleteuserById',view_func=user_fun.deleteuserById,methods=['GET','POST'])
 
+#=======================================Action Table Start====================================
 
+app.add_url_rule('/action_table' ,view_func=user_fun.action_table,methods=['GET' , 'POST'])
 
-
-# 
+# ======================================Action Table End====================================== 
 
 
 

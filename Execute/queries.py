@@ -116,7 +116,7 @@ def action_table(data):
 
 def underlying_table(data):
     try:
-        sql = " INSERT INTO tbl_underlying (company_name, sector, symbol, series, isin_code, created_at) VALUES (%s, %s, %s, %s, %s,%s)"
+        sql = " INSERT INTO tbl_underlying (company_name, sector, symbol, series, isin_code, created_at) VALUES (%s, %s, %s, %s, %s, %s)"
         msg = executeSql.ExecuteReturnId(sql, data)
         return msg
     except Exception as e:

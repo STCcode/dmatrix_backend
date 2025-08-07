@@ -85,11 +85,17 @@ app.add_url_rule('/action_table' ,view_func=user_fun.action_table,methods=['GET'
 
 # ======================================Action Table End======================================
 
-#=======================================Underlying Table Start====================================
+#=======================================mcap Table Start====================================
+
+app.add_url_rule('/mcap_table' ,view_func=user_fun.mcap_table,methods=['GET','POST'])
+
+# ======================================mcap Table End======================================
+# 
+# #=======================================Underlying Table Start====================================
 
 app.add_url_rule('/underlying_table' ,view_func=user_fun.underlying_table,methods=['GET','POST'])
 
-# ======================================Underlying Table End======================================  
+# ======================================Underlying Table End======================================    
 
 
 

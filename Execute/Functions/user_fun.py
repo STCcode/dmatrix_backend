@@ -193,6 +193,42 @@ def action_table():
 
 #========================================Action Table End ======================================================
 
+#========================================mcap Start ====================================================
+def mcap_table():
+    try:
+        if request.method == 'POST':
+            formData = request.get_json()
+
+            # required_fields = ['company_name', 'sector', 'symbol', 'series',isin_code]
+            # missing = [f for f in required_fields if f not in formData]
+
+            # if missing:
+            #     return make_response(
+            #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
+            #         400
+            #     )
+
+            formlist = (formData['company_name'],formData['sector'],formData['symbol'],formData['series'],formData['isin_code'], datetime.now()
+            )
+
+            insert_id = queries.mcap_table(formlist)
+
+            if type(insert_id).__name__ != "int":
+                return make_response(insert_id, 500)
+
+            result = middleware.exs_msgs(insert_id, responses.insert_200, '1020200')
+            return make_response(result, 200)
+
+    except Exception as e:
+        print("Error in save_user:", e)
+        return make_response(
+            middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
+            500
+        )
+
+#========================================mcap Table End ======================================================
+
+
 #========================================Underlying Start ====================================================
 def underlying_table():
     try:
@@ -208,7 +244,7 @@ def underlying_table():
             #         400
             #     )
 
-            formlist = (formData['company_name'],formData['sector'],formData['symbol'],formData['series'],formData['isin_code'], datetime.now()
+            formlist = (formData['company_name'],formData['scripcode'],formData['weightage'],formData['sector'],formData['isin_code'], datetime.now()
             )
 
             insert_id = queries.underlying_table(formlist)

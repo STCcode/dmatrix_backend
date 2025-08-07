@@ -112,18 +112,32 @@ def action_table(data):
 # ==================================== Action Table End====================================
 
 
-# ==============================Underlying Table Start=====================================
+# ==============================mcap Table Start=====================================
 
-def underlying_table(data):
+def mcap_table(data):
     try:
-        sql = " INSERT INTO tbl_underlying (company_name, sector, symbol, series, isin_code, created_at) VALUES (%s, %s, %s, %s, %s, %s)"
+        sql = " INSERT INTO tbl_mcap (company_name, sector, symbol, series, isin_code, created_at) VALUES (%s, %s, %s, %s, %s, %s)"
         msg = executeSql.ExecuteReturnId(sql, data)
         return msg
     except Exception as e:
         print("Error in save_user query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
 
-# ==============================Underlying Table End=======================================
+# ==============================mcap Table End=======================================
+
+
+# ==============================mcap Table Start=====================================
+
+def underlying_table(data):
+    try:
+        sql = " INSERT INTO tbl_Underlying (company_name, scripcode, weightage, sector, isin_code, created_at) VALUES (%s, %s, %s, %s, %s, %s)"
+        msg = executeSql.ExecuteReturnId(sql, data)
+        return msg
+    except Exception as e:
+        print("Error in save_user query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
+
+# ==============================mcap Table End=======================================
 
      
 

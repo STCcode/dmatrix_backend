@@ -62,7 +62,7 @@ from Execute.Functions import functions,user_fun
 app.add_url_rule('/', view_func=functions.index)
 # app.add_url_rule('/login', view_func=functions.login,methods=['GET','POST'])
 
-app.add_url_rule('/login_user', view_func=functions.login_user,methods=['GET','POST'])
+app.add_url_rule('/login', view_func=functions.login_user,methods=['GET','POST'])
 
 app.add_url_rule('/emailhtml', view_func=functions.emailhtml)
 app.add_url_rule('/landingpage', view_func=functions.landingpage)
@@ -72,7 +72,7 @@ app.add_url_rule('/logout', view_func=functions.logout)
 #User Master 
 app.add_url_rule('/wcare/getallrole',view_func=user_fun.getallrole,methods=['GET','POST'])
 # app.add_url_rule('/wcare/saveuser',view_func=user_fun.saveuser,methods=['GET','POST'])
-app.add_url_rule('/save_user',view_func=user_fun.save_user,methods=['GET','POST'])
+app.add_url_rule('/register',view_func=user_fun.save_user,methods=['GET','POST'])
 app.add_url_rule('/wcare/checkusername',view_func=user_fun.checkusername,methods=['GET','POST'])
 app.add_url_rule('/wcare/getAlluser',view_func=user_fun.getAlluser,methods=['GET','POST'])
 app.add_url_rule('/wcare/getAllUserById',view_func=user_fun.getAllUserById,methods=['GET','POST'])

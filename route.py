@@ -83,7 +83,13 @@ app.add_url_rule('/wcare/deleteuserById',view_func=user_fun.deleteuserById,metho
 
 app.add_url_rule('/action_table' ,view_func=user_fun.action_table,methods=['GET' , 'POST'])
 
-# ======================================Action Table End====================================== 
+# ======================================Action Table End======================================
+
+#=======================================Underlying Table Start====================================
+
+app.add_url_rule('/underlying_table' ,view_func=user_fun.underlying_table,methods=['GET' , 'POST'])
+
+# ======================================Underlying Table End======================================  
 
 
 

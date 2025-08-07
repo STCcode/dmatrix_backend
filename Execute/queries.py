@@ -29,7 +29,7 @@ def getAllUserData():
 
 def login_user(data):
     try:
-        sql = "SELECT id, s_name, s_email FROM tbl_user_master WHERE s_email = %s AND s_password = md5(%s)"
+        sql = "SELECT id, name, email FROM tbl_users WHERE s_email = %s AND s_password = md5(%s)"
         return executeSql.ExecuteAllNew(sql, data)
     except Exception as e:
         print("Error in login_user query==========================", e)

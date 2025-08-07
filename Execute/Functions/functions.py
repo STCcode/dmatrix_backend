@@ -45,13 +45,13 @@ def login_user():
             data = request.get_json()
 
             # Input validation
-            if 'username' not in data or 'password' not in data:
+            if 'name' not in data or 'password' not in data:
                 return make_response(
                     middleware.exe_msgs(responses.getAll_501, "Missing username or password", '1023201'),
                     400
                 )
 
-            username = data['username']
+            username = data['name']
             password = data['password']
             formdata = (username, password)
 
@@ -65,7 +65,7 @@ def login_user():
                     status = 500
             else:
                 if len(user_data) > 0:
-                    session['username'] = username  # Set session
+                    session['name'] = username  # Set session
                     result = middleware.exs_msgs(user_data, responses.getAll_200, '1023200')
                     status = 200
                 else:

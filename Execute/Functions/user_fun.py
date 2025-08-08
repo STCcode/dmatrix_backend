@@ -218,7 +218,7 @@ def entity_table():
         )
     
 def getAllentity():
-     if request.method == 'POST':
+     if request.method == 'GET':
         try:
             data=queries.getAllentity()
             if type(data).__name__  != "list":

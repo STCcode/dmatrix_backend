@@ -159,25 +159,48 @@ def getAllUserById():
             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)
 
 #========================================Entity Table Start ====================================================
+# def entity_table():
+#     try:
+#         if request.method == 'POST':
+#             formData = request.get_json()
+
+#             # required_fields = ['scrip_name', 'scripcode', 'entityID', 'benchmark',category, sector,  nickname]
+#             # missing = [f for f in required_fields if f not in formData]
+#             # scrip_name, scripcode, entityID, benchmark, category, sector, nickname, created_at
+
+#             # if missing:
+#             #     return make_response(
+#             #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
+#             #         400
+#             #     )
+
+#             next_id = queries.get_next_entity_id()
+#             entity_id = f"ENT-{str(next_id).zfill(4)}"  # ENT-0001 style
+
+#             formlist = (formData['scrip_name'],formData['scripcode'],entity_id,formData['benchmark'],formData['category'],formData['sector'],formData['nickname'], datetime.now())
+
+#             insert_id = queries.entity_table(formlist)
+
+#             if type(insert_id).__name__ != "int":
+#                 return make_response(insert_id, 500)
+
+#             result = middleware.exs_msgs(insert_id, responses.insert_200, '1020200')
+#             return make_response(result, 200)
+
+#     except Exception as e:
+#         print("Error in save_user:", e)
+#         return make_response(
+#             middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
+#             500
+#         )
+
 def entity_table():
     try:
         if request.method == 'POST':
             formData = request.get_json()
 
-            # required_fields = ['scrip_name', 'scripcode', 'entityID', 'benchmark',category, sector,  nickname]
-            # missing = [f for f in required_fields if f not in formData]
-            # scrip_name, scripcode, entityID, benchmark, category, sector, nickname, created_at
-
-            # if missing:
-            #     return make_response(
-            #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
-            #         400
-            #     )
-
-            next_id = queries.get_next_entity_id()
-            entity_id = f"ENT-{str(next_id).zfill(4)}"  # ENT-0001 style
-
-            formlist = (formData['scrip_name'],formData['scripcode'],entity_id,formData['benchmark'],formData['category'],formData['sector'],formData['nickname'], datetime.now())
+            formlist = (formData['scrip_name'],formData.get('scripcode'),None,formData.get('benchmark'),formData['category'],formData.get('sector'),formData.get('nickname'),datetime.now()
+            )
 
             insert_id = queries.entity_table(formlist)
 
@@ -193,6 +216,7 @@ def entity_table():
             middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
             500
         )
+
 
 #========================================Entity Table End ======================================================
 

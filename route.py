@@ -79,23 +79,30 @@ app.add_url_rule('/wcare/getAllUserById',view_func=user_fun.getAllUserById,metho
 app.add_url_rule('/wcare/updateuser',view_func=user_fun.updateuser,methods=['GET','POST'])
 app.add_url_rule('/wcare/deleteuserById',view_func=user_fun.deleteuserById,methods=['GET','POST'])
 
+#=======================================Entity Table Start====================================
+
+app.add_url_rule('/entity_table' ,view_func=user_fun.entity_table,methods=['GET','POST'])
+
+# ======================================entity Table End======================================
+
 #=======================================Action Table Start====================================
 
 app.add_url_rule('/action_table' ,view_func=user_fun.action_table,methods=['GET','POST'])
 
 # ======================================Action Table End======================================
 
-#=======================================mcap Table Start====================================
+#=======================================mcap Table Start======================================
 
 app.add_url_rule('/mcap_table' ,view_func=user_fun.mcap_table,methods=['GET','POST'])
 
-# ======================================mcap Table End======================================
-# 
-# #=======================================Underlying Table Start====================================
+# ======================================mcap Table End=========================================
+
+
+#========================================Underlying Table Start====================================
 
 app.add_url_rule('/underlying_table' ,view_func=user_fun.underlying_table,methods=['GET','POST'])
 
-# ======================================Underlying Table End======================================    
+# ======================================Underlying Table End========================================    
 
 
 

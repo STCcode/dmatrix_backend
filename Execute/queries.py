@@ -98,6 +98,38 @@ def updateuser(data):
 
 
 
+# ==============================entity Table Start=====================================
+
+def get_next_entity_id():
+    try:
+        sql = "SELECT COALESCE(MAX(id), 0) + 1 FROM tbl_entity"
+        result = executeSql.ExecuteReturnId(sql)
+        return result[0][0]  # return next id number
+    except Exception as e:
+        print("Error in get_next_entity_id:", e)
+        return 1  # fallback to 1 if error
+
+
+
+def entity_table(data):
+    try:
+        sql = " INSERT INTO tbl_entity (scrip_name, scripcode, entity_Id, benchmark, category, sector, nickname, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+        msg = executeSql.ExecuteReturnId(sql, data)
+        return msg
+    except Exception as e:
+        print("Error in save_user query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
+    
+
+
+
+
+        
+
+# ==============================entity Table End=======================================
+
+
+
 # ==================================== Action Table Start==================================
 def action_table(data):
     try:
@@ -136,6 +168,17 @@ def underlying_table(data):
     except Exception as e:
         print("Error in save_user query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
+    
+
+#     def getunderlying():
+#      try:
+#           sql="SELECT * FROM tbl_user_master"
+#           data=''
+#           msgs=executeSql.ExecuteAllNew(sql,data)
+#           return msgs
+#      except Exception as e:
+#           print("Error in getingroleRecord query==========================",e)
+#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
 # ==============================mcap Table End=======================================
 

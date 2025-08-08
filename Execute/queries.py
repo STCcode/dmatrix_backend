@@ -112,7 +112,7 @@ def updateuser(data):
 
 def entity_table(data):
     try:
-        sql = "INSERT INTO tbl_entity (scrip_name, scripcode, entityID, benchmark, category,subCategory, nickname, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+        sql = "INSERT INTO tbl_entity (scripname, scripcode, entityID, benchmark, category,subCategory, nickname, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
         msg = executeSql.ExecuteReturnId(sql, data)
         return msg
     except Exception as e:

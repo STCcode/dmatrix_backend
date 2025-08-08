@@ -118,6 +118,18 @@ def entity_table(data):
     except Exception as e:
         print("Error in save_user query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
+    
+    
+def getAllentity():
+     try:
+          sql="SELECT * FROM tbl_entity"
+          data=''
+          msgs=executeSql.ExecuteAllNew(sql,data)
+          return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+     
 
 
 

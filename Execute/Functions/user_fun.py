@@ -308,7 +308,7 @@ def underlying_table():
             #         400
             #     )
 
-            formlist = (formData['company_name'],formData['scripcode'],formData['weightage'],formData['sector'],formData['isin_code'],formData[' entityid'], datetime.now()
+            formlist = (formData['company_name'],formData['scripcode'],formData['weightage'],formData['sector'],formData['isin_code'], datetime.now()
             )
 
             insert_id = queries.underlying_table(formlist)

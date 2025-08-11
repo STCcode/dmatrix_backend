@@ -130,9 +130,9 @@ def getAllentity():
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
      
-def getentityid():
+def getentityById():
      try:
-          sql="SELECT entityid FROM tbl_entity"
+          sql="SELECT * FROM tbl_entity where id =%s"
           data=''
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs

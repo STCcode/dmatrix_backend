@@ -236,10 +236,10 @@ def getAllentity():
         
 
 
-def getentityid():
+def getentityById():
      if request.method == 'GET':
         try:
-            data=queries.getentityid()
+            data=queries.getentityById()
             if type(data).__name__  != "list":
                 if data.json:
                     result=data

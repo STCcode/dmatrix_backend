@@ -133,7 +133,7 @@ def getAllentity():
 def getentityById(id):
      try:
           sql="SELECT * FROM tbl_entity where id =%s"
-          data={id}
+          data=(id,)
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs
      except Exception as e:

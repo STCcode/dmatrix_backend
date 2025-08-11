@@ -236,23 +236,52 @@ def getAllentity():
         
 
 
-def getentityById():
-     if request.method == 'GET':
-        try:
-            en_id = request.form['id']
-            data=queries.getentityById(en_id)
-            if type(data).__name__  != "list":
-                if data.json:
-                    result=data
-                    status=500
-            else:
-                result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
-                status=200
+# def getentityById():
+#      if request.method == 'GET':
+#         try:
+#             en_id = request.form['id']
+#             data=queries.getentityById(en_id)
+#             if type(data).__name__  != "list":
+#                 if data.json:
+#                     result=data
+#                     status=500
+#             else:
+#                 result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
+#                 status=200
                         
-            return make_response(result,status)
-        except Exception as e:
-            print("Error in getting role data=============================", e)
-            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)        
+#             return make_response(result,status)
+#         except Exception as e:
+#             print("Error in getting role data=============================", e)
+#             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)        
+def update_entity_table():
+    try:
+        if request.method == 'POST': 
+            formData = request.get_json()
+
+           
+            formlist = (formData.get('scripname'),formData.get('scripcode'),formData.get('benchmark'),formData.get('category'),formData.get('subcategory'),formData.get('nickname'),datetime.now(),formData.get('entityID')  # WHERE entityID = ?
+            )
+
+            updated_rows = queries.update_entity_table(formlist)
+
+            if type(updated_rows).__name__ != "int":
+                return make_response(updated_rows, 500)
+
+            if updated_rows == 0:
+                return make_response(
+                    middleware.exe_msgs(responses.update_404, "No record found to update", '1020404'),
+                    404
+                )
+
+            result = middleware.exs_msgs(updated_rows, responses.update_200, '1020400')
+            return make_response(result, 200)
+
+    except Exception as e:
+        print("Error in update_entity_table:", e)
+        return make_response(
+            middleware.exe_msgs(responses.update_501, str(e.args), '1020501'),
+            500
+        )
 
 
 

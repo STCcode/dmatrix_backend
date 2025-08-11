@@ -130,17 +130,25 @@ def getAllentity():
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
      
-def getentityById(id):
-     try:
-          sql="SELECT * FROM tbl_entity where id =%s"
-          data=(id,)
-          msgs=executeSql.ExecuteAllNew(sql,data)
-          return msgs
-     except Exception as e:
-          print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')     
+# def getentityById(id):
+#      try:
+#           sql="SELECT * FROM tbl_entity where id =%s"
+#           data=(id,)
+#           msgs=executeSql.ExecuteAllNew(sql,data)
+#           return msgs
+#      except Exception as e:
+#           print("Error in getingroleRecord query==========================",e)
+#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')     
      
 
+def update_entity_table(data):
+    try:
+        sql = "UPDATE tbl_entity SET scripname = %s,scripcode = %s,benchmark = %s,category = %s,subcategory = %s,nickname = %s,updated_at = %s WHERE entityID = %s"
+        msg = executeSql.ExecuteAllNew(sql, data)
+        return msg
+    except Exception as e:
+        print("Error in update_entity_table query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020311')
 
 
 

@@ -239,7 +239,8 @@ def getAllentity():
 def getentityById():
      if request.method == 'GET':
         try:
-            data=queries.getentityById()
+            en_id = request.form['id']
+            data=queries.getentityById(en_id)
             if type(data).__name__  != "list":
                 if data.json:
                     result=data

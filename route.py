@@ -84,6 +84,11 @@ app.add_url_rule('/wcare/deleteuserById',view_func=user_fun.deleteuserById,metho
 app.add_url_rule('/entity_table' ,view_func=user_fun.entity_table,methods=['GET','POST'])
 app.add_url_rule('/getAllentity',view_func=user_fun.getAllentity,methods=['GET','POST'])
 
+
+app.add_url_rule('/getentityid',view_func=user_fun.getentityid,methods=['GET','POST'])
+
+
+
 # ======================================entity Table End======================================
 
 #=======================================Action Table Start====================================

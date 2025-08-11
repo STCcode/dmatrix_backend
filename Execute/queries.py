@@ -143,7 +143,7 @@ def getAllentity():
 
 def update_entity_table(data):
     try:
-        sql = "UPDATE tbl_entity SET scripname = %s,scripcode = %s,benchmark = %s,category = %s,subcategory = %s,nickname = %s,updated_at = %s WHERE entityID = %s"
+        sql = "UPDATE tbl_entity SET scripname = %s,scripcode = %s,benchmark = %s,category = %s,subcategory = %s,nickname = %s,updated_at = %s WHERE id = %s"
         msg = executeSql.ExecuteReturnId(sql, data)
         return msg
     except Exception as e:

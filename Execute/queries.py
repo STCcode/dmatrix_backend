@@ -201,14 +201,27 @@ def mcap_table(data):
 
 # ==============================mcap Table Start=====================================
 
+# def underlying_table(data):
+#     try:
+#         sql = " INSERT INTO tbl_Underlying (company_name, scripcode, weightage, sector, isin_code, created_at,entityid) VALUES (%s, %s, %s, %s, %s, %s,%s)"
+#         msg = executeSql.ExecuteReturnId(sql, data)
+#         return msg
+#     except Exception as e:
+#         print("Error in save_user query==========================", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
+
+
 def underlying_table(data):
     try:
-        sql = " INSERT INTO tbl_Underlying (company_name, scripcode, weightage, sector, isin_code, created_at,entityid) VALUES (%s, %s, %s, %s, %s, %s,%s)"
+        sql = "INSERT INTO tbl_Underlying (company_name, scripcode, weightage, sector, isin_code, created_at, entityid) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id"
         msg = executeSql.ExecuteReturnId(sql, data)
         return msg
     except Exception as e:
-        print("Error in save_user query==========================", e)
+        print("Error in underlying_table query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
+
+    
+    
     
 
 #     def getunderlying():

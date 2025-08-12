@@ -361,38 +361,76 @@ def mcap_table():
 
 
 #========================================Underlying Start ====================================================
+# def underlying_table():
+#     try:
+#         if request.method == 'POST':
+#             formData = request.get_json()
+
+#             # required_fields = ['company_name', 'sector', 'symbol', 'series',isin_code]
+#             # missing = [f for f in required_fields if f not in formData]
+
+#             # if missing:
+#             #     return make_response(
+#             #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
+#             #         400
+#             #     )
+
+#             formlist = (formData['company_name'],formData['scripcode'],formData['weightage'],formData['sector'],formData['isin_code'], datetime.now(),formData['entityid'],
+#             )
+
+#             insert_id = queries.underlying_table(formlist)
+
+#             if type(insert_id).__name__ != "int":
+#                 return make_response(insert_id, 500)
+
+#             result = middleware.exs_msgs(insert_id, responses.insert_200, '1020200')
+#             return make_response(result, 200)
+
+#     except Exception as e:
+#         print("Error in save_user:", e)
+#         return make_response(
+#             middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
+#             500
+#         )
+    
 def underlying_table():
     try:
         if request.method == 'POST':
             formData = request.get_json()
 
-            # required_fields = ['company_name', 'sector', 'symbol', 'series',isin_code]
-            # missing = [f for f in required_fields if f not in formData]
+            entityid = formData.get('entityid')
+            rows = formData.get('rows')
 
-            # if missing:
-            #     return make_response(
-            #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
-            #         400
-            #     )
+            if not entityid or not rows or not isinstance(rows, list):
+                return make_response(
+                    middleware.exe_msgs(responses.insert_501, "Missing or invalid 'entityid' or 'rows' in request.", '1020501'),
+                    400
+                )
 
-            formlist = (formData['company_name'],formData['scripcode'],formData['weightage'],formData['sector'],formData['isin_code'], datetime.now(),formData['entityid'],
-            )
+            inserted_ids = []
+            for row in rows:
+                # Prepare tuple for each row
+                formlist = (row.get('company_name'),row.get('scripcode'),row.get('weightage'),row.get('sector'),row.get('isin_code'),datetime.now(),entityid)
+                insert_id = queries.underlying_table(formlist)
 
-            insert_id = queries.underlying_table(formlist)
+                if type(insert_id).__name__ != "int":
+                    # If any insert fails, return error immediately
+                    return make_response(insert_id, 500)
 
-            if type(insert_id).__name__ != "int":
-                return make_response(insert_id, 500)
+                inserted_ids.append(insert_id)
 
-            result = middleware.exs_msgs(insert_id, responses.insert_200, '1020200')
+            result = middleware.exs_msgs(inserted_ids, responses.insert_200, '1020200')
             return make_response(result, 200)
 
     except Exception as e:
-        print("Error in save_user:", e)
+        print("Error in underlying_table:", e)
         return make_response(
             middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
             500
         )
-    
+
+
+
 
 #========================================Underlying Table End ======================================================
 

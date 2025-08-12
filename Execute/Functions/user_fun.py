@@ -255,11 +255,11 @@ def getAllentity():
 #             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)        
 def update_entity_table():
     try:
-        if request.method == 'POST': 
+        if request.method == 'PUT': 
             formData = request.get_json()
 
            
-            formlist = (formData.get('scripname'),formData.get('scripcode'),formData.get('benchmark'),formData.get('category'),formData.get('subcategory'),formData.get('nickname'),datetime.now(),formData.get('id')  # WHERE entityID = ?
+            formlist = (formData.get('scripname'),formData.get('scripcode'),formData.get('benchmark'),formData.get('category'),formData.get('subcategory'),formData.get('nickname'),datetime.now(),formData.get('id')
             )
 
             updated_rows = queries.update_entity_table(formlist)

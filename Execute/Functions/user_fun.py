@@ -490,8 +490,8 @@ def getAllUnderlying():
 def getUnderlyingById():
      if request.method == 'GET':
         try:
-            id = request.form['entityid']
-            data=queries.getUnderlyingById(id)
+            entity_id = request.form['entityid']
+            data=queries.getUnderlyingById(entity_id)
             if type(data).__name__  != "list":
                 if data.json:
                     result=data

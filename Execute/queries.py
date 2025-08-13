@@ -256,11 +256,11 @@ def getAllUnderlying():
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
      
 
-def getUnderlyingById(id):
+def getUnderlyingById(entity_id):
      try:
           # sql="select * from tbl_user_master where n_user_id=%s"
           sql="select * from tbl_underlying where entityid = '%s';"
-          data={id}
+          data={entity_id}
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs
      except Exception as e:

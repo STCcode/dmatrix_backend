@@ -488,7 +488,7 @@ def getAllUnderlying():
         
 
 def getUnderlyingById():
-     if request.method == 'GET':
+     if request.method == 'POST':
         try:
             entity_id = request.form['entityid']
             data=queries.getUnderlyingById(entity_id)

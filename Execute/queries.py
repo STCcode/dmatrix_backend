@@ -258,7 +258,6 @@ def getAllUnderlying():
 
 def getUnderlyingById(entity_id):
      try:
-          # sql="select * from tbl_user_master where n_user_id=%s"
           sql="select * from tbl_underlying where entityid = '%s';"
           data={entity_id,}
           msgs=executeSql.ExecuteAllNew(sql,data)

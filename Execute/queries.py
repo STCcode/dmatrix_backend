@@ -290,14 +290,34 @@ def getUnderlyingById(entity_id):
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
-# ==============================mcap Table End=======================================
+# ==============================mcap Table End =======================================
 
      
 
+# ==============================bigsheet Table Start =======================================   
+    
+# def getCamByid():
+#      try:
+#           sql="SELECT * FROM tbl_underlying"
+#           data=''
+#           msgs=executeSql.ExecuteAllNew(sql,data)
+#           return msgs
+#      except Exception as e:
+#           print("Error in getingroleRecord query==========================",e)
+#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
    
 
-   
 
+def getCamByid(company_name=None):
+    try:
+          sql = "SELECT name_of_company, isin_number FROM bigsheet_data WHERE name_of_company ILIKE %s"
+          data = (f"%{company_name}%",)  
+          msgs = executeSql.ExecuteAllNew(sql, data)
+          return msgs
+    except Exception as e:
+        print("Error in getCamByid query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310')   
+# ==============================bigsheet Table End =======================================
 
 
 

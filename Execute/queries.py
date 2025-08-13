@@ -234,17 +234,18 @@ def underlying_table(data):
 
     
     
+def getAllUnderlying():
+     try:
+          sql="SELECT * FROM tbl_underlying"
+          data=''
+          msgs=executeSql.ExecuteAllNew(sql,data)
+          return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
     
 
-#     def getunderlying():
-#      try:
-#           sql="SELECT * FROM tbl_user_master"
-#           data=''
-#           msgs=executeSql.ExecuteAllNew(sql,data)
-#           return msgs
-#      except Exception as e:
-#           print("Error in getingroleRecord query==========================",e)
-#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 
 # ==============================mcap Table End=======================================
 

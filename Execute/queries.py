@@ -256,17 +256,26 @@ def getAllUnderlying():
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
      
 
-def getUnderlyingById(entity_id):
-     try:
-          sql="select * from tbl_underlying where entityid = '%s';"
-          data={entity_id,}
-          msgs=executeSql.ExecuteAllNew(sql,data)
-          return msgs
-     except Exception as e:
-          print("Error in geeting area by id query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1022310')     
+# def getUnderlyingById(entity_id):
+#      try:
+#           sql="select * from tbl_underlying where entityid = '%s';"
+#           data={entity_id,}
+#           msgs=executeSql.ExecuteAllNew(sql,data)
+#           return msgs
+#      except Exception as e:
+#           print("Error in geeting area by id query==========================",e)
+#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1022310')     
     
 
+def getUnderlyingById(entity_id):
+    try:
+        sql = "SELECT * FROM tbl_underlying WHERE entityid = %s;"
+        data = (entity_id,)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
 # ==============================mcap Table End=======================================

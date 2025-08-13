@@ -487,23 +487,58 @@ def getAllUnderlying():
             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)
         
 
-def getUnderlyingById():
-     if request.method == 'POST':
-        try:
-            entity_id = request.form['entityid']
-            data=queries.getUnderlyingById(entity_id)
-            if type(data).__name__  != "list":
-                if data.json:
-                    result=data
-                    status=500
-            else:
-                result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
-                status=200
+# def getUnderlyingById():
+#      if request.method == 'POST':
+#         try:
+#             entity_id = request.form['entityid']
+#             data=queries.getUnderlyingById(entity_id)
+#             if type(data).__name__  != "list":
+#                 if data.json:
+#                     result=data
+#                     status=500
+#             else:
+#                 result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
+#                 status=200
                         
-            return make_response(result,status)
+#             return make_response(result,status)
+#         except Exception as e:
+#             print("Error in getting area data=============================", e)
+#             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)        
+
+
+def getUnderlyingById():
+    if request.method == 'POST':
+        try:
+            # If JSON body
+            if request.is_json:
+                entity_id = request.json.get('entityid')
+            else:
+                entity_id = request.form.get('entityid')  # for form-data
+
+            if not entity_id:
+                return make_response(
+                    middleware.exe_msgs(responses.getAll_501, "Missing entityid parameter", '1023501'),
+                    400
+                )
+
+            data = queries.getUnderlyingById(entity_id)
+
+            if isinstance(data, list):
+                result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+                status = 200
+            else:
+                result = data
+                status = 500
+
+            return make_response(result, status)
+
         except Exception as e:
-            print("Error in getting area data=============================", e)
-            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)        
+            print("Error in getting underlying by id:", e)
+            return make_response(
+                middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
+                500
+            )
+
 
 
 

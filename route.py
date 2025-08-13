@@ -112,6 +112,7 @@ app.add_url_rule('/mcap_table' ,view_func=user_fun.mcap_table,methods=['GET','PO
 
 app.add_url_rule('/underlying_table' ,view_func=user_fun.underlying_table,methods=['GET','POST'])
 app.add_url_rule('/getAllUnderlying',view_func=user_fun.getAllUnderlying,methods=['GET','POST'])
+app.add_url_rule('/getUnderlyingById',view_func=user_fun.getUnderlyingById,methods=['GET','POST'])
 
 # ======================================Underlying Table End========================================    
 

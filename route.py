@@ -116,6 +116,8 @@ app.add_url_rule('/underlying_table' ,view_func=user_fun.underlying_table,method
 app.add_url_rule('/getAllUnderlying',view_func=user_fun.getAllUnderlying,methods=['GET','POST'])
 app.add_url_rule('/getUnderlyingById',view_func=user_fun.getUnderlyingById,methods=['GET','POST'])
 
+app.add_url_rule('/getUnderlyingByMf',view_func=user_fun.getUnderlyingByMf,methods=['GET','POST'])
+
 # ======================================Underlying Table End========================================  
 
 #========================================bigsheet Table Start====================================

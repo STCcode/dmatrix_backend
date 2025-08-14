@@ -288,6 +288,16 @@ def getUnderlyingById(entity_id):
     except Exception as e:
         print("Error in getting underlying by id query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
+    
+def getUnderlyingByMf():
+     try:
+          sql="SELECT e.*, a.*, u.* FROM tbl_entity e JOIN tbl_action_table a ON e.entityid = a.entityid JOIN tbl_underlying u ON e.entityid = u.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund';"
+          data=''
+          msgs=executeSql.ExecuteAllNew(sql,data)
+          return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')    
 
 
 # ==============================mcap Table End =======================================

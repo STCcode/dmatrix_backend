@@ -98,6 +98,7 @@ app.add_url_rule('/getAllMutualFund',view_func=user_fun.getAllMutualFund,methods
 
 app.add_url_rule('/action_table' ,view_func=user_fun.action_table,methods=['GET','POST'])
 app.add_url_rule('/getAllAction',view_func=user_fun.getAllAction,methods=['GET','POST'])
+app.add_url_rule('/getActionByentId',view_func=user_fun.getActionByentId,methods=['GET','POST'])
 
 app.add_url_rule('/getMfByentId',view_func=user_fun.getMfByentId,methods=['GET','POST'])
 

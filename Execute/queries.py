@@ -164,7 +164,7 @@ def update_entity_table(data):
 def DeleteEntityByid(id):
      try:
           sql="delete from tbl_entity where id=%s"
-          data={id}
+          data=(id,)
           msgs=executeSql.ExecuteOne(sql,data)
           return msgs
      except Exception as e:

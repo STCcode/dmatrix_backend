@@ -165,7 +165,7 @@ def DeleteEntityByid(entity_id):
     try:
         sql = "DELETE FROM tbl_entity WHERE id = %s"
         data = (entity_id,) 
-        deleted_count = executeSql.ExecuteUpdate(sql, data) 
+        deleted_count = executeSql.ExecuteReturnId(sql, data) 
         return deleted_count
     except Exception as e:
         print("Error in DeleteEntityByid query:", e)

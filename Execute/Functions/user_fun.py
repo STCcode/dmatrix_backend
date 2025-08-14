@@ -256,7 +256,7 @@ def getAllMutualFund():
         
 
 def getMutualFundDetaiById():
-    if request.method == 'POST':
+    if request.method == 'GET':
         try:
             # If JSON body
             if request.is_json:
@@ -377,7 +377,7 @@ def getAllAction():
             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)  
 
 def getActionByentId():
-    if request.method == 'POST':
+    if request.method == 'GET':
         try:
             # If JSON body
             if request.is_json:

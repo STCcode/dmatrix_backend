@@ -161,15 +161,16 @@ def update_entity_table(data):
         print("Error in update_entity_table query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020311')
     
-def DeleteEntityByid(id):
-     try:
-          sql="delete from tbl_entity where id=%s"
-          data=(id,)
-          msgs=executeSql.ExecuteOne(sql,data)
-          return msgs
-     except Exception as e:
-          print("Error in deleting area data query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1024310')    
+def DeleteEntityByid(entity_id):
+    try:
+        sql = "DELETE FROM tbl_entity WHERE id = %s"
+        data = (entity_id,) 
+        deleted_count = executeSql.ExecuteUpdate(sql, data) 
+        return deleted_count
+    except Exception as e:
+        print("Error in DeleteEntityByid query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')
+  
 
 
 

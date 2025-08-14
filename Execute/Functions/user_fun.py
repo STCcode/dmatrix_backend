@@ -306,7 +306,7 @@ def update_entity_table():
             formData = request.get_json()
 
            
-            formlist = (formData.get('scripname'),formData.get('scripcode'),formData.get('benchmark'),formData.get('category'),formData.get('subcategory'),formData.get('nickname'),datetime.now(),formData.get('id')
+            formlist = (formData.get('scripname'),formData.get('scripcode'),formData.get('benchmark'),formData.get('category'),formData.get('subcategory'),formData.get('nickname'),datetime.now(),formData.get('id'),formData.get('isin')
             )
 
             updated_rows = queries.update_entity_table(formlist)

@@ -142,16 +142,15 @@ def getAllMutualFund():
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
      
-# def getentityById(id):
-#      try:
-#           sql="SELECT * FROM tbl_entity where id =%s"
-#           data=(id,)
-#           msgs=executeSql.ExecuteAllNew(sql,data)
-#           return msgs
-#      except Exception as e:
-#           print("Error in getingroleRecord query==========================",e)
-#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')     
-     
+def getMutualFundDetaiById(entity_id):
+    try:
+        sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
+        data = (entity_id,)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 def update_entity_table(data):
     try:

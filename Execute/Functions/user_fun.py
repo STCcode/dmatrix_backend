@@ -562,7 +562,7 @@ def getUnderlyingById():
 def getUnderlyingByMf():
      if request.method == 'GET':
         try:
-            data=queries.getAllUnderlying()
+            data=queries.getUnderlyingByMf()
             if type(data).__name__  != "list":
                 if data.json:
                     result=data

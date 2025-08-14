@@ -337,6 +337,27 @@ def update_entity_table():
             middleware.exe_msgs(responses.update_501, str(e.args), '1020501'),
             500
         )
+    
+
+    
+def DeleteEntityByid():
+    if request.method == 'POST':
+        try:
+            print(request)
+            id = request.form['id']
+            result=queries.DeleteEntityByid(id)
+            if type(result).__name__  != "str":
+                    if result.json:
+                            result=result
+                            status=500
+            else:
+                    result=middleware.exs_msgs(result,responses.delete_200,'1024200')
+                    status=200
+            return make_response(result,status)
+            
+        except Exception as e:
+            print("Error in deleting area data=============================", e)
+            return  make_response(middleware.exe_msgs(responses.delete_501,str(e.args),'1024500'),500)
 
 
 

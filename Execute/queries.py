@@ -142,7 +142,7 @@ def getAllMutualFund():
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
      
-def getMutualFundDetaiById(entity_id):
+def getMutualFundDataById(entity_id):
     try:
         sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
         data = (entity_id,)  # tuple, not set

@@ -84,7 +84,7 @@ app.add_url_rule('/wcare/deleteuserById',view_func=user_fun.deleteuserById,metho
 app.add_url_rule('/entity_table' ,view_func=user_fun.entity_table,methods=['GET','POST'])
 app.add_url_rule('/getAllentity',view_func=user_fun.getAllentity,methods=['GET','POST'])
 app.add_url_rule('/updateentity',view_func=user_fun.update_entity_table,methods=['PUT'])
-app.add_url_rule('/getMutualFundDetaiById',view_func=user_fun.getMutualFundDetaiById,methods=['GET','POST'])
+app.add_url_rule('/getMutualFundDataById',view_func=user_fun.getMutualFundDataById,methods=['GET','POST'])
 
 app.add_url_rule('/getAllMutualFund',view_func=user_fun.getAllMutualFund,methods=['GET','POST'])
 

@@ -196,7 +196,7 @@ def DeleteEntityByid(entity_id):
 # ==================================== Action Table Start==================================
 def action_table(data):
     try:
-        sql = " INSERT INTO tbl_action_table (scrip_code, mode, order_type, scrip_name, isin, order_number, folio_number, nav, stt, unit, redeem_amount, purchase_amount, cgst, sgst, igst, ugst, stamp_duty, cess_value,net_amount,created_at,entityid,purchase_value,order_date,sett_no) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s,%s,%s,%s)"
+        sql = " INSERT INTO tbl_action_table (entityid, trans_date, trans_type, contribution_amount, setup_expense, stamp_duty, amount_invested, post_tax_nav, num_units, balance_units, strategy_name, amc_name, created_at) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s)"
         msg = executeSql.ExecuteReturnId(sql, data)
         return msg
     except Exception as e:
@@ -348,6 +348,61 @@ def getCamByid(company_name=None):
         print("Error in getCamByid query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310')   
 # ==============================bigsheet Table End =======================================
+
+
+
+# ==================================== AIF Table Start==================================
+def InsertAifData(data):
+    try:
+        sql = " INSERT INTO tbl_aif (scrip_code, mode, order_type, scrip_name, isin, order_number, folio_number, nav, stt, unit, redeem_amount, purchase_amount, cgst, sgst, igst, ugst, stamp_duty, cess_value,net_amount,created_at,entityid,purchase_value,order_date,sett_no) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s,%s,%s,%s)"
+        msg = executeSql.ExecuteReturnId(sql, data)
+        return msg
+    except Exception as e:
+        print("Error in save_user query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
+    
+
+# def getAllAction():
+#      try:
+#           sql="SELECT * FROM tbl_action_table"
+#           data=''
+#           msgs=executeSql.ExecuteAllNew(sql,data)
+#           return msgs
+#      except Exception as e:
+#           print("Error in getingroleRecord query==========================",e)
+#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+     
+# def getActionByentId(entity_id):
+#     try:
+#         sql = "SELECT * FROM tbl_action_table WHERE entityid = %s;"
+#         data = (entity_id,)  # tuple, not set
+#         msgs = executeSql.ExecuteAllNew(sql, data)
+#         return msgs
+#     except Exception as e:
+#         print("Error in getting underlying by id query:", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
+
+
+# def getMfByentId():
+#      try:
+#           sql="SELECT e.*, a.* FROM tbl_entity e JOIN tbl_action_table a ON e.entityid = a.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund';"
+#           data=''
+#           msgs=executeSql.ExecuteAllNew(sql,data)
+#           return msgs
+#      except Exception as e:
+#           print("Error in getingroleRecord query==========================",e)
+#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')      
+
+
+
+# ==================================== AIF Table End====================================
+
+
+
+
+
+
+
 
 
 

@@ -131,7 +131,15 @@ app.add_url_rule('/getCamByid',view_func=user_fun.getCamByid,methods=['GET','POS
 # ======================================Bigsheet Table End========================================    
 
 
+#=======================================AIF Table Start====================================
 
+app.add_url_rule('/InsertAifData' ,view_func=user_fun.InsertAifData,methods=['GET','POST'])
+app.add_url_rule('/getAllAction',view_func=user_fun.getAllAction,methods=['GET','POST'])
+# app.add_url_rule('/getActionByentId',view_func=user_fun.getActionByentId,methods=['GET','POST'])
+
+# app.add_url_rule('/getMfByentId',view_func=user_fun.getMfByentId,methods=['GET','POST'])
+
+# ======================================AIF Table End======================================
 
 
 

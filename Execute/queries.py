@@ -362,15 +362,15 @@ def InsertAifData(data):
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
     
 
-# def getAllAction():
-#      try:
-#           sql="SELECT * FROM tbl_action_table"
-#           data=''
-#           msgs=executeSql.ExecuteAllNew(sql,data)
-#           return msgs
-#      except Exception as e:
-#           print("Error in getingroleRecord query==========================",e)
-#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+def getAllAif():
+     try:
+          sql="SELECT * FROM tbl_aif"
+          data=''
+          msgs=executeSql.ExecuteAllNew(sql,data)
+          return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
      
 # def getActionByentId(entity_id):
 #     try:

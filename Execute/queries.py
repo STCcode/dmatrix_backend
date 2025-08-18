@@ -354,7 +354,7 @@ def getCamByid(company_name=None):
 # ==================================== AIF Table Start==================================
 def InsertAifData(data):
     try:
-        sql = " NSERT INTO tbl_action_table (entityid, trans_date, trans_type, contribution_amount, setup_expense, stamp_duty, amount_invested, post_tax_nav, num_units, balance_units, strategy_name, amc_name, created_at) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s)"
+        sql = " NSERT INTO tbl_aif (entityid, trans_date, trans_type, contribution_amount, setup_expense, stamp_duty, amount_invested, post_tax_nav, num_units, balance_units, strategy_name, amc_name, created_at) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s)"
         msg = executeSql.ExecuteReturnId(sql, data)
         return msg
     except Exception as e:

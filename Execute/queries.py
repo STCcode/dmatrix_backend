@@ -301,7 +301,7 @@ def getAllUnderlying():
 
 def getUnderlyingById(entity_id):
     try:
-        sql = "SELECT * FROM tbl_underlying WHERE entityid = %s;"
+        sql = "SELECT u.*, e.scripname FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE u.entityid = %s;"
         data = (entity_id,)  # tuple, not set
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs

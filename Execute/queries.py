@@ -197,7 +197,7 @@ def DeleteEntityByid(entity_id):
 def action_table(data):
     try:
         sql = " INSERT INTO tbl_action_table (scrip_code, mode, order_type, scrip_name, isin, order_number, folio_number, nav, stt, unit, redeem_amount, purchase_amount, cgst, sgst, igst, ugst, stamp_duty, cess_value,net_amount,created_at,entityid,purchase_value,order_date,sett_no) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s,%s,%s,%s)"
-        msg = executeSql.ExecuteReturnId(sql, data)
+        msg = executeSql.ExecuteAllNew(sql, data)
         return msg
     except Exception as e:
         print("Error in save_user query==========================", e)

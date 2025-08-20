@@ -478,11 +478,16 @@ def getAllAction():
 #                 500
 #             )        
 
-def serialize_dates(data):
+def serialize_dates(data, date_fields=None):
+    if date_fields is None:
+        date_fields = ["order_date", "created_at"] 
+
     for row in data:
-        if "order_date" in row and isinstance(row["order_date"], (datetime, )):
-            row["order_date"] = row["order_date"].strftime("%Y-%m-%d")  # Example: 2025-01-31
+        for field in date_fields:
+            if field in row and isinstance(row[field], datetime):
+                row[field] = row[field].strftime("%Y-%m-%d")
     return data
+
 
 def  getActionByentId():
     try:

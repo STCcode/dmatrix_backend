@@ -477,15 +477,32 @@ def getAllAction():
 #                 middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
 #                 500
 #             )        
+from datetime import datetime
+
 def serialize_dates(data, date_fields=None):
     if date_fields is None:
-        date_fields = ["order_date", "created_at"]  # Add any other date columns here
+        date_fields = ["order_date", "created_at"]
 
     for row in data:
         for field in date_fields:
-            if field in row and isinstance(row[field], datetime):
-                row[field] = row[field].strftime("%Y-%m-%d")
+            if field in row and row[field]:
+                value = row[field]
+
+                # Case 1: Already datetime
+                if isinstance(value, datetime):
+                    row[field] = value.strftime("%Y-%m-%d")
+
+                # Case 2: String with time (from DB)
+                elif isinstance(value, str):
+                    try:
+                        # Handles "2025-08-12 05:16:04.067188+00"
+                        dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                        row[field] = dt.strftime("%Y-%m-%d")
+                    except Exception:
+                        # leave as-is if it can't parse
+                        pass
     return data
+
 
 
 def  getActionByentId():

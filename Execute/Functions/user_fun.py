@@ -6,6 +6,8 @@ import wheel
 import pandas
 import os
 import json  
+from datetime import datetime
+from email.utils import parsedate_to_datetime
 from Execute import queries,middleware,responses
 
 def getallrole():
@@ -477,6 +479,7 @@ def getAllAction():
 #                 500
 #             )        
 
+
 def serialize_dates(data, date_fields=None):
     if date_fields is None:
         date_fields = ["order_date", "created_at"]
@@ -493,22 +496,19 @@ def serialize_dates(data, date_fields=None):
                 # Case 2: String
                 elif isinstance(value, str):
                     parsed = None
-                    # Try ISO 8601 (with or without timezone)
+                    # Try ISO 8601
                     try:
                         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
                     except Exception:
                         pass
 
-                    # Try RFC 1123 (Mon, 10 Mar 2025 00:00:00 GMT)
+                    # Try RFC1123 using email.utils
                     if not parsed:
                         try:
-                            # Remove trailing GMT if present
-                            clean_val = value.replace(" GMT", "")
-                            parsed = datetime.strptime(clean_val, "%a, %d %b %Y %H:%M:%S")
+                            parsed = parsedate_to_datetime(value)
                         except Exception:
                             pass
 
-                    # If parsed successfully, format it
                     if parsed:
                         row[field] = parsed.strftime("%Y-%m-%d")
     return data

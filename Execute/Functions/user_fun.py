@@ -1,6 +1,6 @@
 from flask import session, redirect, url_for,  request, render_template,flash,jsonify,make_response
 #from route import app
-from datetime import datetime
+from datetime import  date, datetime 
 from werkzeug.utils import secure_filename
 import wheel
 import pandas
@@ -482,32 +482,12 @@ def getAllAction():
 def serialize_dates(data):
     for row in data:
         for field, value in row.items():
-            if not value:
+            if value is None:
                 continue
 
-            # Case 1: Already datetime
-            if isinstance(value, datetime):
+            # Format date or datetime objects
+            if isinstance(value, (datetime, date)):
                 row[field] = value.strftime("%Y-%m-%d")
-
-            # Case 2: String
-            elif isinstance(value, str):
-                parsed = None
-
-                # Try ISO 8601 ("2025-08-12 05:16:04.067188+00")
-                try:
-                    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
-                except Exception:
-                    pass
-
-                # Try RFC1123 ("Mon, 10 Mar 2025 00:00:00 GMT")
-                if not parsed:
-                    try:
-                        parsed = parsedate_to_datetime(value)
-                    except Exception:
-                        pass
-
-                if parsed:
-                    row[field] = parsed.strftime("%Y-%m-%d")
     return data
 
 

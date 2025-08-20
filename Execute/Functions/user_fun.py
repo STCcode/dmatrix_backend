@@ -6,7 +6,6 @@ import wheel
 import pandas
 import os
 import json  
-from datetime import datetime
 from Execute import queries,middleware,responses
 
 def getallrole():
@@ -477,7 +476,6 @@ def getAllAction():
 #                 middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
 #                 500
 #             )        
-from datetime import datetime
 
 def serialize_dates(data, date_fields=None):
     if date_fields is None:
@@ -492,16 +490,26 @@ def serialize_dates(data, date_fields=None):
                 if isinstance(value, datetime):
                     row[field] = value.strftime("%Y-%m-%d")
 
-                # Case 2: String with time (from DB)
+                # Case 2: String - try multiple formats
                 elif isinstance(value, str):
+                    parsed = None
+                    # Try ISO 8601 (with or without timezone)
                     try:
-                        # Handles "2025-08-12 05:16:04.067188+00"
-                        dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
-                        row[field] = dt.strftime("%Y-%m-%d")
+                        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
                     except Exception:
-                        # leave as-is if it can't parse
                         pass
+                    # Try RFC 1123 (Mon, 10 Mar 2025 00:00:00 GMT)
+                    if not parsed:
+                        try:
+                            parsed = datetime.strptime(value, "%a, %d %b %Y %H:%M:%S %Z")
+                        except Exception:
+                            pass
+
+                    # If parsed successfully, format it
+                    if parsed:
+                        row[field] = parsed.strftime("%Y-%m-%d")
     return data
+
 
 
 

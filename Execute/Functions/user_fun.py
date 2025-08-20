@@ -490,7 +490,7 @@ def serialize_dates(data, date_fields=None):
                 if isinstance(value, datetime):
                     row[field] = value.strftime("%Y-%m-%d")
 
-                # Case 2: String - try multiple formats
+                # Case 2: String
                 elif isinstance(value, str):
                     parsed = None
                     # Try ISO 8601 (with or without timezone)
@@ -498,10 +498,13 @@ def serialize_dates(data, date_fields=None):
                         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
                     except Exception:
                         pass
+
                     # Try RFC 1123 (Mon, 10 Mar 2025 00:00:00 GMT)
                     if not parsed:
                         try:
-                            parsed = datetime.strptime(value, "%a, %d %b %Y %H:%M:%S %Z")
+                            # Remove trailing GMT if present
+                            clean_val = value.replace(" GMT", "")
+                            parsed = datetime.strptime(clean_val, "%a, %d %b %Y %H:%M:%S")
                         except Exception:
                             pass
 
@@ -509,8 +512,6 @@ def serialize_dates(data, date_fields=None):
                     if parsed:
                         row[field] = parsed.strftime("%Y-%m-%d")
     return data
-
-
 
 
 def  getActionByentId():

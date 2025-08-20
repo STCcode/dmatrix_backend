@@ -187,17 +187,26 @@ def ExecuteReturnId(query, data):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        # cur.execute(query, data)
-        cur.execute(query + " RETURNING id", data)  # Use RETURNING if PostgreSQL
-        inserted_id = cur.fetchone()[0]  # fetch the inserted id
-        # inserted_id = cur.fetchone()[0]  # works with RETURNING id
+        
+        # Execute the insert query and return the inserted id
+        cur.execute(query + " RETURNING id", data)
+        inserted_id = cur.fetchone()[0]
+        
         conn.commit()
         cur.close()
         conn.close()
+        
         return inserted_id
+
     except Exception as e:
+        if cur:
+            cur.close()
+        if conn:
+            conn.rollback()
+            conn.close()
         print("Error in ExecuteReturnId=============================", e)
         return middleware.exe_msgs(responses.execution_501, str(e.args), '1022300')
+
 
 
 # SELECT ALL with headers

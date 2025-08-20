@@ -480,39 +480,36 @@ def getAllAction():
 #             )        
 
 
-def serialize_dates(data, date_fields=None):
-    if date_fields is None:
-        date_fields = ["order_date", "created_at"]
-
+def serialize_dates(data):
     for row in data:
-        for field in date_fields:
-            if field in row and row[field]:
-                value = row[field]
+        for field, value in row.items():
+            if not value:
+                continue
 
-                # Case 1: Already datetime
-                if isinstance(value, datetime):
-                    row[field] = value.strftime("%Y-%m-%d")
+            # Case 1: Already datetime
+            if isinstance(value, datetime):
+                row[field] = value.strftime("%Y-%m-%d")
 
-                # Case 2: String
-                elif isinstance(value, str):
-                    parsed = None
-                    # Try ISO 8601 (e.g. "2025-08-12 05:16:04.067188+00")
+            # Case 2: String
+            elif isinstance(value, str):
+                parsed = None
+
+                # Try ISO 8601 ("2025-08-12 05:16:04.067188+00")
+                try:
+                    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                except Exception:
+                    pass
+
+                # Try RFC1123 ("Mon, 10 Mar 2025 00:00:00 GMT")
+                if not parsed:
                     try:
-                        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                        parsed = parsedate_to_datetime(value)
                     except Exception:
                         pass
 
-                    # Try RFC 1123 (e.g. "Mon, 31 Aug 2026 00:00:00 GMT")
-                    if not parsed:
-                        try:
-                            parsed = parsedate_to_datetime(value)
-                        except Exception:
-                            pass
-
-                    if parsed:
-                        row[field] = parsed.strftime("%Y-%m-%d")
+                if parsed:
+                    row[field] = parsed.strftime("%Y-%m-%d")
     return data
-
 def  getActionByentId():
     try:
         entity_id = None

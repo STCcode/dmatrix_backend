@@ -477,10 +477,9 @@ def getAllAction():
 #                 middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
 #                 500
 #             )        
-
 def serialize_dates(data, date_fields=None):
     if date_fields is None:
-        date_fields = ["order_date", "created_at"] 
+        date_fields = ["order_date", "created_at"]  # Add any other date columns here
 
     for row in data:
         for field in date_fields:

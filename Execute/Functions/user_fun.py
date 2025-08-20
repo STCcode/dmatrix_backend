@@ -7,7 +7,7 @@ import pandas
 import os
 import json  
 from datetime import datetime
-from email.utils import parsedate_to_datetime
+from email.utils import parsedate_to_datetime   # <-- new import
 from Execute import queries,middleware,responses
 
 def getallrole():
@@ -496,13 +496,13 @@ def serialize_dates(data, date_fields=None):
                 # Case 2: String
                 elif isinstance(value, str):
                     parsed = None
-                    # Try ISO 8601
+                    # Try ISO 8601 (e.g. "2025-08-12 05:16:04.067188+00")
                     try:
                         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
                     except Exception:
                         pass
 
-                    # Try RFC1123 using email.utils
+                    # Try RFC 1123 (e.g. "Mon, 31 Aug 2026 00:00:00 GMT")
                     if not parsed:
                         try:
                             parsed = parsedate_to_datetime(value)
@@ -512,7 +512,6 @@ def serialize_dates(data, date_fields=None):
                     if parsed:
                         row[field] = parsed.strftime("%Y-%m-%d")
     return data
-
 
 def  getActionByentId():
     try:

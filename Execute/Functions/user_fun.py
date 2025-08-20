@@ -6,6 +6,7 @@ import wheel
 import pandas
 import os
 import json  
+from datetime import datetime
 from Execute import queries,middleware,responses
 
 def getallrole():
@@ -476,6 +477,13 @@ def getAllAction():
 #                 middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
 #                 500
 #             )        
+
+def serialize_dates(data):
+    for row in data:
+        if "order_date" in row and isinstance(row["order_date"], (datetime, )):
+            row["order_date"] = row["order_date"].strftime("%Y-%m-%d")  # Example: 2025-01-31
+    return data
+
 def  getActionByentId():
     try:
         entity_id = None
@@ -503,6 +511,7 @@ def  getActionByentId():
 
         # Return proper response
         if isinstance(data, list):
+            data = serialize_dates(data)
             result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
             status = 200
         else:

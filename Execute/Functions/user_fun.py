@@ -544,6 +544,8 @@ def getMfByentId():
                     result=data
                     status=500
             else:
+
+                data = serialize_dates(data, ["order_date", "created_at"])
                 result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
                 status=200
                         

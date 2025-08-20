@@ -6,7 +6,6 @@ import wheel
 import pandas
 import os
 import json  
-from datetime import datetime
 from email.utils import parsedate_to_datetime   # <-- new import
 from Execute import queries,middleware,responses
 
@@ -510,6 +509,8 @@ def serialize_dates(data):
                 if parsed:
                     row[field] = parsed.strftime("%Y-%m-%d")
     return data
+
+
 def  getActionByentId():
     try:
         entity_id = None
@@ -558,24 +559,28 @@ def  getActionByentId():
 
 
 def getMfByentId():
-     if request.method == 'GET':
+    if request.method == 'GET':
         try:
-            data=queries.getMfByentId()
-            if type(data).__name__  != "list":
-                if data.json:
-                    result=data
-                    status=500
-            else:
+            data = queries.getMfByentId()
 
+            if type(data).__name__ != "list":
+                if data.json:
+                    result = data
+                    status = 500
+            else:
+                # ✅ Auto-detect and format all date fields
                 data = serialize_dates(data)
-                result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
-                status=200
+
+                result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+                status = 200
                         
-            return make_response(result,status)
+            return make_response(result, status)
         except Exception as e:
             print("Error in getting role data=============================", e)
-            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)            
-
+            return make_response(
+                middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
+                500
+            )
 #========================================Action Table End ======================================================
 
 #========================================mcap Start ====================================================

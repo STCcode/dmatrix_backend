@@ -1,6 +1,6 @@
 from flask import session, redirect, url_for,  request, render_template,flash,jsonify,make_response
 #from route import app
-from datetime import  date, datetime 
+from datetime import  date, datetime, time 
 from werkzeug.utils import secure_filename
 import wheel
 import pandas
@@ -478,16 +478,17 @@ def getAllAction():
 #                 500
 #             )        
 
-
 def serialize_dates(data):
     for row in data:
         for field, value in row.items():
             if value is None:
                 continue
 
-            # Format date or datetime objects
+            # Format date, datetime, or time objects
             if isinstance(value, (datetime, date)):
                 row[field] = value.strftime("%Y-%m-%d")
+            elif isinstance(value, time):
+                row[field] = value.strftime("%H:%M:%S")
     return data
 
 
@@ -1008,14 +1009,15 @@ def getallDirectdata():
      if request.method == 'GET':
         try:
             data=queries.getallDirectdata()
-            if type(data).__name__  != "list":
-                if data.json:
-                    result=data
-                    status=500
+
+
+            if not isinstance(data, list):
+                 result = data
+                 status = 500
             else:
                 data = serialize_dates(data)
-                result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
-                status=200
+                result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+                status = 200
                         
             return make_response(result,status)
         except Exception as e:
@@ -1048,10 +1050,10 @@ def  getdirectByentId():
 
         # Return proper response
         if isinstance(data, list):
+            data = serialize_dates(data)
             result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
             status = 200
         else:
-            data = serialize_dates(data)
             result = data
             status = 500
 
@@ -1063,4 +1065,5 @@ def  getdirectByentId():
             middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
             500
         )
+
 #========================================Direct Table End ======================================================

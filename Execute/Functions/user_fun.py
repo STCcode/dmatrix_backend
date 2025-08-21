@@ -1125,13 +1125,13 @@ def getAllActionTableOfDirectEquity():
      if request.method == 'GET':
         try:
             data=queries.getAllActionTableOfDirectEquity()
-            if type(data).__name__  != "list":
-                if data.json:
-                    result=data
-                    status=500
+            if isinstance(data, list):
+                data = serialize_dates(data)
+                result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+                status = 200
             else:
-                result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
-                status=200
+                result=data
+                status=500
                         
             return make_response(result,status)
         except Exception as e:

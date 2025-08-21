@@ -1013,6 +1013,7 @@ def getallDirectdata():
                     result=data
                     status=500
             else:
+                data = serialize_dates(data)
                 result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
                 status=200
                         
@@ -1050,6 +1051,7 @@ def  getdirectByentId():
             result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
             status = 200
         else:
+            data = serialize_dates(data)
             result = data
             status = 500
 

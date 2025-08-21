@@ -410,25 +410,25 @@ def Insert_directData(data):
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
     
 
-# def getAllAif():
-#      try:
-#           sql="SELECT * FROM tbl_aif"
-#           data=''
-#           msgs=executeSql.ExecuteAllNew(sql,data)
-#           return msgs
-#      except Exception as e:
-#           print("Error in getingroleRecord query==========================",e)
-#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+def getallDirectdata():
+     try:
+          sql="SELECT * FROM tbl_direct_equity"
+          data=''
+          msgs=executeSql.ExecuteAllNew(sql,data)
+          return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
      
-# def getAifByentId(entity_id):
-#     try:
-#         sql = "SELECT * FROM tbl_aif WHERE entityid = %s;"
-#         data = (entity_id,)  # tuple, not set
-#         msgs = executeSql.ExecuteAllNew(sql, data)
-#         return msgs
-#     except Exception as e:
-#         print("Error in getting underlying by id query:", e)
-#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')    
+def getdirectByentId(entity_id):
+    try:
+        sql = "SELECT * FROM tbl_direct_equity WHERE entityid = %s;"
+        data = (entity_id,)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')    
 
 # ====================================Direct table end============================
 

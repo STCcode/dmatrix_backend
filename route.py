@@ -145,8 +145,8 @@ app.add_url_rule('/getAifByentId',view_func=user_fun.getAifByentId,methods=['GET
 #=======================================Direct Table Start====================================
 
 app.add_url_rule('/InsertdirectData' ,view_func=user_fun.Insert_directData,methods=['GET','POST'])
-# app.add_url_rule('/getAllAif',view_func=user_fun.getAllAif,methods=['GET','POST'])
-# app.add_url_rule('/getAifByentId',view_func=user_fun.getAifByentId,methods=['GET','POST'])
+app.add_url_rule('/getallDirectdata',view_func=user_fun.getallDirectdata,methods=['GET','POST'])
+app.add_url_rule('/getdirectByentId',view_func=user_fun.getdirectByentId,methods=['GET','POST'])
 
 # app.add_url_rule('/getMfByentId',view_func=user_fun.getMfByentId,methods=['GET','POST'])
 

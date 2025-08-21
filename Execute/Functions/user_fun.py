@@ -966,3 +966,99 @@ def  getAifByentId():
 #             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)            
 
 #========================================AIF Table End ======================================================
+
+
+
+
+#========================================Direct Table Start ====================================================
+def Insert_directData():
+    try:
+        if request.method == 'POST':
+            formData = request.get_json()
+
+            # required_fields = ['entityid', 'trans_date', 'trans_type', 'contribution_amount', 'setup_expense', 'stamp_duty', 'amount_invested', 'post_tax_nav', 'num_units', 'balance_units', 'strategy_name', 'amc_name', 'created_at']
+            # missing = [f for f in required_fields if f not in formData]
+
+            # if missing:
+            #     return make_response(
+            #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
+            #         400
+            #     )
+
+            formlist = (formData['entityid'],formData['contract_note_number'],formData['trade_date'],formData['client_code'],formData['client_name'],formData['order_number'],formData['order_time'],formData['trade_number'],formData['description'],formData['order_type'],formData['qty'],formData['trade_price'],formData['brokerage_per_unit'],formData['net_rate_per_unit'],formData['gst'],formData['stt'],formData['security_transaction_tax'],formData['exchange_transaction_charges'],formData['sebi_turnover_fees'],formData['stamp_duty'],formData['ipft'],formData['net_total'],formData['net_amount_receivable'],datetime.now()
+            )
+
+            insert_id = queries.Insert_directData(formlist)
+
+            if type(insert_id).__name__ != "int":
+                return make_response(insert_id, 500)
+
+            result = middleware.exs_msgs(insert_id, responses.insert_200, '1020200')
+            return make_response(result, 200)
+
+    except Exception as e:
+        print("Error in save_user:", e)
+        return make_response(
+            middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
+            500
+        )
+   
+
+def getAllAif():
+     if request.method == 'GET':
+        try:
+            data=queries.getAllAif()
+            if type(data).__name__  != "list":
+                if data.json:
+                    result=data
+                    status=500
+            else:
+                result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
+                status=200
+                        
+            return make_response(result,status)
+        except Exception as e:
+            print("Error in getting role data=============================", e)
+            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)  
+
+
+def  getAifByentId():
+    try:
+        entity_id = None
+
+        # Handle GET → from query params
+        if request.method == 'GET':
+            entity_id = request.args.get('entityid')
+
+        # Handle POST → from JSON or form-data
+        elif request.method == 'POST':
+            if request.is_json:
+                entity_id = request.json.get('entityid')
+            else:
+                entity_id = request.form.get('entityid')
+
+        if not entity_id:
+            return make_response(
+                middleware.exe_msgs(responses.getAll_501, "Missing entityid parameter", '1023501'),
+                400
+            )
+
+        data = queries.getAifByentId(entity_id)
+
+        # Return proper response
+        if isinstance(data, list):
+            result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+            status = 200
+        else:
+            result = data
+            status = 500
+
+        return make_response(result, status)
+
+    except Exception as e:
+        print("Error in getting underlying by id:", e)
+        return make_response(
+            middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
+            500
+        )
+#========================================Direct Table End ======================================================

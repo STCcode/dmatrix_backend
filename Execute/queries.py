@@ -399,6 +399,39 @@ def getAifByentId(entity_id):
 
 
 
+# ====================================Direct table start============================
+def Insert_directData(data):
+    try:
+        sql = " INSERT INTO tbl_direct_equity (entityid, contract_note_number, trade_date, client_code, client_name, order_number, order_time, trade_number, description, order_type, qty, trade_price, brokerage_per_unit, net_rate_per_unit, gst, stt, security_transaction_tax, exchange_transaction_charges, sebi_turnover_fees, stamp_duty, ipft, net_total, net_amount_receivable, created_at, created_by) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s)"
+        msg = executeSql.ExecuteOne(sql, data)
+        return msg
+    except Exception as e:
+        print("Error in save_user query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
+    
+
+# def getAllAif():
+#      try:
+#           sql="SELECT * FROM tbl_aif"
+#           data=''
+#           msgs=executeSql.ExecuteAllNew(sql,data)
+#           return msgs
+#      except Exception as e:
+#           print("Error in getingroleRecord query==========================",e)
+#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+     
+# def getAifByentId(entity_id):
+#     try:
+#         sql = "SELECT * FROM tbl_aif WHERE entityid = %s;"
+#         data = (entity_id,)  # tuple, not set
+#         msgs = executeSql.ExecuteAllNew(sql, data)
+#         return msgs
+#     except Exception as e:
+#         print("Error in getting underlying by id query:", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')    
+
+# ====================================Direct table end============================
+
 
 
 

@@ -150,7 +150,7 @@ app.add_url_rule('/getdirectByentId',view_func=user_fun.getdirectByentId,methods
 
 # app.add_url_rule('/getMfByentId',view_func=user_fun.getMfByentId,methods=['GET','POST'])
 
-# ======================================AIF Table End======================================
+# ======================================Direct Table End======================================
 
 
 

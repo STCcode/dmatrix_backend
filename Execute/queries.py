@@ -400,15 +400,34 @@ def getaifByentityId():
 
 
 # ====================================Direct table start============================
+# def Insert_directData(data):
+#     try:
+#         sql = " INSERT INTO tbl_direct_equity (entityid, contract_note_number, trade_date, client_code, client_name, order_number, order_time, trade_number, description, order_type, qty, trade_price, brokerage_per_unit, net_rate_per_unit, gst, stt, security_transaction_tax, exchange_transaction_charges, sebi_turnover_fees, stamp_duty, ipft, net_total, net_amount_receivable, created_at) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s)"
+#         msg = executeSql.ExecuteOne(sql, data)
+#         return msg
+#     except Exception as e:
+#         print("Error in save_user query==========================", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
+    
 def Insert_directData(data):
     try:
-        sql = " INSERT INTO tbl_direct_equity (entityid, contract_note_number, trade_date, client_code, client_name, order_number, order_time, trade_number, description, order_type, qty, trade_price, brokerage_per_unit, net_rate_per_unit, gst, stt, security_transaction_tax, exchange_transaction_charges, sebi_turnover_fees, stamp_duty, ipft, net_total, net_amount_receivable, created_at) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s)"
+        sql = """
+        INSERT INTO tbl_direct_equity (
+            entityid, contract_note_number, trade_date, client_code, client_name, order_number, order_time, trade_number, description, order_type,
+            qty, trade_price, brokerage_per_unit, net_rate_per_unit, gst, stt, security_transaction_tax, exchange_transaction_charges, sebi_turnover_fees,
+            stamp_duty, ipft, net_total, net_amount_receivable, created_at
+        ) VALUES (
+            %s, %s, %s::date, %s, %s, %s, %s::time, %s, %s, %s,
+            %s::int, %s::numeric, %s::numeric, %s::numeric, %s::numeric, %s::numeric, %s::numeric, %s::numeric, %s::numeric,
+            %s::numeric, %s::numeric, %s::numeric, %s::numeric, %s
+        )
+        """
         msg = executeSql.ExecuteOne(sql, data)
         return msg
     except Exception as e:
         print("Error in save_user query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
-    
+
 
 def getallDirectdata():
      try:

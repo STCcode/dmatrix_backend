@@ -972,22 +972,45 @@ def getaifByentityId():
 
 
 #========================================Direct Table Start ====================================================
+# def Insert_directData():
+#     try:
+#         if request.method == 'POST':
+#             formData = request.get_json()
+
+#             # required_fields = ['entityid', 'trans_date', 'trans_type', 'contribution_amount', 'setup_expense', 'stamp_duty', 'amount_invested', 'post_tax_nav', 'num_units', 'balance_units', 'strategy_name', 'amc_name', 'created_at']
+#             # missing = [f for f in required_fields if f not in formData]
+
+#             # if missing:
+#             #     return make_response(
+#             #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
+#             #         400
+#             #     )
+
+#             formlist = (formData['entityid'],formData['contract_note_number'],formData['trade_date'],formData['client_code'],formData['client_name'],formData['order_number'],formData['order_time'],formData['trade_number'],formData['description'],formData['order_type'],formData['qty'],formData['trade_price'],formData['brokerage_per_unit'],formData['net_rate_per_unit'],formData['gst'],formData['stt'],formData['security_transaction_tax'],formData['exchange_transaction_charges'],formData['sebi_turnover_fees'],formData['stamp_duty'],formData['ipft'],formData['net_total'],formData['net_amount_receivable'],datetime.now()
+#             )
+
+#             insert_id = queries.Insert_directData(formlist)
+
+#             if type(insert_id).__name__ != "int":
+#                 return make_response(insert_id, 500)
+
+#             result = middleware.exs_msgs(insert_id, responses.insert_200, '1020200')
+#             return make_response(result, 200)
+
+#     except Exception as e:
+#         print("Error in save_user:", e)
+#         return make_response(
+#             middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
+#             500
+#         )
+   
 def Insert_directData():
     try:
         if request.method == 'POST':
             formData = request.get_json()
 
-            # required_fields = ['entityid', 'trans_date', 'trans_type', 'contribution_amount', 'setup_expense', 'stamp_duty', 'amount_invested', 'post_tax_nav', 'num_units', 'balance_units', 'strategy_name', 'amc_name', 'created_at']
-            # missing = [f for f in required_fields if f not in formData]
-
-            # if missing:
-            #     return make_response(
-            #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
-            #         400
-            #     )
-
-            formlist = (formData['entityid'],formData['contract_note_number'],formData['trade_date'],formData['client_code'],formData['client_name'],formData['order_number'],formData['order_time'],formData['trade_number'],formData['description'],formData['order_type'],formData['qty'],formData['trade_price'],formData['brokerage_per_unit'],formData['net_rate_per_unit'],formData['gst'],formData['stt'],formData['security_transaction_tax'],formData['exchange_transaction_charges'],formData['sebi_turnover_fees'],formData['stamp_duty'],formData['ipft'],formData['net_total'],formData['net_amount_receivable'],datetime.now()
-            )
+            # Prepare tuple in same order as SQL
+            formlist = (formData.get('entityid'),formData.get('contract_note_number'),formData.get('trade_date'),formData.get('client_code'),formData.get('client_name'),formData.get('order_number'),formData.get('order_time'),formData.get('trade_number'),formData.get('description'),formData.get('order_type'),formData.get('qty'),formData.get('trade_price'),formData.get('brokerage_per_unit', 0),formData.get('net_rate_per_unit'),formData.get('gst', 0),formData.get('stt', 0),formData.get('security_transaction_tax', 0),formData.get('exchange_transaction_charges', 0),formData.get('sebi_turnover_fees', 0),formData.get('stamp_duty', 0),formData.get('ipft', 0),formData.get('net_total'),formData.get('net_amount_receivable'),datetime.now())
 
             insert_id = queries.Insert_directData(formlist)
 
@@ -998,12 +1021,13 @@ def Insert_directData():
             return make_response(result, 200)
 
     except Exception as e:
-        print("Error in save_user:", e)
+        print("Error in Insert_directData:", e)
         return make_response(
-            middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
+            middleware.exe_msgs(responses.insert_501, str(e), '1020500'),
             500
         )
-   
+
+
 
 def getallDirectdata():
      if request.method == 'GET':

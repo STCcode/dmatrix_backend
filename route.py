@@ -148,7 +148,7 @@ app.add_url_rule('/InsertdirectData' ,view_func=user_fun.Insert_directData,metho
 app.add_url_rule('/getAllDirectEquity',view_func=user_fun.getallDirectdata,methods=['GET','POST'])
 app.add_url_rule('/getdirectByentId',view_func=user_fun.getdirectByentId,methods=['GET','POST'])
 
-# app.add_url_rule('/getMfByentId',view_func=user_fun.getMfByentId,methods=['GET','POST'])
+app.add_url_rule('/getAllActionTableOfDirectEquity',view_func=user_fun.getAllActionTableOfDirectEquity,methods=['GET','POST'])
 
 # ======================================Direct Table End======================================
 

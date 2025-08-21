@@ -437,7 +437,18 @@ def getdirectByentId(entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')    
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310') 
+
+
+def getAllActionTableOfDirectEquity():
+     try:
+          sql="SELECT d.* FROM tbl_direct_equity d JOIN tbl_entity e ON e.entityid = d.entityid WHERE e.category ILIKE 'Equity' AND e.subcategory ILIKE 'Direct Equity';"
+          data=''
+          msgs=executeSql.ExecuteAllNew(sql,data)
+          return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')    
 
 # ====================================Direct table end============================
 

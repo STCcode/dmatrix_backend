@@ -364,7 +364,7 @@ def InsertAifData(data):
 
 def getAllAif():
      try:
-          sql="SELECT * FROM tbl_aif"
+          sql="SELECT * FROM tbl_entity WHERE category ILIKE 'Equity' AND subcategory ILIKE 'AIF';"
           data=''
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs
@@ -421,7 +421,7 @@ def Insert_directData(data):
 
 def getallDirectdata():
      try:
-          sql="SELECT * FROM tbl_direct_equity"
+          sql="SELECT * FROM tbl_entity WHERE category = 'Equity' AND subcategory = 'Direct Equity';"
           data=''
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs

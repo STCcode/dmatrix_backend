@@ -137,7 +137,7 @@ app.add_url_rule('/InsertAifData' ,view_func=user_fun.InsertAifData,methods=['GE
 app.add_url_rule('/getAllAif',view_func=user_fun.getAllAif,methods=['GET','POST'])
 app.add_url_rule('/getAifByentId',view_func=user_fun.getAifByentId,methods=['GET','POST'])
 
-app.add_url_rule('/getaifByentityId',view_func=user_fun.getaifByentityId,methods=['GET','POST'])
+# app.add_url_rule('/getaifByentityId',view_func=user_fun.getaifByentityId,methods=['GET','POST'])
 
 # ======================================AIF Table End======================================
 

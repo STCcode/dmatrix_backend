@@ -1140,16 +1140,76 @@ def getAllActionTableOfDirectEquity():
 
 #========================================Direct Table End ======================================================
 
+# def delete_entity_data():
+#     try:
+#         entity_id = None
+
+#         # If DELETE → get from body
+#         if request.method == 'DELETE':
+#             data = request.get_json()
+#             entity_id = data.get("entityid")
+
+#         # If POST → get from form-data or JSON
+#         elif request.method == 'POST':
+#             if request.is_json:
+#                 entity_id = request.json.get('entityid')
+#             else:
+#                 entity_id = request.form.get('entityid')
+
+#         # Validate input
+#         if not entity_id:
+#             return make_response(
+#                 middleware.exe_msgs(responses.delete_501, "Missing entityid parameter", '1024501'),
+#                 400
+#             )
+
+#         # Perform deletion
+#         deleted_summary = queries.delete_entity_data(entity_id)
+
+#         if isinstance(deleted_summary, dict):
+#             total_deleted = sum(deleted_summary.values())
+#             if total_deleted > 0:
+#                 result = middleware.exs_msgs(
+#                     {"total_deleted": total_deleted, "breakdown": deleted_summary},
+#                     responses.delete_200,
+#                     '1024200'
+#                 )
+#                 status = 200
+#             else:
+#                 result = middleware.exe_msgs(
+#                     responses.delete_404,
+#                     f"No record found to delete for entityid {entity_id}",
+#                     '1024504'
+#                 )
+#                 status = 404
+#         else:
+#             # Query returned error object
+#             result = deleted_summary
+#             status = 500
+
+#         return make_response(result, status)
+
+#     except Exception as e:
+#         print("Error in delete_entity:", e)
+#         return make_response(
+#             middleware.exe_msgs(responses.delete_501, str(e.args), '1024500'),
+#             500
+#         )
+
 def delete_entity_data():
     try:
         entity_id = None
 
-        # If DELETE → get from body
         if request.method == 'DELETE':
-            data = request.get_json()
-            entity_id = data.get("entityid")
+            # Try JSON body first
+            if request.is_json:
+                data = request.get_json()
+                entity_id = data.get("entityid")
 
-        # If POST → get from form-data or JSON
+            # If not found, fallback to query param
+            if not entity_id:
+                entity_id = request.args.get("entityid")
+
         elif request.method == 'POST':
             if request.is_json:
                 entity_id = request.json.get('entityid')
@@ -1183,7 +1243,6 @@ def delete_entity_data():
                 )
                 status = 404
         else:
-            # Query returned error object
             result = deleted_summary
             status = 500
 
@@ -1195,4 +1254,3 @@ def delete_entity_data():
             middleware.exe_msgs(responses.delete_501, str(e.args), '1024500'),
             500
         )
-

@@ -364,7 +364,9 @@ def InsertAifData(data):
 
 def getAllAif():
      try:
-          sql="SELECT * FROM tbl_entity WHERE category ILIKE 'Equity' AND subcategory ILIKE 'AIF';"
+          # sql="SELECT * FROM tbl_entity WHERE category ILIKE 'Equity' AND subcategory ILIKE 'AIF';"
+          sql="SELECT * FROM tbl_aif;"
+
           data=''
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs

@@ -15,3 +15,8 @@ queryError_501="Error in Sql syntax"
 filetye="File Not Allowed"
 saveImg="Error in Image saving"
 shedulerErr="Error while implementing scheduler"
+delete_200 = "Record(s) deleted successfully"
+
+# Error responses
+delete_404 = "No record found to delete"
+delete_501 = "Internal Server Error while Deleting Data"

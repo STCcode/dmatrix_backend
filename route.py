@@ -91,7 +91,7 @@ app.add_url_rule('/getMutualFundDataById',view_func=user_fun.getMutualFundDataBy
 app.add_url_rule('/getAllMutualFund',view_func=user_fun.getAllMutualFund,methods=['GET','POST'])
 
 
-# app.add_url_rule('/getentityid',view_func=user_fun.getentityById,methods=['GET','POST'])
+app.add_url_rule('/getCountOfAllEntity',view_func=user_fun.getCountOfAllEntity,methods=['GET','POST'])
 
 
 

@@ -172,6 +172,17 @@ def DeleteEntityByid(entity_id):
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')
   
 
+def getCountOfAllEntity():
+     try:
+          sql="SELECT MIN(subcategory) AS subcategory, COUNT(*) AS total FROM tbl_entity WHERE LOWER(subcategory) IN ('mutual fund', 'aif', 'direct equity')GROUP BY LOWER(subcategory) ORDER BY subcategory;"
+          data=''
+          msgs=executeSql.ExecuteAllNew(sql,data)
+          return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
+
 
 
 # def entity_table(data):
@@ -184,10 +195,6 @@ def DeleteEntityByid(entity_id):
 #         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
     
 
-
-
-
-        
 
 # ==============================entity Table End=======================================
 

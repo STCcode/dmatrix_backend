@@ -519,7 +519,21 @@ def getAllEquity():
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
-# ======================================Get All Equity======================================     
+# ======================================Get All Equity======================================  
+
+
+
+# ======================================Get All EquityActionTable======================================
+def getEquityActionTable():
+     try:
+          sql="WITH counts AS (SELECT (SELECT COUNT(*) FROM tbl_action_table) AS action_count,(SELECT COUNT(*) FROM tbl_aif) AS aif_count,(SELECT COUNT(*) FROM tbl_direct_equity) AS equity_count)SELECT action_count,aif_count,equity_count,(action_count * 100.0 / (action_count + aif_count + equity_count))::numeric(5,2) AS action_percent,(aif_count * 100.0 / (action_count + aif_count + equity_count))::numeric(5,2)    AS aif_percent,(equity_count * 100.0 / (action_count + aif_count + equity_count))::numeric(5,2) AS equity_percent FROM counts;"
+          data=''
+          msgs=executeSql.ExecuteAllNew(sql,data)
+          return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+# ======================================Get All EquityActionTable======================================
 
 
 

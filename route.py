@@ -162,6 +162,13 @@ app.add_url_rule('/getAllEquity',view_func=user_fun.getAllEquity,methods=['GET',
 
 
 
+# ======================================Get All EquityActionTable ======================================
+app.add_url_rule('/getEquityActionTable',view_func=user_fun.getEquityActionTable,methods=['GET','POST'])
+# ======================================Get All Equity ActionTable======================================
+
+
+
+
 
 
 

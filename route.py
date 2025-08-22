@@ -142,7 +142,7 @@ app.add_url_rule('/getAifByentId',view_func=user_fun.getAifByentId,methods=['GET
 # ======================================AIF Table End======================================
 
 
-#=======================================Direct Table Start====================================
+#=======================================Direct Table Start============================================
 
 app.add_url_rule('/InsertdirectData' ,view_func=user_fun.Insert_directData,methods=['GET','POST'])
 app.add_url_rule('/getAllDirectEquity',view_func=user_fun.getallDirectdata,methods=['GET','POST'])
@@ -150,8 +150,11 @@ app.add_url_rule('/getdirectByentId',view_func=user_fun.getdirectByentId,methods
 
 app.add_url_rule('/getAllActionTableOfDirectEquity',view_func=user_fun.getAllActionTableOfDirectEquity,methods=['GET','POST'])
 
-# ======================================Direct Table End======================================
+# ======================================Direct Table End=================================================
 
+# ======================================Delete Etity data From Underlying,Action Table======================================
+app.add_url_rule('/delete_entity_data',view_func=user_fun.delete_entity_data,methods=['GET','POST'])
+# ======================================Delete Etity data From Underlying,Action Table======================================
 
 
 

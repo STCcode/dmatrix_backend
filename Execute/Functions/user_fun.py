@@ -1167,6 +1167,7 @@ def getDirectEquityByid():
 
         # Return proper response
         if isinstance(data, list):
+            data = serialize_dates(data)
             result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
             status = 200
         else:

@@ -464,7 +464,7 @@ def getDirectEquityByid(entity_id):
 
 def getDEDetailActionTable():
      try:
-          sql="SELECT * FROM tbl_direct_equity;"
+          sql="SELECT * FROM tbl_direct_equity WHERE entityid = %s;"
           data=''
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs

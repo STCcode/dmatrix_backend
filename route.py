@@ -149,7 +149,7 @@ app.add_url_rule('/getAllDirectEquity',view_func=user_fun.getallDirectdata,metho
 app.add_url_rule('/getdirectByentId',view_func=user_fun.getdirectByentId,methods=['GET','POST'])
 app.add_url_rule('/getAllActionTableOfDirectEquity',view_func=user_fun.getAllActionTableOfDirectEquity,methods=['GET','POST'])
 app.add_url_rule('/getDirectEquityDetailsById',view_func=user_fun.getDirectEquityByid,methods=['GET','POST'])
-
+app.add_url_rule('/getDEDetailActionTable',view_func=user_fun.getDEDetailActionTable,methods=['GET','POST'])
 # ======================================Direct Table End=================================================
 
 # ======================================Delete Etity data From Underlying,Action Table======================================

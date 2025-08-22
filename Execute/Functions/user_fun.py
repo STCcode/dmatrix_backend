@@ -905,7 +905,7 @@ def getAllAif():
             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)  
 
 
-def  getAifByentId():
+def  getAifActionTablebyId ():
     try:
         entity_id = None
 
@@ -926,7 +926,7 @@ def  getAifByentId():
                 400
             )
 
-        data = queries.getAifByentId(entity_id)
+        data = queries.getAifActionTablebyId (entity_id)
 
         # Return proper response
         if isinstance(data, list):

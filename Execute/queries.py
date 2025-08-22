@@ -481,6 +481,7 @@ def getDEDetailActionTable(entity_id):
 
 # ====================================Direct table end============================
 
+# ======================================Delete Etity data From Underlying,Action Table============================
 def delete_entity_data(entity_id):
     try:
         deleted_summary = {}
@@ -504,10 +505,21 @@ def delete_entity_data(entity_id):
     except Exception as e:
         print("Error in DeleteEntityByid query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')
+    
+# ======================================Delete Etity data From Underlying,Action Table======================================    
 
 
-
-
+# ======================================Get All Equity======================================
+def getAllEquity():
+     try:
+          sql="SELECT *FROM tbl_entity WHERE LOWER(category) IN ('equity');"
+          data=''
+          msgs=executeSql.ExecuteAllNew(sql,data)
+          return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+# ======================================Get All Equity======================================     
 
 
 

@@ -156,6 +156,10 @@ app.add_url_rule('/getDEDetailActionTable',view_func=user_fun.getDEDetailActionT
 app.add_url_rule('/delete_entity_data',view_func=user_fun.delete_entity_data,methods=['DELETE','POST'])
 # ======================================Delete Etity data From Underlying,Action Table======================================
 
+# ======================================Get All Equity======================================
+app.add_url_rule('/getAllEquity',view_func=user_fun.getAllEquity,methods=['GET','POST'])
+# ======================================Get All Equity======================================
+
 
 
 

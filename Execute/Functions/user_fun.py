@@ -1249,6 +1249,9 @@ def getDEDetailActionTable():
 
 #========================================Direct Table End ======================================================
 
+
+
+# ======================================Delete Etity data From Underlying,Action Table======================================
 # def delete_entity_data():
 #     try:
 #         entity_id = None
@@ -1363,3 +1366,29 @@ def delete_entity_data():
             middleware.exe_msgs(responses.delete_501, str(e.args), '1024500'),
             500
         )
+
+# ======================================Delete Etity data From Underlying,Action Table======================================
+
+
+# ======================================Get All Equity======================================
+
+def getAllEquity():
+     if request.method == 'GET':
+        try:
+            data=queries.getAllEquity()
+
+
+            if not isinstance(data, list):
+                 result = data
+                 status = 500
+            else:
+                data = serialize_dates(data)
+                result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+                status = 200
+                        
+            return make_response(result,status)
+        except Exception as e:
+            print("Error in getting role data=============================", e)
+            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500) 
+        
+# ======================================Get All Equity======================================

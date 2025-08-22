@@ -385,15 +385,15 @@ def getAifByentId(entity_id):
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
 
 
-# def getaifByentityId():
-#      try:
-#           sql="SELECT a.* FROM tbl_aif a JOIN tbl_entity e ON e.entityid = a.entityid WHERE e.category ILIKE 'Equity' AND e.subcategory ILIKE 'AIF';"
-#           data=''
-#           msgs=executeSql.ExecuteAllNew(sql,data)
-#           return msgs
-#      except Exception as e:
-#           print("Error in getingroleRecord query==========================",e)
-#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')      
+def getAifEntity():
+     try:
+          sql="SELECT e.* FROM tbl_aif a JOIN tbl_entity e ON e.entityid = a.entityid WHERE e.category ILIKE 'Equity' AND e.subcategory ILIKE 'AIF';"
+          data=''
+          msgs=executeSql.ExecuteAllNew(sql,data)
+          return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')      
 
 
 
@@ -450,7 +450,17 @@ def getAllActionTableOfDirectEquity():
           return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')    
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+     
+def getDirectEntityByid(entity_id):
+    try:
+        sql = "SELECT * FROM tbl_direct_equity  WHERE entityid = %s;"
+        data = (entity_id,)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')        
 
 # ====================================Direct table end============================
 

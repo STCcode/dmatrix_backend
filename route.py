@@ -73,11 +73,11 @@ app.add_url_rule('/logout', view_func=functions.logout)
 app.add_url_rule('/wcare/getallrole',view_func=user_fun.getallrole,methods=['GET','POST'])
 # app.add_url_rule('/wcare/saveuser',view_func=user_fun.saveuser,methods=['GET','POST'])
 app.add_url_rule('/register',view_func=user_fun.save_user,methods=['GET','POST'])
-app.add_url_rule('/wcare/checkusername',view_func=user_fun.checkusername,methods=['GET','POST'])
-app.add_url_rule('/wcare/getAlluser',view_func=user_fun.getAlluser,methods=['GET','POST'])
-app.add_url_rule('/wcare/getAllUserById',view_func=user_fun.getAllUserById,methods=['GET','POST'])
-app.add_url_rule('/wcare/updateuser',view_func=user_fun.updateuser,methods=['GET','POST'])
-app.add_url_rule('/wcare/deleteuserById',view_func=user_fun.deleteuserById,methods=['GET','POST'])
+# app.add_url_rule('/wcare/checkusername',view_func=user_fun.checkusername,methods=['GET','POST'])
+# app.add_url_rule('/wcare/getAlluser',view_func=user_fun.getAlluser,methods=['GET','POST'])
+# app.add_url_rule('/wcare/getAllUserById',view_func=user_fun.getAllUserById,methods=['GET','POST'])
+# app.add_url_rule('/wcare/updateuser',view_func=user_fun.updateuser,methods=['GET','POST'])
+# app.add_url_rule('/wcare/deleteuserById',view_func=user_fun.deleteuserById,methods=['GET','POST'])
 
 #=======================================Entity Table Start====================================
 
@@ -137,7 +137,7 @@ app.add_url_rule('/InsertAifData' ,view_func=user_fun.InsertAifData,methods=['GE
 app.add_url_rule('/getAllAif',view_func=user_fun.getAllAif,methods=['GET','POST'])
 app.add_url_rule('/getAifByentId',view_func=user_fun.getAifByentId,methods=['GET','POST'])
 
-# app.add_url_rule('/getaifByentityId',view_func=user_fun.getaifByentityId,methods=['GET','POST'])
+app.add_url_rule('/getAifEntity',view_func=user_fun.getAifEntity,methods=['GET','POST'])
 
 # ======================================AIF Table End======================================
 
@@ -147,8 +147,8 @@ app.add_url_rule('/getAifByentId',view_func=user_fun.getAifByentId,methods=['GET
 app.add_url_rule('/InsertdirectData' ,view_func=user_fun.Insert_directData,methods=['GET','POST'])
 app.add_url_rule('/getAllDirectEquity',view_func=user_fun.getallDirectdata,methods=['GET','POST'])
 app.add_url_rule('/getdirectByentId',view_func=user_fun.getdirectByentId,methods=['GET','POST'])
-
 app.add_url_rule('/getAllActionTableOfDirectEquity',view_func=user_fun.getAllActionTableOfDirectEquity,methods=['GET','POST'])
+app.add_url_rule('/getDirectEquityDetailsById',view_func=user_fun.getDirectEntityByid,methods=['GET','POST'])
 
 # ======================================Direct Table End=================================================
 

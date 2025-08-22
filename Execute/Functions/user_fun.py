@@ -949,22 +949,22 @@ def  getAifByentId():
 
 
 
-# def getaifByentityId():
-#      if request.method == 'GET':
-#         try:
-#             data=queries.getaifByentityId()
-#             if type(data).__name__  != "list":
-#                 if data.json:
-#                     result=data
-#                     status=500
-#             else:
-#                 result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
-#                 status=200
+def getAifEntity():
+     if request.method == 'GET':
+        try:
+            data=queries.getAifEntity()
+            if type(data).__name__  != "list":
+                if data.json:
+                    result=data
+                    status=500
+            else:
+                result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
+                status=200
                         
-#             return make_response(result,status)
-#         except Exception as e:
-#             print("Error in getting role data=============================", e)
-#             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)            
+            return make_response(result,status)
+        except Exception as e:
+            print("Error in getting role data=============================", e)
+            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)            
 
 #========================================AIF Table End ======================================================
 
@@ -1136,7 +1136,53 @@ def getAllActionTableOfDirectEquity():
             return make_response(result,status)
         except Exception as e:
             print("Error in getting role data=============================", e)
-            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)  
+            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500) 
+
+
+
+def getDirectEntityByid():
+    try:
+        entity_id = None
+
+        # Handle GET → from query params
+        if request.method == 'GET':
+            entity_id = request.args.get('entityid')
+
+        # Handle POST → from JSON or form-data
+        elif request.method == 'POST':
+            if request.is_json:
+                entity_id = request.json.get('entityid')
+            else:
+                entity_id = request.form.get('entityid')
+
+        # Validate entity_id
+        if not entity_id:
+            return make_response(
+                middleware.exe_msgs(responses.getAll_501, "Missing entityid parameter", '1023501'),
+                400
+            )
+
+        # Query the database
+        data = queries.getDirectEntityByid(entity_id)
+
+        # Return proper response
+        if isinstance(data, list):
+            result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+            status = 200
+        else:
+            result = data
+            status = 500
+
+        return make_response(result, status)
+
+    except Exception as e:
+        print("Error in getting underlying by id:", e)
+        return make_response(
+            middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
+            500
+        )
+
+
 
 #========================================Direct Table End ======================================================
 

@@ -153,7 +153,7 @@ app.add_url_rule('/getAllActionTableOfDirectEquity',view_func=user_fun.getAllAct
 # ======================================Direct Table End=================================================
 
 # ======================================Delete Etity data From Underlying,Action Table======================================
-app.add_url_rule('/delete_entity_data',view_func=user_fun.delete_entity_data,methods=['GET','POST'])
+app.add_url_rule('/delete_entity_data',view_func=user_fun.delete_entity_data,methods=['DELETE','POST'])
 # ======================================Delete Etity data From Underlying,Action Table======================================
 
 

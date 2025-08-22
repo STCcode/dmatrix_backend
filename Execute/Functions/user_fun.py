@@ -1140,7 +1140,7 @@ def getAllActionTableOfDirectEquity():
 
 
 
-def getDirectEntityByid():
+def getDirectEquityByid():
     try:
         entity_id = None
 
@@ -1163,7 +1163,7 @@ def getDirectEntityByid():
             )
 
         # Query the database
-        data = queries.getDirectEntityByid(entity_id)
+        data = queries.getDirectEquityByid(entity_id)
 
         # Return proper response
         if isinstance(data, list):

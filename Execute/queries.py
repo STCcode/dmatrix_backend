@@ -452,7 +452,7 @@ def getAllActionTableOfDirectEquity():
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
      
-def getDirectEntityByid(entity_id):
+def getDirectEquityByid(entity_id):
     try:
         sql = "SELECT * FROM tbl_direct_equity  WHERE entityid = %s;"
         data = (entity_id,)  # tuple, not set

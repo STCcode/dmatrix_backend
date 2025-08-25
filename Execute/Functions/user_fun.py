@@ -893,37 +893,23 @@ def ClearUnderlyingdata():
         action = action_result.get("action")
         rows = action_result.get("rows_affected", 0)
 
-        if action == "deleted":
-            result = middleware.exs_msgs(
-                {"message": f"Entity {entity_id} deleted from tbl_underlying", "rows_affected": rows},
-                responses.delete_200,
-                '1024200'
-            )
-            status = 200
+        if isinstance(action_result, dict):
+            action = action_result.get("action")
+            rows = action_result.get("rows_affected", 0)
 
-        elif action == "inserted":
-            result = middleware.exs_msgs(
-                {"message": f"Entity {entity_id} was not in tbl_underlying, inserted successfully", "rows_affected": rows},
-                getattr(responses, 'insert_200', responses.delete_200),
-                '1024201'
-            )
-            status = 200
-
-        elif action == "not_found":
-            result = middleware.exe_msgs(
-                responses.delete_404,
-                f"Entity {entity_id} not found in tbl_entity",
-                '1024504'
-            )
-            status = 404
-
-        else:
-            result = middleware.exe_msgs(
-                responses.delete_501,
-                f"Unexpected action result: {action}",
-                '1024502'
-            )
-            status = 500
+            if action == "deleted":
+                ...
+            elif action == "inserted":
+                ...
+            elif action == "not_found":
+                ...
+            elif action == "error":
+                result = middleware.exe_msgs(
+                    responses.delete_501,
+                    f"Query error: {action_result.get('error')}",
+                    '1024503'
+                )
+                status = 500
 
         return make_response(result, status)
 

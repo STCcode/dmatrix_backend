@@ -866,19 +866,18 @@ def getUnderlyingByMf():
 #         return make_response(
 #             middleware.exe_msgs(responses.delete_501, str(e.args), '1024500'),
 #             500
-#         )
+#  
+#       )
+
 
 def ClearUnderlyingdata():
     try:
         entity_id = None
 
         if request.method == 'DELETE':
-            # Try JSON body first
             if request.is_json:
                 data = request.get_json()
                 entity_id = data.get("entityid")
-
-            # If not found, fallback to query param
             if not entity_id:
                 entity_id = request.args.get("entityid")
 
@@ -890,10 +889,8 @@ def ClearUnderlyingdata():
 
         # Validate input
         if not entity_id:
-            return make_response(
-                middleware.exe_msgs(responses.delete_501, "Missing entityid parameter", '1024501'),
-                400
-            )
+            result = middleware.exe_msgs(responses.delete_501, "Missing entityid parameter", '1024501')
+            return result if isinstance(result, Response) else make_response(result, 400)
 
         # Perform delete/insert logic
         action_result = queries.ClearUnderlyingdata(entity_id)
@@ -913,7 +910,7 @@ def ClearUnderlyingdata():
             elif action == "inserted":
                 result = middleware.exs_msgs(
                     {"message": f"Entity {entity_id} was not in tbl_underlying, inserted successfully", "rows_affected": rows},
-                    responses.insert_200 if hasattr(responses, 'insert_200') else responses.delete_200,
+                    getattr(responses, 'insert_200', responses.delete_200),
                     '1024201'
                 )
                 status = 200
@@ -935,20 +932,16 @@ def ClearUnderlyingdata():
                 status = 500
 
         else:
-            # If query.py returned error object
             result = action_result
             status = 500
 
-        return make_response(result, status)
+        # ✅ Safe return handling
+        return result if isinstance(result, Response) else make_response(result, status)
 
     except Exception as e:
         print("Error in ClearUnderlyingdata API:", e)
-        return make_response(
-            middleware.exe_msgs(responses.delete_501, str(e.args), '1024500'),
-            500
-        )
-
-
+        result = middleware.exe_msgs(responses.delete_501, str(e.args), '1024500')
+        return result if isinstance(result, Response) else make_response(result, 500)
 
 
 

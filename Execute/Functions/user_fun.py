@@ -903,6 +903,7 @@ def ClearUnderlyingdata():
         action_result = queries.ClearUnderlyingdata(entity_id)
 
         if isinstance(action_result, dict):
+            data = serialize_dates(data)
             action = action_result.get("action")
             rows = action_result.get("rows_affected", 0)
 

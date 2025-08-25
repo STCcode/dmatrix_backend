@@ -539,7 +539,7 @@ def getEquityActionTable():
 # ======================================Get All Home Data of Equity======================================
 def getAllHomeData():
      try:
-          sql=" SELECT SUM(cnt) AS total_count FROM (SELECT COUNT(*) AS cnt FROM tbl_action_table UNION ALL SELECT COUNT(*) FROM tbl_aif UNION ALL SELECT COUNT(*) FROM tbl_direct_equity) AS Totalequity_count;"
+          sql="WITH instrument_counts AS (SELECT 'Equity' AS instrument, (SELECT COUNT(*) FROM tbl_action_table) + (SELECT COUNT(*) FROM tbl_aif) + (SELECT COUNT(*) FROM tbl_direct_equity) AS instrument_total_count UNION ALL SELECT 'Fixed Income', 0 UNION ALL SELECT 'Commodities', 0)SELECT * FROM instrument_counts;"
           data=''
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs

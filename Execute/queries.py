@@ -338,11 +338,47 @@ def getUnderlyingByMf():
 #         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')  
 # 
 # 
+# def ClearUnderlyingdata(entity_id):
+#     try:
+#         deleted_summary = {}
+
+#         # Child tables list (table_name : delete_sql)
+#         delete_queries = {
+#             "tbl_underlying": "DELETE FROM tbl_underlying WHERE entityid = %s",
+#         }
+
+#         for table, sql in delete_queries.items():
+#             deleted_count = executeSql.ExecuteReturnId(sql, (entity_id,))
+#             if isinstance(deleted_count, int):
+#                 deleted_summary[table] = deleted_count
+#             else:
+#                 deleted_summary[table] = 0  # fallback if not integer
+
+#         return deleted_summary
+
+#     except Exception as e:
+#         print("Error in DeleteEntityByid query:", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')     
 def ClearUnderlyingdata(entity_id):
     try:
         deleted_summary = {}
 
-        # Child tables list (table_name : delete_sql)
+        # 1. Check if entityid exists in tbl_entity
+        check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s"
+        entity_exists = executeSql.ExecuteReturnId(check_entity_sql, (entity_id,))
+
+        if entity_exists:
+            # 2. Check if entityid exists in tbl_underlying
+            check_underlying_sql = "SELECT 1 FROM tbl_underlying WHERE entityid = %s"
+            underlying_exists = executeSql.ExecuteReturnId(check_underlying_sql, (entity_id,))
+
+            # 3. If not in tbl_underlying but present in tbl_entity → insert
+            if not underlying_exists:
+                insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
+                executeSql.ExecuteReturnId(insert_sql, (entity_id,))
+                print(f"Inserted missing entityid {entity_id} into tbl_underlying")
+
+        # 4. Now perform delete from tbl_underlying
         delete_queries = {
             "tbl_underlying": "DELETE FROM tbl_underlying WHERE entityid = %s",
         }
@@ -352,13 +388,13 @@ def ClearUnderlyingdata(entity_id):
             if isinstance(deleted_count, int):
                 deleted_summary[table] = deleted_count
             else:
-                deleted_summary[table] = 0  # fallback if not integer
+                deleted_summary[table] = 0
 
         return deleted_summary
 
     except Exception as e:
         print("Error in DeleteEntityByid query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')     
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')
 
 
 # ==============================Underlying Table End =======================================

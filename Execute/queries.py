@@ -261,7 +261,7 @@ def mcap_table(data):
 # ==============================mcap Table End=======================================
 
 
-# ==============================mcap Table Start=====================================
+# ==============================Underlying Table Start=====================================
 
 # def underlying_table(data):
 #     try:
@@ -324,10 +324,21 @@ def getUnderlyingByMf():
           return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')    
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')  
 
 
-# ==============================mcap Table End =======================================
+def ClearUnderlyingdata(entity_id):
+    try:
+        sql = "DELETE FROM tbl_underlying WHERE id = %s"
+        data = (entity_id,) 
+        deleted_count = executeSql.ExecuteReturnId(sql, data) 
+        return deleted_count
+    except Exception as e:
+        print("Error in DeleteUnderlyingByid query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')       
+
+
+# ==============================Underlying Table End =======================================
 
      
 

@@ -817,7 +817,58 @@ def getUnderlyingByMf():
             return make_response(result,status)
         except Exception as e:
             print("Error in getting role data=============================", e)
-            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)        
+            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)
+
+
+
+    
+def ClearUnderlyingdata():
+    try:
+        entity_id = None
+
+        # If DELETE → get from query parameters
+        if request.method == 'DELETE':
+            entity_id = request.args.get('id')
+
+        # If POST → get from form-data or JSON
+        elif request.method == 'POST':
+            if request.is_json:
+                entity_id = request.json.get('id')
+            else:
+                entity_id = request.form.get('id')
+
+        # Validate input
+        if not entity_id:
+            return make_response(
+                middleware.exe_msgs(responses.delete_501, "Missing id parameter", '1024501'),
+                400
+            )
+
+        # Perform deletion
+        deleted_rows = queries.ClearUnderlyingdata(entity_id)
+
+        if isinstance(deleted_rows, int):
+            if deleted_rows > 0:
+                result = middleware.exs_msgs(deleted_rows, responses.delete_200, '1024200')
+                status = 200
+            else:
+                result = middleware.exe_msgs(responses.delete_404, "No record found to delete", '1024504')
+                status = 404
+        else:
+            # Query returned error message object
+            result = deleted_rows
+            status = 500
+
+        return make_response(result, status)
+
+    except Exception as e:
+        print("Error in delete_entity:", e)
+        return make_response(
+            middleware.exe_msgs(responses.delete_501, str(e.args), '1024500'),
+            500
+        )
+
+
 
 
 

@@ -923,6 +923,14 @@ def ClearUnderlyingdata():
                 )
                 status = 404
 
+            elif action == "error":
+                result = middleware.exe_msgs(
+                    responses.delete_501,
+                    action_result.get("error", "Unknown error"),
+                    '1024500'
+                )
+                status = 500
+
             else:
                 result = middleware.exe_msgs(
                     responses.delete_501,
@@ -942,7 +950,6 @@ def ClearUnderlyingdata():
         print("Error in ClearUnderlyingdata API:", e)
         result = middleware.exe_msgs(responses.delete_501, str(e.args), '1024500')
         return result if isinstance(result, Response) else make_response(result, 500)
-
 
 
 #========================================Underlying Table End ======================================================

@@ -394,7 +394,12 @@ def ClearUnderlyingdata(entity_id):
 
     except Exception as e:
         print("Error in ClearUnderlyingdata query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')
+        # ❌ don't return Flask response here
+        return {
+            "action": "error",
+            "error": str(e),
+            "rows_affected": 0
+        }
 
 # ==============================Underlying Table End =======================================
 

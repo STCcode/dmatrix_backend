@@ -361,39 +361,39 @@ def getUnderlyingByMf():
 #         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')     
 def ClearUnderlyingdata(entity_id):
     try:
-        deleted_summary = {}
+        result_summary = {}
 
-        # 1. Check if entityid exists in tbl_entity
-        check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s"
-        entity_exists = executeSql.ExecuteReturnId(check_entity_sql, (entity_id,))
+        # 1. Check if entityid exists in tbl_underlying
+        check_underlying_sql = "SELECT 1 FROM tbl_underlying WHERE entityid = %s"
+        underlying_exists = executeSql.ExecuteReturnId(check_underlying_sql, (entity_id,))
 
-        if entity_exists:
-            # 2. Check if entityid already in tbl_underlying
-            check_underlying_sql = "SELECT 1 FROM tbl_underlying WHERE entityid = %s"
-            underlying_exists = executeSql.ExecuteReturnId(check_underlying_sql, (entity_id,))
+        if underlying_exists:
+            # Case A: entityid exists in tbl_underlying → delete it
+            delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
+            deleted_count = executeSql.ExecuteReturnId(delete_sql, (entity_id,))
+            result_summary["action"] = "deleted"
+            result_summary["rows_affected"] = deleted_count
 
-            # 3. If not in tbl_underlying, insert entityid only
-            if not underlying_exists:
+        else:
+            # Case B: entityid not in tbl_underlying → check if it exists in tbl_entity
+            check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s"
+            entity_exists = executeSql.ExecuteReturnId(check_entity_sql, (entity_id,))
+
+            if entity_exists:
+                # Insert entityid only into tbl_underlying
                 insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
-                executeSql.ExecuteReturnId(insert_sql, (entity_id,))
-                print(f"Inserted {entity_id} into tbl_underlying (entityid only) before deletion")
-
-        # 4. Now perform delete from tbl_underlying
-        delete_queries = {
-            "tbl_underlying": "DELETE FROM tbl_underlying WHERE entityid = %s",
-        }
-
-        for table, sql in delete_queries.items():
-            deleted_count = executeSql.ExecuteReturnId(sql, (entity_id,))
-            if isinstance(deleted_count, int):
-                deleted_summary[table] = deleted_count
+                inserted_count = executeSql.ExecuteReturnId(insert_sql, (entity_id,))
+                result_summary["action"] = "inserted"
+                result_summary["rows_affected"] = inserted_count
             else:
-                deleted_summary[table] = 0
+                # Case C: entityid not in tbl_entity either → nothing to do
+                result_summary["action"] = "not_found"
+                result_summary["rows_affected"] = 0
 
-        return deleted_summary
+        return result_summary
 
     except Exception as e:
-        print("Error in DeleteEntityByid query:", e)
+        print("Error in ClearUnderlyingdata query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')
 
 # ==============================Underlying Table End =======================================

@@ -895,38 +895,58 @@ def ClearUnderlyingdata():
                 400
             )
 
-        # Perform deletion
-        deleted_summary = queries.ClearUnderlyingdata(entity_id)
+        # Perform delete/insert logic
+        action_result = queries.ClearUnderlyingdata(entity_id)
 
-        if isinstance(deleted_summary, dict):
-            total_deleted = sum(deleted_summary.values())
-            if total_deleted > 0:
+        if isinstance(action_result, dict):
+            action = action_result.get("action")
+            rows = action_result.get("rows_affected", 0)
+
+            if action == "deleted":
                 result = middleware.exs_msgs(
-                    {"total_deleted": total_deleted, "breakdown": deleted_summary},
+                    {"message": f"Entity {entity_id} deleted from tbl_underlying", "rows_affected": rows},
                     responses.delete_200,
                     '1024200'
                 )
                 status = 200
-            else:
+
+            elif action == "inserted":
+                result = middleware.exs_msgs(
+                    {"message": f"Entity {entity_id} was not in tbl_underlying, inserted successfully", "rows_affected": rows},
+                    responses.insert_200 if hasattr(responses, 'insert_200') else responses.delete_200,
+                    '1024201'
+                )
+                status = 200
+
+            elif action == "not_found":
                 result = middleware.exe_msgs(
                     responses.delete_404,
-                    f"No record found to delete for entityid {entity_id}",
+                    f"Entity {entity_id} not found in tbl_entity or tbl_underlying",
                     '1024504'
                 )
                 status = 404
+
+            else:
+                result = middleware.exe_msgs(
+                    responses.delete_501,
+                    "Unexpected action result",
+                    '1024502'
+                )
+                status = 500
+
         else:
-            result = deleted_summary
+            # If query.py returned error object
+            result = action_result
             status = 500
 
         return make_response(result, status)
 
     except Exception as e:
-        print("Error in delete_entity:", e)
+        print("Error in ClearUnderlyingdata API:", e)
         return make_response(
             middleware.exe_msgs(responses.delete_501, str(e.args), '1024500'),
             500
         )
-
 
 
 

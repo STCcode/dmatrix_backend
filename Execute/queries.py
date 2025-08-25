@@ -536,6 +536,19 @@ def getEquityActionTable():
 # ======================================Get All EquityActionTable======================================
 
 
+# ======================================Get All Home Data of Equity======================================
+def getAllHomeData():
+     try:
+          sql=" SELECT SUM(cnt) AS total_count FROM (SELECT COUNT(*) AS cnt FROM tbl_action_table UNION ALL SELECT COUNT(*) FROM tbl_aif UNION ALL SELECT COUNT(*) FROM tbl_direct_equity) AS Totalequity_count;"
+          data=''
+          msgs=executeSql.ExecuteAllNew(sql,data)
+          return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+# ======================================Get All Home Data of Equity======================================
+
+
 
 
 

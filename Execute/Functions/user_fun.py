@@ -1417,3 +1417,27 @@ def getEquityActionTable():
             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500) 
         
 # ======================================Get All EquityActionTable======================================
+
+
+# ======================================Get All Home Dtata of Equity======================================
+
+def getAllHomeData():
+     if request.method == 'GET':
+        try:
+            data=queries.getAllHomeData()
+
+
+            if not isinstance(data, list):
+                 result = data
+                 status = 500
+            else:
+                data = serialize_dates(data)
+                result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+                status = 200
+                        
+            return make_response(result,status)
+        except Exception as e:
+            print("Error in getting role data=============================", e)
+            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500) 
+        
+# ======================================Get All Home Dtata of Equity======================================

@@ -368,15 +368,15 @@ def ClearUnderlyingdata(entity_id):
         entity_exists = executeSql.ExecuteReturnId(check_entity_sql, (entity_id,))
 
         if entity_exists:
-            # 2. Check if entityid exists in tbl_underlying
+            # 2. Check if entityid already in tbl_underlying
             check_underlying_sql = "SELECT 1 FROM tbl_underlying WHERE entityid = %s"
             underlying_exists = executeSql.ExecuteReturnId(check_underlying_sql, (entity_id,))
 
-            # 3. If not in tbl_underlying but present in tbl_entity → insert
+            # 3. If not in tbl_underlying, insert entityid only
             if not underlying_exists:
                 insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
                 executeSql.ExecuteReturnId(insert_sql, (entity_id,))
-                print(f"Inserted missing entityid {entity_id} into tbl_underlying")
+                print(f"Inserted {entity_id} into tbl_underlying (entityid only) before deletion")
 
         # 4. Now perform delete from tbl_underlying
         delete_queries = {
@@ -395,7 +395,6 @@ def ClearUnderlyingdata(entity_id):
     except Exception as e:
         print("Error in DeleteEntityByid query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')
-
 
 # ==============================Underlying Table End =======================================
 

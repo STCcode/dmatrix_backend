@@ -141,7 +141,7 @@ def ExecuteReturn(query, data):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute(query, data)
+        cur.execute(query, data or () )
         result = cur.fetchone()
         conn.commit()
         cur.close()

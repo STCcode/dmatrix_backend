@@ -875,6 +875,7 @@ def ClearUnderlyingdata():
         entity_id = None
         data = {}
 
+        # ✅ Get entity_id depending on method
         if request.method == 'DELETE':
             if request.is_json:
                 data = request.get_json(silent=True) or {}
@@ -896,13 +897,13 @@ def ClearUnderlyingdata():
                 "Missing entityid parameter",
                 '1024501'
             )
-            return result if isinstance(result, Response) else make_response(result, 400)
+            return result if isinstance(result, Response) else make_response(jsonify(result), 400)
 
         # ✅ Call query layer
         action_result = queries.ClearUnderlyingdata(entity_id)
 
-        result = None   # always initialize
-        status = 500    # default fallback
+        result = None
+        status = 500
 
         if isinstance(action_result, dict):
             action = action_result.get("action")
@@ -941,7 +942,6 @@ def ClearUnderlyingdata():
                 status = 500
 
         else:
-            # If query.py returned something unexpected
             result = middleware.exe_msgs(
                 responses.delete_501,
                 "Unexpected return type from query",
@@ -950,12 +950,23 @@ def ClearUnderlyingdata():
             status = 500
 
         # ✅ Always safe return
-        return result if isinstance(result, Response) else make_response(result, status)
+        if isinstance(result, Response):
+            return result
+        elif isinstance(result, dict):
+            return make_response(jsonify(result), status)
+        else:
+            return make_response(result, status)
 
     except Exception as e:
         print("Error in ClearUnderlyingdata API:", e)
         result = middleware.exe_msgs(responses.delete_501, str(e), '1024500')
-        return result if isinstance(result, Response) else make_response(result, 500)
+        if isinstance(result, Response):
+            return result
+        elif isinstance(result, dict):
+            return make_response(jsonify(result), 500)
+        else:
+            return make_response(result, 500)
+
 
 
 

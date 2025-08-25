@@ -367,42 +367,35 @@ def ClearUnderlyingdata(entity_id):
 
         # 1. Check if entityid exists in tbl_underlying
         check_underlying_sql = "SELECT 1 FROM tbl_underlying WHERE entityid = %s"
-        underlying_exists = executeSql.ExecuteReturnId(check_underlying_sql, (entity_id,))
+        underlying_exists = executeSql.ExecuteReturn(check_underlying_sql, (entity_id,))
 
         if underlying_exists:
             # Case A: entityid exists in tbl_underlying → delete it
             delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
-            deleted_count = executeSql.ExecuteReturnId(delete_sql, (entity_id,))
-            result_summary = {
-                "action": "deleted",
-                "rows_affected": deleted_count
-            }
+            executeSql.ExecuteOne(delete_sql, (entity_id,))
+            result_summary["action"] = "deleted"
+            result_summary["rows_affected"] = 1
 
         else:
             # Case B: entityid not in tbl_underlying → check if it exists in tbl_entity
             check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s"
-            entity_exists = executeSql.ExecuteReturnId(check_entity_sql, (entity_id,))
+            entity_exists = executeSql.ExecuteReturn(check_entity_sql, (entity_id,))
 
             if entity_exists:
-                # Insert entityid only into tbl_underlying
+                # Insert entityid into tbl_underlying
                 insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
-                inserted_count = executeSql.ExecuteReturnId(insert_sql, (entity_id,))
-                result_summary = {
-                    "action": "inserted",
-                    "rows_affected": inserted_count
-                }
+                executeSql.ExecuteOne(insert_sql, (entity_id,))
+                result_summary["action"] = "inserted"
+                result_summary["rows_affected"] = 1
             else:
                 # Case C: entityid not in tbl_entity either → nothing to do
-                result_summary = {
-                    "action": "not_found",
-                    "rows_affected": 0
-                }
+                result_summary["action"] = "not_found"
+                result_summary["rows_affected"] = 0
 
         return result_summary
 
     except Exception as e:
         print("Error in ClearUnderlyingdata query:", e)
-        # ✅ always return dict, never Response
         return {
             "action": "error",
             "error": str(e),

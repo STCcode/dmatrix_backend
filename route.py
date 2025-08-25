@@ -121,7 +121,7 @@ app.add_url_rule('/getAllUnderlying',view_func=user_fun.getAllUnderlying,methods
 app.add_url_rule('/getUnderlyingById',view_func=user_fun.getUnderlyingById,methods=['GET','POST'])
 app.add_url_rule('/getUnderlyingByMf',view_func=user_fun.getUnderlyingByMf,methods=['GET','POST'])
 # app.add_url_rule('/ClearUnderlyingdata',view_func=user_fun.ClearUnderlyingdata,methods=['DELETE','POST'])
-app.add_url_rule('/ClearUnderlyingByEntityId',view_func=user_fun.ClearUnderlyingdata,methods=['DELETE','POST'])
+app.add_url_rule('/clearUnderlyingByEntityId',view_func=user_fun.ClearUnderlyingdata,methods=['DELETE','POST'])
 
 # ======================================Underlying Table End========================================  
 

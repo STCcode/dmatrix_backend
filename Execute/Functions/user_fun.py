@@ -873,30 +873,36 @@ def getUnderlyingByMf():
 def ClearUnderlyingdata():
     try:
         entity_id = None
+        data = {}  # ✅ always initialize
 
         if request.method == 'DELETE':
             if request.is_json:
-                data = request.get_json()
+                data = request.get_json(silent=True) or {}
                 entity_id = data.get("entityid")
+
             if not entity_id:
                 entity_id = request.args.get("entityid")
 
         elif request.method == 'POST':
             if request.is_json:
-                entity_id = request.json.get('entityid')
+                data = request.get_json(silent=True) or {}
+                entity_id = data.get("entityid")
             else:
                 entity_id = request.form.get('entityid')
 
-        # Validate input
+        # ✅ Validate input
         if not entity_id:
-            result = middleware.exe_msgs(responses.delete_501, "Missing entityid parameter", '1024501')
+            result = middleware.exe_msgs(
+                responses.delete_501,
+                "Missing entityid parameter",
+                '1024501'
+            )
             return result if isinstance(result, Response) else make_response(result, 400)
 
-        # Perform delete/insert logic
+        # ✅ Call query layer
         action_result = queries.ClearUnderlyingdata(entity_id)
 
         if isinstance(action_result, dict):
-            data = serialize_dates(data)
             action = action_result.get("action")
             rows = action_result.get("rows_affected", 0)
 
@@ -924,14 +930,6 @@ def ClearUnderlyingdata():
                 )
                 status = 404
 
-            elif action == "error":
-                result = middleware.exe_msgs(
-                    responses.delete_501,
-                    action_result.get("error", "Unknown error"),
-                    '1024500'
-                )
-                status = 500
-
             else:
                 result = middleware.exe_msgs(
                     responses.delete_501,
@@ -941,10 +939,11 @@ def ClearUnderlyingdata():
                 status = 500
 
         else:
+            # If query.py returned something unexpected (e.g. error obj)
             result = action_result
             status = 500
 
-        # ✅ Safe return handling
+        # ✅ Always wrap safely
         return result if isinstance(result, Response) else make_response(result, status)
 
     except Exception as e:

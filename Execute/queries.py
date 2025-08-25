@@ -327,15 +327,38 @@ def getUnderlyingByMf():
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')  
 
 
+# def ClearUnderlyingdata(entity_id):
+#     try:
+#         sql = "DELETE FROM tbl_underlying WHERE id = %s"
+#         data = (entity_id,) 
+#         deleted_count = executeSql.ExecuteReturnId(sql, data) 
+#         return deleted_count
+#     except Exception as e:
+#         print("Error in DeleteUnderlyingByid query:", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')  
+# 
+# 
 def ClearUnderlyingdata(entity_id):
     try:
-        sql = "DELETE FROM tbl_underlying WHERE id = %s"
-        data = (entity_id,) 
-        deleted_count = executeSql.ExecuteReturnId(sql, data) 
-        return deleted_count
+        deleted_summary = {}
+
+        # Child tables list (table_name : delete_sql)
+        delete_queries = {
+            "tbl_underlying": "DELETE FROM tbl_underlying WHERE entityid = %s",
+        }
+
+        for table, sql in delete_queries.items():
+            deleted_count = executeSql.ExecuteReturnId(sql, (entity_id,))
+            if isinstance(deleted_count, int):
+                deleted_summary[table] = deleted_count
+            else:
+                deleted_summary[table] = 0  # fallback if not integer
+
+        return deleted_summary
+
     except Exception as e:
-        print("Error in DeleteUnderlyingByid query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')       
+        print("Error in DeleteEntityByid query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')     
 
 
 # ==============================Underlying Table End =======================================

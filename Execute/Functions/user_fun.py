@@ -822,41 +822,100 @@ def getUnderlyingByMf():
 
 
     
+# def ClearUnderlyingdata():
+#     try:
+#         entity_id = None
+
+#         # If DELETE → get from query parameters
+#         if request.method == 'DELETE':
+#             entity_id = request.args.get('id')
+
+#         # If POST → get from form-data or JSON
+#         elif request.method == 'POST':
+#             if request.is_json:
+#                 entity_id = request.json.get('id')
+#             else:
+#                 entity_id = request.form.get('id')
+
+#         # Validate input
+#         if not entity_id:
+#             return make_response(
+#                 middleware.exe_msgs(responses.delete_501, "Missing id parameter", '1024501'),
+#                 400
+#             )
+
+#         # Perform deletion
+#         deleted_rows = queries.ClearUnderlyingdata(entity_id)
+
+#         if isinstance(deleted_rows, int):
+#             if deleted_rows > 0:
+#                 result = middleware.exs_msgs(deleted_rows, responses.delete_200, '1024200')
+#                 status = 200
+#             else:
+#                 result = middleware.exe_msgs(responses.delete_404, "No record found to delete", '1024504')
+#                 status = 404
+#         else:
+#             # Query returned error message object
+#             result = deleted_rows
+#             status = 500
+
+#         return make_response(result, status)
+
+#     except Exception as e:
+#         print("Error in delete_entity:", e)
+#         return make_response(
+#             middleware.exe_msgs(responses.delete_501, str(e.args), '1024500'),
+#             500
+#         )
+
 def ClearUnderlyingdata():
     try:
         entity_id = None
 
-        # If DELETE → get from query parameters
         if request.method == 'DELETE':
-            entity_id = request.args.get('id')
+            # Try JSON body first
+            if request.is_json:
+                data = request.get_json()
+                entity_id = data.get("entityid")
 
-        # If POST → get from form-data or JSON
+            # If not found, fallback to query param
+            if not entity_id:
+                entity_id = request.args.get("entityid")
+
         elif request.method == 'POST':
             if request.is_json:
-                entity_id = request.json.get('id')
+                entity_id = request.json.get('entityid')
             else:
-                entity_id = request.form.get('id')
+                entity_id = request.form.get('entityid')
 
         # Validate input
         if not entity_id:
             return make_response(
-                middleware.exe_msgs(responses.delete_501, "Missing id parameter", '1024501'),
+                middleware.exe_msgs(responses.delete_501, "Missing entityid parameter", '1024501'),
                 400
             )
 
         # Perform deletion
-        deleted_rows = queries.ClearUnderlyingdata(entity_id)
+        deleted_summary = queries.ClearUnderlyingdata(entity_id)
 
-        if isinstance(deleted_rows, int):
-            if deleted_rows > 0:
-                result = middleware.exs_msgs(deleted_rows, responses.delete_200, '1024200')
+        if isinstance(deleted_summary, dict):
+            total_deleted = sum(deleted_summary.values())
+            if total_deleted > 0:
+                result = middleware.exs_msgs(
+                    {"total_deleted": total_deleted, "breakdown": deleted_summary},
+                    responses.delete_200,
+                    '1024200'
+                )
                 status = 200
             else:
-                result = middleware.exe_msgs(responses.delete_404, "No record found to delete", '1024504')
+                result = middleware.exe_msgs(
+                    responses.delete_404,
+                    f"No record found to delete for entityid {entity_id}",
+                    '1024504'
+                )
                 status = 404
         else:
-            # Query returned error message object
-            result = deleted_rows
+            result = deleted_summary
             status = 500
 
         return make_response(result, status)

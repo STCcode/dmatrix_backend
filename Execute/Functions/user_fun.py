@@ -1,4 +1,4 @@
-from flask import session, redirect, url_for,  request, render_template,flash,jsonify,make_response
+from flask import session, redirect, url_for, Response,  request, render_template,flash,jsonify,make_response
 #from route import app
 from datetime import  date, datetime, time 
 from werkzeug.utils import secure_filename

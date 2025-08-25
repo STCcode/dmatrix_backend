@@ -873,84 +873,64 @@ def getUnderlyingByMf():
 def ClearUnderlyingdata():
     try:
         entity_id = None
-        data = {}  # ✅ always initialize
 
         if request.method == 'DELETE':
-            if request.is_json:
-                data = request.get_json(silent=True) or {}
-                entity_id = data.get("entityid")
-
-            if not entity_id:
-                entity_id = request.args.get("entityid")
+            data = request.get_json(silent=True) or {}
+            entity_id = data.get("entityid") or request.args.get("entityid")
 
         elif request.method == 'POST':
-            if request.is_json:
-                data = request.get_json(silent=True) or {}
-                entity_id = data.get("entityid")
-            else:
-                entity_id = request.form.get('entityid')
+            data = request.get_json(silent=True) or {}
+            entity_id = data.get("entityid") or request.form.get("entityid")
 
-        # ✅ Validate input
+        # Validate input
         if not entity_id:
-            result = middleware.exe_msgs(
-                responses.delete_501,
-                "Missing entityid parameter",
-                '1024501'
-            )
-            return result if isinstance(result, Response) else make_response(result, 400)
+            result = middleware.exe_msgs(responses.delete_501, "Missing entityid parameter", '1024501')
+            return make_response(result, 400)
 
-        # ✅ Call query layer
+        # Call query layer (dict only)
         action_result = queries.ClearUnderlyingdata(entity_id)
 
-        if isinstance(action_result, dict):
-            data = serialize_dates(data)
-            action = action_result.get("action")
-            rows = action_result.get("rows_affected", 0)
+        action = action_result.get("action")
+        rows = action_result.get("rows_affected", 0)
 
-            if action == "deleted":
-                result = middleware.exs_msgs(
-                    {"message": f"Entity {entity_id} deleted from tbl_underlying", "rows_affected": rows},
-                    responses.delete_200,
-                    '1024200'
-                )
-                status = 200
+        if action == "deleted":
+            result = middleware.exs_msgs(
+                {"message": f"Entity {entity_id} deleted from tbl_underlying", "rows_affected": rows},
+                responses.delete_200,
+                '1024200'
+            )
+            status = 200
 
-            elif action == "inserted":
-                result = middleware.exs_msgs(
-                    {"message": f"Entity {entity_id} was not in tbl_underlying, inserted successfully", "rows_affected": rows},
-                    getattr(responses, 'insert_200', responses.delete_200),
-                    '1024201'
-                )
-                status = 200
+        elif action == "inserted":
+            result = middleware.exs_msgs(
+                {"message": f"Entity {entity_id} was not in tbl_underlying, inserted successfully", "rows_affected": rows},
+                getattr(responses, 'insert_200', responses.delete_200),
+                '1024201'
+            )
+            status = 200
 
-            elif action == "not_found":
-                result = middleware.exe_msgs(
-                    responses.delete_404,
-                    f"Entity {entity_id} not found in tbl_entity or tbl_underlying",
-                    '1024504'
-                )
-                status = 404
-
-            else:
-                result = middleware.exe_msgs(
-                    responses.delete_501,
-                    "Unexpected action result",
-                    '1024502'
-                )
-                status = 500
+        elif action == "not_found":
+            result = middleware.exe_msgs(
+                responses.delete_404,
+                f"Entity {entity_id} not found in tbl_entity",
+                '1024504'
+            )
+            status = 404
 
         else:
-            # If query.py returned something unexpected (e.g. error obj)
-            result = action_result
+            result = middleware.exe_msgs(
+                responses.delete_501,
+                f"Unexpected action result: {action}",
+                '1024502'
+            )
             status = 500
 
-        # ✅ Always wrap safely
-        return result if isinstance(result, Response) else make_response(result, status)
+        return make_response(result, status)
 
     except Exception as e:
         print("Error in ClearUnderlyingdata API:", e)
-        result = middleware.exe_msgs(responses.delete_501, str(e.args), '1024500')
-        return result if isinstance(result, Response) else make_response(result, 500)
+        result = middleware.exe_msgs(responses.delete_501, str(e), '1024500')
+        return make_response(result, 500)
 
 
 #========================================Underlying Table End ======================================================

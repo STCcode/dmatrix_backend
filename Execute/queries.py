@@ -1,4 +1,5 @@
 from datetime import datetime
+from multiprocessing import connection
 from Execute import executeSql,responses,middleware
 import platform
 from flask import jsonify, request
@@ -359,47 +360,35 @@ def getUnderlyingByMf():
 #     except Exception as e:
 #         print("Error in DeleteEntityByid query:", e)
 #         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')     
+
+
+
+# query.py
 def ClearUnderlyingdata(entity_id):
     try:
-        result_summary = {}
+        with connection.cursor() as cur:
+            # Check if entity exists
+            cur.execute("SELECT 1 FROM tbl_entity WHERE entityid = %s", (entity_id,))
+            if not cur.fetchone():
+                return {"action": "not_found", "rows_affected": 0}
 
-        # 1. Check if entityid exists in tbl_underlying
-        check_underlying_sql = "SELECT 1 FROM tbl_underlying WHERE entityid = %s"
-        underlying_exists = executeSql.ExecuteReturnId(check_underlying_sql, (entity_id,))
+            # Try delete from tbl_underlying
+            cur.execute("DELETE FROM tbl_underlying WHERE entityid = %s RETURNING *", (entity_id,))
+            rows_deleted = cur.rowcount
 
-        if underlying_exists:
-            # Case A: entityid exists in tbl_underlying → delete it
-            delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
-            deleted_count = executeSql.ExecuteReturnId(delete_sql, (entity_id,))
-            result_summary["action"] = "deleted"
-            result_summary["rows_affected"] = deleted_count
+            if rows_deleted > 0:
+                connection.commit()
+                return {"action": "deleted", "rows_affected": rows_deleted}
 
-        else:
-            # Case B: entityid not in tbl_underlying → check if it exists in tbl_entity
-            check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s"
-            entity_exists = executeSql.ExecuteReturnId(check_entity_sql, (entity_id,))
-
-            if entity_exists:
-                # Insert entityid only into tbl_underlying
-                insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
-                inserted_count = executeSql.ExecuteReturnId(insert_sql, (entity_id,))
-                result_summary["action"] = "inserted"
-                result_summary["rows_affected"] = inserted_count
-            else:
-                # Case C: entityid not in tbl_entity either → nothing to do
-                result_summary["action"] = "not_found"
-                result_summary["rows_affected"] = 0
-
-        return result_summary
+            # If nothing deleted, insert it
+            cur.execute("INSERT INTO tbl_underlying(entityid) VALUES (%s)", (entity_id,))
+            connection.commit()
+            return {"action": "inserted", "rows_affected": 1}
 
     except Exception as e:
+        connection.rollback()
         print("Error in ClearUnderlyingdata query:", e)
-        # ❌ don't return Flask response here
-        return {
-            "action": "error",
-            "error": str(e),
-            "rows_affected": 0
-        }
+        return {"action": "error", "error": str(e), "rows_affected": 0}
 
 # ==============================Underlying Table End =======================================
 

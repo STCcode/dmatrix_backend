@@ -174,7 +174,7 @@ def DeleteEntityByid(entity_id):
 
 def getCountOfAllEntity():
      try:
-          sql="SELECT MIN(subcategory) AS subcategory,MIN(category) AS category,COUNT(*) AS total FROM tbl_entity WHERE LOWER(subcategory) IN ('mutual fund', 'aif', 'direct equity') AND LOWER(category) IN ('equity') GROUP BY LOWER(subcategory) ORDER BY subcategory;"
+          sql=" SELECT MIN(subcategory) AS subcategory,MIN(category) AS category,COUNT(*) AS total FROM tbl_entity WHERE LOWER(subcategory) IN ('mutual fund', 'alternative investment funds', 'direct equity') AND LOWER(category) IN ('equity') GROUP BY LOWER(subcategory) ORDER BY subcategory;"
           data=''
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs

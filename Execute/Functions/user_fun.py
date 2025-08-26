@@ -1648,7 +1648,6 @@ def getAllActionInstrument():
                 result = middleware.exe_msgs(responses.getAll_501, "Invalid data format", '1023501')
                 status = 500
             else:
-                # You can return directly as JSON
                 result = {
                     "code": "1023200",
                     "successmsgs": responses.getAll_200,

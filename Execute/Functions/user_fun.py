@@ -1154,15 +1154,22 @@ def getAifEntity():
      if request.method == 'GET':
         try:
             data=queries.getAifEntity()
-            if type(data).__name__  != "list":
-                if data.json:
-                    result=data
-                    status=500
+            # if type(data).__name__  != "list":
+            #     if data.json:
+            #         result=data
+            #         status=500
+            # else:
+            #     result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
+            #     status=200
+            if isinstance(data, list):
+                result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+                status = 200
             else:
-                result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
-                status=200
-                        
-            return make_response(result,status)
+                result = data
+                status = 500
+
+            return make_response(result, status)
+     
         except Exception as e:
             print("Error in getting role data=============================", e)
             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)            

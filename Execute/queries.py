@@ -727,23 +727,23 @@ def getAllActionInstrument():
         """
         data = executeSql.ExecuteOne(sql, None)
 
-        print("DEBUG SQL OUTPUT:", data)  # 👈 see exact structure
+        print("DEBUG SQL OUTPUT:", data)  # 👈 check what your driver returns
 
         if not data:
             return {}
 
-        # Case 1: dict
+        # Handle dict
         if isinstance(data, dict) and "result" in data:
             return data["result"]
 
-        # Case 2: list of dicts
+        # Handle list-of-dicts
         if isinstance(data, list) and len(data) > 0 and "result" in data[0]:
             return data[0]["result"]
 
         return {}
     except Exception as e:
         print("Error in getAllActionInstrument query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310')
+        return {}
 
 # ======================================Get All Action  Table Instrument======================================
 

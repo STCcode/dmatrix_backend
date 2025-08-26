@@ -1036,16 +1036,16 @@ def InsertAifData():
             formlist = (formData['entityid'],formData['trans_date'],formData['trans_type'],formData['contribution_amount'],formData['setup_expense'],formData['stamp_duty'],formData['amount_invested'],formData['post_tax_nav'],formData['num_units'],formData['balance_units'],formData['strategy_name'],formData['amc_name'], datetime.now()
             )
 
-            insert_id = queries.InsertAifData(formlist)
+            insert_msg = queries.InsertAifData(formlist)
 
-            if type(insert_id).__name__ != "int":
-                return make_response(insert_id, 500)
-
-            result = middleware.exs_msgs(insert_id, responses.insert_200, '1020200')
-            return make_response(result, 200)
+            # Always return 200 if insert succeeds
+            return make_response(
+                middleware.exs_msgs(insert_msg, responses.insert_200, '1020200'),
+                200
+            )
 
     except Exception as e:
-        print("Error in save_user:", e)
+        print("Error in insertNavData:", e)
         return make_response(
             middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
             500
@@ -1069,16 +1069,16 @@ def insertNavData():
             formlist = (formData['entityid'],formData['pre_tax_nav'],formData['post_tax_nav'],formData['nav_date'], datetime.now()
             )
 
-            insert_id = queries.insertNavData(formlist)
+            insert_msg = queries.insertNavData(formlist)
 
-            if type(insert_id).__name__ != "int":
-                return make_response(insert_id, 500)
-
-            result = middleware.exs_msgs(insert_id, responses.insert_200, '1020200')
-            return make_response(result, 200)
+            
+            return make_response(
+                middleware.exs_msgs(insert_msg, responses.insert_200, '1020200'),
+                200
+            )
 
     except Exception as e:
-        print("Error in save_user:", e)
+        print("Error in insertNavData:", e)
         return make_response(
             middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
             500

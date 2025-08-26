@@ -173,6 +173,10 @@ app.add_url_rule('/getEquityActionTable',view_func=user_fun.getEquityActionTable
 app.add_url_rule('/getAllHomeData',view_func=user_fun.getAllHomeData,methods=['GET','POST'])
 # ======================================Get All Home Equity======================================
 
+# ======================================Get All Action instrument======================================
+app.add_url_rule('/getAllActionInstrument',view_func=user_fun.getAllActionInstrument,methods=['GET','POST'])
+# ======================================Get All Action instrument======================================
+
 
 
 

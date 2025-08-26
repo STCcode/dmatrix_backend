@@ -697,6 +697,42 @@ def getAllHomeData():
 
 
 
+#
+# ======================================Get All Action  Table Instrument======================================
+def getAllActionInstrument():
+    try:
+        sql = """
+        SELECT json_build_object(
+            'action_data', (
+                SELECT json_agg(json_build_object(
+                    'order_type', COALESCE(order_type, '-'),
+                    'scrip_name', COALESCE(scrip_name, '-')
+                )) FROM tbl_action_table
+            ),
+            'aif_data', (
+                SELECT json_agg(json_build_object(
+                    'amc_name', COALESCE(amc_name, '-'),
+                    'contribution_amount', COALESCE(contribution_amount::text, '-')
+                )) FROM tbl_aif
+            ),
+            'direct_equity_data', (
+                SELECT json_agg(json_build_object(
+                    'order_type', COALESCE(order_type, '-'),
+                    'trade_price', COALESCE(trade_price::text, '-')
+                )) FROM tbl_direct_equity
+            )
+        ) AS result;
+        """
+        data = executeSql.ExecuteOne(sql, "")
+        return data["result"] if data else {}
+    except Exception as e:
+        print("Error in getAllActionInstrument query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310')
+
+# ======================================Get All Action  Table Instrument======================================
+
+
+
 
 
 

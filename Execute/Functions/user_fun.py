@@ -1632,3 +1632,37 @@ def getAllHomeData():
             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500) 
         
 # ======================================Get All Home Dtata of Equity======================================
+
+
+
+
+
+# ======================================Get All Action table Instrument======================================
+
+def getAllActionInstrument():
+    if request.method == 'GET':
+        try:
+            data = queries.getAllActionInstrument()   # this already returns a dict (JSON from SQL)
+
+            if not isinstance(data, dict):
+                result = middleware.exe_msgs(responses.getAll_501, "Invalid data format", '1023501')
+                status = 500
+            else:
+                # You can return directly as JSON
+                result = {
+                    "code": "1023200",
+                    "successmsgs": responses.getAll_200,
+                    "data": data
+                }
+                status = 200
+
+            return make_response(result, status)
+
+        except Exception as e:
+            print("Error in getAllActionInstrument =============================", e)
+            return make_response(
+                middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
+                500
+            )
+   
+# ======================================Get All Action table Instrument======================================

@@ -426,10 +426,18 @@ def ClearUnderlyingdata(entity_id):
             entity_exists = executeSql.ExecuteReturn(check_entity_sql, (entity_id,))
 
             if entity_exists:
-                # Insert full row into tbl_underlying by copying from tbl_entity
+                # Copy matching fields from tbl_entity → tbl_underlying
                 insert_sql = """
-                    INSERT INTO tbl_underlying (name, code, weight, sector, isin, created_at, entityid)
-                    SELECT scripname, scripcode, weightage, sector, isin, NOW(), entityid
+                    INSERT INTO tbl_underlying 
+                        (company_name, scripcode, weightage, sector, isin_code, created_at, entityid)
+                    SELECT 
+                        scripname,       -- maps to company_name
+                        scripcode,       -- maps to scripcode
+                        weightage,       -- maps to weightage
+                        sector,          -- maps to sector
+                        isin,            -- maps to isin_code
+                        NOW(),           -- maps to created_at
+                        entityid         -- maps to entityid
                     FROM tbl_entity
                     WHERE entityid = %s
                 """
@@ -450,7 +458,6 @@ def ClearUnderlyingdata(entity_id):
             "error": str(e),
             "rows_affected": 0
         }
-
 
 # ####
 

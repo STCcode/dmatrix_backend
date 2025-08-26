@@ -503,7 +503,8 @@ def serialize_dates(data):
 
             # Format date, datetime, or time objects
             if isinstance(value, (datetime, date)):
-                row[field] = value.strftime("%Y-%m-%d")
+                # row[field] = value.strftime("%Y-%m-%d")
+                row[field] = value.strftime("%d-%m-%Y")
             elif isinstance(value, time):
                 row[field] = value.strftime("%H:%M:%S")
     return data

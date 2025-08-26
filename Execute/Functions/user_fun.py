@@ -1052,6 +1052,41 @@ def InsertAifData():
         )
    
 
+def insertNavData():
+    try:
+        if request.method == 'POST':
+            formData = request.get_json()
+
+            # required_fields = ['entityid', 'trans_date', 'trans_type', 'contribution_amount', 'setup_expense', 'stamp_duty', 'amount_invested', 'post_tax_nav', 'num_units', 'balance_units', 'strategy_name', 'amc_name', 'created_at']
+            # missing = [f for f in required_fields if f not in formData]
+
+            # if missing:
+            #     return make_response(
+            #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
+            #         400
+            #     )
+
+            formlist = (formData['entityid'],formData['pre_tax_nav'],formData['post_tax_nav'],formData['nav_date'], datetime.now()
+            )
+
+            insert_id = queries.insertNavData(formlist)
+
+            if type(insert_id).__name__ != "int":
+                return make_response(insert_id, 500)
+
+            result = middleware.exs_msgs(insert_id, responses.insert_200, '1020200')
+            return make_response(result, 200)
+
+    except Exception as e:
+        print("Error in save_user:", e)
+        return make_response(
+            middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
+            500
+        )
+   
+
+
+
 def getAllAif():
      if request.method == 'GET':
         try:

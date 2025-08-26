@@ -496,6 +496,17 @@ def InsertAifData(data):
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
     
 
+
+def insertNavData(data):
+    try:
+        sql = " INSERT INTO tbl_aif_nav (entityid, pre_tax_nav, post_tax_nav, nav_date, created_at) VALUES (%s, %s, %s, %s, %s)"
+        msg = executeSql.ExecuteOne(sql, data)
+        return msg
+    except Exception as e:
+        print("Error in save_user query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')    
+    
+
 def getAllAif():
      try:
           # sql="SELECT * FROM tbl_entity WHERE category ILIKE 'Equity' AND subcategory ILIKE 'AIF';"

@@ -539,7 +539,9 @@ def getAifActionTablebyId (entity_id):
 
 def getAifEntity():
      try:
-          sql="SELECT e.* FROM tbl_aif a JOIN tbl_entity e ON e.entityid = a.entityid WHERE e.category ILIKE 'Equity' AND e.subcategory ILIKE 'Alternative Investment Funds';"
+          # sql="SELECT e.* FROM tbl_aif a JOIN tbl_entity e ON e.entityid = a.entityid WHERE e.category ILIKE 'Equity' AND e.subcategory ILIKE 'Alternative Investment Funds';"
+          sql="SELECT e.*, a.* FROM tbl_entity e LEFT JOIN tbl_aif a ON e.entityid = a.entityid  WHERE e.category ILIKE 'Equity' AND e.subcategory ILIKE 'Alternative Investment Funds';"
+
           data=''
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs

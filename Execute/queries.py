@@ -703,32 +703,32 @@ def getAllActionInstrument():
     try:
         sql = """
         SELECT json_build_object(
-    'action_data', COALESCE((
-        SELECT json_agg(json_build_object(
-            'order_type', COALESCE(order_type, '-'),
-            'scrip_name', COALESCE(scrip_name, '-')
-        )) FROM tbl_action_table
-    ), '[]'::json),
-    
-    'aif_data', COALESCE((
-        SELECT json_agg(json_build_object(
-            'amc_name', COALESCE(amc_name, '-'),
-            'contribution_amount', COALESCE(contribution_amount::text, '-')
-        )) FROM tbl_aif
-    ), '[]'::json),
-    
-    'direct_equity_data', COALESCE((
-        SELECT json_agg(json_build_object(
-            'order_type', COALESCE(order_type, '-'),
-            'trade_price', COALESCE(trade_price::text, '-')
-        )) FROM tbl_direct_equity
-    ), '[]'::json)
-);
+            'action_data', COALESCE((
+                SELECT json_agg(json_build_object(
+                    'order_type', COALESCE(order_type, '-'),
+                    'scrip_name', COALESCE(scrip_name, '-')
+                )) FROM tbl_action_table
+            ), '[]'::json),
+            
+            'aif_data', COALESCE((
+                SELECT json_agg(json_build_object(
+                    'amc_name', COALESCE(amc_name, '-'),
+                    'contribution_amount', COALESCE(contribution_amount::text, '-')
+                )) FROM tbl_aif
+            ), '[]'::json),
+            
+            'direct_equity_data', COALESCE((
+                SELECT json_agg(json_build_object(
+                    'order_type', COALESCE(order_type, '-'),
+                    'trade_price', COALESCE(trade_price::text, '-')
+                )) FROM tbl_direct_equity
+            ), '[]'::json)
+        ) AS result;
         """
         data = executeSql.ExecuteOne(sql, None)
 
-        # Now Postgres returns the JSON directly, not inside "result"
-        return data if data else {}
+        # Extract the actual JSON object
+        return data["result"] if data and "result" in data else {}
     except Exception as e:
         print("Error in getAllActionInstrument query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310')

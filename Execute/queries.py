@@ -1,6 +1,7 @@
 from datetime import datetime
 from Execute import executeSql,responses,middleware
 import platform
+import json
 from flask import jsonify, request
 import json  
 #getting all user data
@@ -727,24 +728,29 @@ def getAllActionInstrument():
         """
         data = executeSql.ExecuteOne(sql, None)
 
-        print("DEBUG SQL OUTPUT:", data)  # 👈 check what your driver returns
+        # 👇 Debugging: see what we *really* get from DB
+        print("DEBUG TYPE:", type(data))
+        try:
+            print("DEBUG VALUE:", json.dumps(data, indent=2, default=str))
+        except:
+            print("DEBUG RAW:", data)
 
-        if not data:
-            return {}
-
-        # Handle dict
+        # Case 1: driver already returns dict with key "result"
         if isinstance(data, dict) and "result" in data:
             return data["result"]
 
-        # Handle list-of-dicts
+        # Case 2: driver returns list of dicts
         if isinstance(data, list) and len(data) > 0 and "result" in data[0]:
             return data[0]["result"]
+
+        # Case 3: driver returns JSON string inside "result"
+        if isinstance(data, dict) and isinstance(data.get("result"), str):
+            return json.loads(data["result"])
 
         return {}
     except Exception as e:
         print("Error in getAllActionInstrument query==========================", e)
         return {}
-
 # ======================================Get All Action  Table Instrument======================================
 
 

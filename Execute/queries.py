@@ -700,33 +700,62 @@ def getAllHomeData():
 
 #
 # ======================================Get All Action  Table Instrument======================================
+# def getAllActionInstrument():
+#     try:
+#         # Fetch action data
+#         sql_action = """
+#             SELECT COALESCE(order_type, '-') AS order_type,
+#                    COALESCE(scrip_name, '-') AS scrip_name
+#             FROM tbl_action_table
+#         """
+#         action_result = executeSql.FetchAll(sql_action)
+
+#         # Fetch AIF data
+#         sql_aif = """
+#             SELECT COALESCE(amc_name, '-') AS amc_name,
+#                    COALESCE(contribution_amount::text, '-') AS contribution_amount
+#             FROM tbl_aif
+#         """
+#         aif_result = executeSql.FetchAll(sql_aif)
+
+#         # Fetch direct equity data
+#         sql_direct_equity = """
+#             SELECT COALESCE(order_type, '-') AS order_type,
+#                    COALESCE(trade_price::text, '-') AS trade_price
+#             FROM tbl_direct_equity
+#         """
+#         direct_equity_result = executeSql.FetchAll(sql_direct_equity)
+
+#         # Always return only the data[] portion
+#         return {
+#             "action_data": action_result["data"],
+#             "aif_data": aif_result["data"],
+#             "direct_equity_data": direct_equity_result["data"]
+#         }
+
+#     except Exception as e:
+#         print("Error in getAllActionInstrument ==============================", e)
+#         return {
+#             "action_data": [],
+#             "aif_data": [],
+#             "direct_equity_data": []
+#         }
+
+
 def getAllActionInstrument():
     try:
-        # Fetch action data
-        sql_action = """
-            SELECT COALESCE(order_type, '-') AS order_type,
-                   COALESCE(scrip_name, '-') AS scrip_name
-            FROM tbl_action_table
-        """
+        sql_action = "SELECT COALESCE(order_type, '-') AS order_type, COALESCE(scrip_name, '-') AS scrip_name FROM tbl_action_table"
         action_result = executeSql.FetchAll(sql_action)
+        print("DEBUG: action_result =>", action_result)
 
-        # Fetch AIF data
-        sql_aif = """
-            SELECT COALESCE(amc_name, '-') AS amc_name,
-                   COALESCE(contribution_amount::text, '-') AS contribution_amount
-            FROM tbl_aif
-        """
+        sql_aif = "SELECT COALESCE(amc_name, '-') AS amc_name, COALESCE(contribution_amount::text, '-') AS contribution_amount FROM tbl_aif"
         aif_result = executeSql.FetchAll(sql_aif)
+        print("DEBUG: aif_result =>", aif_result)
 
-        # Fetch direct equity data
-        sql_direct_equity = """
-            SELECT COALESCE(order_type, '-') AS order_type,
-                   COALESCE(trade_price::text, '-') AS trade_price
-            FROM tbl_direct_equity
-        """
+        sql_direct_equity = "SELECT COALESCE(order_type, '-') AS order_type, COALESCE(trade_price::text, '-') AS trade_price FROM tbl_direct_equity"
         direct_equity_result = executeSql.FetchAll(sql_direct_equity)
+        print("DEBUG: direct_equity_result =>", direct_equity_result)
 
-        # Always return only the data[] portion
         return {
             "action_data": action_result["data"],
             "aif_data": aif_result["data"],
@@ -734,12 +763,13 @@ def getAllActionInstrument():
         }
 
     except Exception as e:
-        print("Error in getAllActionInstrument ==============================", e)
+        print("Error in getAllActionInstrument==============================", e)
         return {
             "action_data": [],
             "aif_data": [],
             "direct_equity_data": []
         }
+
 
 # ======================================Get All Action  Table Instrument======================================
 

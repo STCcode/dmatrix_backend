@@ -1,7 +1,6 @@
 from datetime import datetime
 from Execute import executeSql,responses,middleware
 import platform
-import json
 from flask import jsonify, request
 import json  
 #getting all user data

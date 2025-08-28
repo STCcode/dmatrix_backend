@@ -165,6 +165,45 @@ def ExecuteOne(query, data):
     except Exception as e:
         print("Error in ExecuteOne==============================", e)
         return middleware.exe_msgs(responses.execution_501, str(e.args), '1020300')
+    
+def FetchOne(query, data=None):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute(query, data)
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        return {
+            "code": "1024400",
+            "successmsgs": "Fetched Successfully",
+            "data": row if row else {}
+        }
+
+    except Exception as e:
+        print("Error in FetchOne ==============================", e)
+        return {
+            "code": "1024500",
+            "errmsgs": "Fetching Failed",
+            "error": str(e)
+        }
+
+    
+
+def FetchAll(query, params=None):
+    """Fetch multiple rows as list of dicts"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute(query, params)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return [dict(row) for row in rows] if rows else []
+    except Exception as e:
+        print("Error in FetchAll==============================", e)
+        return []    
 
 
 # EXECUTE MANY

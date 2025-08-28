@@ -702,55 +702,29 @@ def getAllHomeData():
 # ======================================Get All Action  Table Instrument======================================
 def getAllActionInstrument():
     try:
-        sql = """
-        SELECT json_build_object(
-            'action_data', COALESCE((
-                SELECT json_agg(json_build_object(
-                    'order_type', COALESCE(order_type, '-'),
-                    'scrip_name', COALESCE(scrip_name, '-')
-                )) FROM tbl_action_table
-            ), '[]'::json),
-            
-            'aif_data', COALESCE((
-                SELECT json_agg(json_build_object(
-                    'amc_name', COALESCE(amc_name, '-'),
-                    'contribution_amount', COALESCE(contribution_amount::text, '-')
-                )) FROM tbl_aif
-            ), '[]'::json),
-            
-            'direct_equity_data', COALESCE((
-                SELECT json_agg(json_build_object(
-                    'order_type', COALESCE(order_type, '-'),
-                    'trade_price', COALESCE(trade_price::text, '-')
-                )) FROM tbl_direct_equity
-            ), '[]'::json)
-        ) AS result;
-        """
-        data = executeSql.ExecuteOne(sql, None)
+        # Fetch action data
+        sql_action = "SELECT COALESCE(order_type, '-') AS order_type,COALESCE(scrip_name, '-') AS scrip_name FROM tbl_action_table"
+        action_data = executeSql.FetchAll(sql_action)
 
-        if not data:
-            return {}
+        # Fetch AIF data
+        sql_aif = "SELECT COALESCE(amc_name, '-') AS amc_name,COALESCE(contribution_amount::text, '-') AS contribution_amount FROM tbl_aif"
+        aif_data = executeSql.FetchAll(sql_aif)
 
-        # --- Universal safe parsing ---
-        if isinstance(data, dict) and "result" in data:
-            return data["result"]
+        # Fetch direct equity data
+        sql_direct_equity = "SELECT COALESCE(order_type, '-') AS order_type,COALESCE(trade_price::text, '-') AS trade_price FROM tbl_direct_equity"
+        direct_equity_data = executeSql.FetchAll(sql_direct_equity)
 
-        if isinstance(data, list) and len(data) > 0 and "result" in data[0]:
-            return data[0]["result"]
-
-        if isinstance(data, str):
-            import json
-            try:
-                return json.loads(data)
-            except:
-                return {"raw_result": data}
-
-        return {"raw_result": str(data)}
+        # Always return a clean dict
+        return {"action_data": action_data,"aif_data": aif_data,"direct_equity_data": direct_equity_data
+        }
 
     except Exception as e:
-        print("Error in getAllActionInstrument query==========================", e)
-        return {"error": str(e)}
-
+        print("Error in getAllActionInstrument==============================", e)
+        return {
+            "action_data": [],
+            "aif_data": [],
+            "direct_equity_data": []
+        }
 # ======================================Get All Action  Table Instrument======================================
 
 

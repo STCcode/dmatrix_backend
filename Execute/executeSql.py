@@ -192,18 +192,30 @@ def FetchOne(query, data=None):
     
 
 def FetchAll(query, params=None):
-    """Fetch multiple rows as list of dicts"""
     try:
         conn = get_db_connection()
+        # use DictCursor so results come as dicts
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cur.execute(query, params)
+
+        if params:
+            cur.execute(query, params)
+        else:
+            cur.execute(query)
+
         rows = cur.fetchall()
+
         cur.close()
         conn.close()
-        return [dict(row) for row in rows] if rows else []
+
+        return {
+            "code": "1023200",
+            "successmsgs": responses.getAll_200,
+            "data": rows  # always a list of dicts
+        }
+
     except Exception as e:
         print("Error in FetchAll==============================", e)
-        return []    
+        return middleware.exe_msgs(responses.getAll_501, str(e.args), '1020300') 
 
 
 # EXECUTE MANY

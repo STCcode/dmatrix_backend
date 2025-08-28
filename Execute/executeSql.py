@@ -194,28 +194,20 @@ def FetchOne(query, data=None):
 def FetchAll(query, params=None):
     try:
         conn = get_db_connection()
-        # use DictCursor so results come as dicts
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-        if params:
-            cur.execute(query, params)
-        else:
-            cur.execute(query)
-
+        cur.execute(query, params or ())
         rows = cur.fetchall()
 
         cur.close()
         conn.close()
 
-        return {
-            "code": "1023200",
-            "successmsgs": responses.getAll_200,
-            "data": rows  # always a list of dicts
-        }
+        # convert to list of dicts (JSON serializable)
+        return [dict(row) for row in rows]
 
     except Exception as e:
         print("Error in FetchAll==============================", e)
-        return middleware.exe_msgs(responses.getAll_501, str(e.args), '1020300') 
+        return []
 
 
 # EXECUTE MANY

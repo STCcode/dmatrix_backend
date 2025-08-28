@@ -742,29 +742,24 @@ def getAllHomeData():
 
 def getAllActionInstrument():
     try:
-        sql_action = "SELECT COALESCE(order_type, '-') AS order_type, COALESCE(scrip_name, '-') AS scrip_name FROM tbl_action_table"
-        action_data = executeSql.FetchAll(sql_action)
+        action_data = executeSql.FetchAll("SELECT order_type, scrip_name FROM tbl_action_table")
+        print("DEBUG action_data:", action_data)
 
-        sql_aif = "SELECT COALESCE(amc_name, '-') AS amc_name, COALESCE(contribution_amount::text, '-') AS contribution_amount FROM tbl_aif"
-        aif_data = executeSql.FetchAll(sql_aif)
+        aif_data = executeSql.FetchAll("SELECT amc_name, contribution_amount FROM tbl_aif")
+        print("DEBUG aif_data:", aif_data)
 
-        sql_direct_equity = "SELECT COALESCE(order_type, '-') AS order_type, COALESCE(trade_price::text, '-') AS trade_price FROM tbl_direct_equity"
-        direct_equity_data = executeSql.FetchAll(sql_direct_equity)
+        direct_equity_data = executeSql.FetchAll("SELECT order_type, trade_price FROM tbl_direct_equity")
+        print("DEBUG direct_equity_data:", direct_equity_data)
 
-        # always return just .get("data", [])
         return {
-            "action_data": action_data.get("data", []),
-            "aif_data": aif_data.get("data", []),
-            "direct_equity_data": direct_equity_data.get("data", [])
+            "action_data": action_data,
+            "aif_data": aif_data,
+            "direct_equity_data": direct_equity_data
         }
 
     except Exception as e:
         print("Error in getAllActionInstrument==============================", e)
-        return {
-            "action_data": [],
-            "aif_data": [],
-            "direct_equity_data": []
-        }
+        return {"action_data": [], "aif_data": [], "direct_equity_data": []}
 
 # ======================================Get All Action  Table Instrument======================================
 

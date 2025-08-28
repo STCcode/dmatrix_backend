@@ -3,6 +3,7 @@ from Execute import responses,middleware
 from psycopg2.extensions import connection as _connection
 # from route import get_db_connection
 from db import get_db_connection
+import psycopg2.extras
 from Execute import responses, middleware
 #for Selecting All record
 

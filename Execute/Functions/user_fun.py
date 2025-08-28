@@ -1642,7 +1642,7 @@ def getAllHomeData():
 def getAllActionInstrument():
     if request.method == 'GET':
         try:
-            data = queries.getAllActionInstrument()  # dict from SQL
+            data = queries.getAllActionInstrument()
 
             result = {
                 "code": "1023200",

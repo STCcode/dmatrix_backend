@@ -483,7 +483,7 @@ def getCamByid(company_name=None):
     try:
           # sql = "SELECT name_of_company, isin_number FROM bigsheet_data WHERE name_of_company ILIKE %s"
           # sql = "SELECT issuer_name,name_of_company, isin,sector_name,tag FROM equity_bigsheet_data WHERE name_of_company ILIKE %s;"
-          sql = "SELECT CASE WHEN issuer_name IS NOT NULL AND name_of_company IS NOT NULL AND normalize_company_name(issuer_name) <> normalize_company_name(name_of_company) THEN issuer_name || ' / ' || name_of_company ELSE COALESCE(issuer_name, name_of_company) END AS company_name,isin,sector_name,tag FROM equity_bigsheet_data WHERE normalize_company_name(COALESCE(name_of_company, issuer_name)) ILIKE '%' || normalize_company_name('%s') || '%';"
+          sql = "SELECT CASE WHEN issuer_name IS NOT NULL AND name_of_company IS NOT NULL AND normalize_company_name(issuer_name) <> normalize_company_name(name_of_company) THEN issuer_name || ' / ' || name_of_company ELSE COALESCE(issuer_name, name_of_company) END AS company_name,isin,sector_name,tag FROM equity_bigsheet_data WHERE normalize_company_name(COALESCE(name_of_company, issuer_name)) ILIKE '%' || normalize_company_name(%s);"
           data = (f"%{company_name}%",)
           msgs = executeSql.ExecuteAllNew(sql, data)
           return msgs

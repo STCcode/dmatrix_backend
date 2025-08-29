@@ -481,7 +481,8 @@ def ClearUnderlyingdata(entity_id):
 
 def getCamByid(company_name=None):
     try:
-          sql = "SELECT name_of_company, isin_number FROM bigsheet_data WHERE name_of_company ILIKE %s"
+          # sql = "SELECT name_of_company, isin_number FROM bigsheet_data WHERE name_of_company ILIKE %s"
+          sql = "SELECT issuer_name,name_of_company, isin,sector_name,tag FROM equity_bigsheet_data WHERE name_of_company ILIKE %s;"
           data = (f"%{company_name}%",)  
           msgs = executeSql.ExecuteAllNew(sql, data)
           return msgs

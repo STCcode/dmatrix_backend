@@ -159,6 +159,22 @@ app.add_url_rule('/getDEDetailActionTable',view_func=user_fun.getDEDetailActionT
 app.add_url_rule('/delete_entity_data',view_func=user_fun.delete_entity_data,methods=['DELETE','POST'])
 # ======================================Delete Etity data From Underlying,Action Table======================================
 
+
+
+#=======================================ETF Table Start====================================
+
+# app.add_url_rule('/insertETFActionTable' ,view_func=user_fun.InsertAifData,methods=['GET','POST'])
+# app.add_url_rule('/getAllAif',view_func=user_fun.getAllAif,methods=['GET','POST'])
+# app.add_url_rule('/getAifActionTablebyId',view_func=user_fun.getAifActionTablebyId,methods=['GET','POST'])
+
+# app.add_url_rule('/getAifEntity',view_func=user_fun.getAifEntity,methods=['GET','POST'])
+
+# app.add_url_rule('/insertNavData' ,view_func=user_fun.insertNavData,methods=['GET','POST'])
+
+# ======================================ETF Table End======================================
+
+
+
 # ======================================Get All Equity======================================
 app.add_url_rule('/getAllEquity',view_func=user_fun.getAllEquity,methods=['GET','POST'])
 # ======================================Get All Equity======================================

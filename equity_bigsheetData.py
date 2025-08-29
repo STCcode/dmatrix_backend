@@ -2,7 +2,6 @@ import pandas as pd
 from datetime import datetime
 import os
 from sqlalchemy import create_engine
-from sqlalchemy_utils import database_exists, create_database
 from db import get_db_connection  # your db.py
 
 downloads_path = r"D:/equity_bigsheetData"
@@ -43,21 +42,6 @@ def get_sqlalchemy_engine():
     raw_conn = get_db_connection()
     engine = create_engine('postgresql+psycopg2://', creator=lambda: raw_conn)
     return engine
-
-def save_to_postgres(df, engine, table_name="equity_bigsheet_data"):
-    # Ensure database exists
-    if not database_exists(engine.url):
-        create_database(engine.url)
-
-    # Create table if not exists (empty schema only)
-    if not engine.dialect.has_table(engine.connect(), table_name):
-        print(f"📦 Creating table '{table_name}' ...")
-        df.head(0).to_sql(table_name, con=engine, if_exists="replace", index=False)
-
-    # Insert new data
-    print(f"🚀 Inserting data into '{table_name}' ...")
-    df.to_sql(table_name, con=engine, if_exists="append", index=False)
-    print(f"✅ Data inserted into {table_name}")
 
 def main():
     # Load files
@@ -100,6 +84,7 @@ def main():
         col_bse = f"{col}_bse"
         col_nse = f"{col}_nse"
         if col_bse in merged.columns and col_nse in merged.columns:
+            # Prefer BSE value, else NSE
             merged[col] = merged[col_bse].combine_first(merged[col_nse])
             merged = merged.drop(columns=[col_bse, col_nse])
         elif col_bse in merged.columns:
@@ -138,9 +123,15 @@ def main():
     merged.to_excel(output_file, index=False)
     print(f"✅ Final file saved locally at: {output_file}")
 
-    # Save to PostgreSQL safely
+    # Save to PostgreSQL
     engine = get_sqlalchemy_engine()
-    save_to_postgres(merged, engine, "equity_bigsheet_data")
+    merged.to_sql(
+        'equity_bigsheet_data',
+        con=engine,
+        if_exists='replace',
+        index=False
+    )
+    print("✅ Data saved to PostgreSQL table 'equity_bigsheet_data'")
 
 if __name__ == "__main__":
     main()

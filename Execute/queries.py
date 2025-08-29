@@ -276,7 +276,7 @@ def mcap_table(data):
 def underlying_table(data):
     try:
         sql = "INSERT INTO tbl_Underlying (company_name, scripcode, weightage, sector, isin_code, created_at, entityid, tag) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        msg = executeSql.ExecuteReturnId(sql, data)
+        msg = executeSql.ExecuteOne(sql, data)
         return msg
     except Exception as e:
         print("Error in underlying_table query:", e)

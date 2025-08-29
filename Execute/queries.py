@@ -638,7 +638,7 @@ def delete_entity_data(entity_id):
         delete_queries = {
             "tbl_underlying": "DELETE FROM tbl_underlying WHERE entityid = %s",
             "tbl_action_table": "DELETE FROM tbl_action_table WHERE entityid = %s"
-            # 👉 Add more tables here if needed
+            #Add more tables here if needed
         }
 
         for table, sql in delete_queries.items():

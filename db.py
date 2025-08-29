@@ -32,7 +32,7 @@ import yaml  # only needed if you want to support db.yaml fallback
 
 # db connection for data can be insert in local and server
 
-def get_db_connections():
+def get_db_connection():
     connections = []
 
     # Render connection

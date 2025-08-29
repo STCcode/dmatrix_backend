@@ -668,7 +668,7 @@ def underlying_table():
             inserted_ids = []
             for row in rows:
                 # Prepare tuple for each row
-                formlist = (row.get('company_name'),row.get('scripcode'),row.get('weightage'),row.get('sector'),row.get('isin_code'),datetime.now(),entityid, row.get('tag'),)
+                formlist = (row.get('company_name'),row.get('scripcode'),row.get('weightage'),row.get('sector'),row.get('isin_code'),datetime.now(),entityid, row.get('tag'))
                 insert_id = queries.underlying_table(formlist)
 
                 if type(insert_id).__name__ != "int":

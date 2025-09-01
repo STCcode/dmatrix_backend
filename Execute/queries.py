@@ -804,8 +804,8 @@ def get_cashflows_action(entityid):
             return [], []
 
         # ✅ If msgs is a list of dicts
-        dates = [row['order_date'] for row in msgs]
-        cashflows = [float(row['cashflow']) for row in msgs]
+        dates = [row['order_date'] if isinstance(row, dict) else row[0] for row in msgs]
+        cashflows = [float(row['cashflow'] if isinstance(row, dict) else row[1]) for row in msgs]
 
         return cashflows, dates
 

@@ -5,6 +5,7 @@ from psycopg2.extensions import connection as _connection
 from db import get_db_connection
 import psycopg2.extras
 from Execute import responses, middleware
+from psycopg2.extras import RealDictCursor
 #for Selecting All record
 
 # def ExecuteAll(query, data):
@@ -279,34 +280,50 @@ def ExecuteAllNew(query, data):
     # Executes a SQL query and returns all rows as a list of dicts.
     # Always returns a list (empty if no rows) to avoid errors.
     # """
+
+
+
 def ExecuteAllWithHeaders(query, params=None):
     """
-    Executes a SELECT query and returns list of dictionaries with column headers.
-    Always returns a list. Never returns a Response object.
+    Executes a query and returns a list of dicts with column headers.
+    Handles TEXT/NUMERIC columns reliably.
+    Never returns a Response object, always a list of dicts.
     """
+    conn = None
+    cur = None
     try:
-        conn = get_db_connection()
-        cur = conn.cursor()
+        conn = get_db_connection()  # Your existing DB connection function
+        cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute(query, params or ())
         rows = cur.fetchall()
 
-        # If no rows, return empty list
+        # Return empty list if no results
         if not rows:
-            cur.close()
-            conn.close()
             return []
 
-        # Extract column names
-        columns = [desc[0] for desc in cur.description]
+        # Convert all numeric strings to float automatically
+        result = []
+        for row in rows:
+            clean_row = {}
+            for k, v in row.items():
+                if v is None:
+                    clean_row[k] = None
+                else:
+                    # Auto-convert numeric strings to float
+                    try:
+                        clean_row[k] = float(v)
+                    except (ValueError, TypeError):
+                        clean_row[k] = v
+            result.append(clean_row)
 
-        # Convert to list of dictionaries
-        result = [dict(zip(columns, row)) for row in rows]
-
-        cur.close()
-        conn.close()
         return result
 
     except Exception as e:
-        print("Error in ExecuteAllWithHeaders ===================", e)
-        # Return empty list on error, do not break other functions
+        print("Error in ExecuteAllWithHeaders =============================", e)
+        # Always return list to avoid 'Response object is not iterable'
         return []
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()

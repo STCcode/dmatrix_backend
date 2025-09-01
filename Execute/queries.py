@@ -803,48 +803,94 @@ def getAllActionInstrument():
 # --- Fetch cashflows from a table ---
 
 # Queries to fetch cashflows per table
-def get_cashflows(entityid, table_name, date_col, amount_in_col, amount_out_col=None, order_type_col=None):
-    """
-    Returns (cashflows, dates) for a given table.
-    Handles purchase/buy = outflow, sell = inflow
-    """
-    sql = f"""
-        SELECT {date_col}::date AS date_col,
-               {order_type_col} AS order_type,
-               {amount_in_col} AS amount_in,
-               {amount_out_col if amount_out_col else '0'} AS amount_out
-        FROM {table_name}
-        WHERE TRIM(entityid) = %s
-        ORDER BY {date_col};
+# Action (Mutual Fund)
+def get_cashflows_action(entityid):
+    sql = """
+        SELECT order_date::date AS order_date,
+               order_type,
+               purchase_amount,
+               redeem_amount
+        FROM tbl_action_table
+        WHERE TRIM(UPPER(entityid)) = UPPER(%s)
+        ORDER BY order_date;
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
     if not rows:
-        raise ValueError(f"No rows found for entityid={entityid} in table {table_name}")
+        raise ValueError(f"No rows found for entityid={entityid} in tbl_action_table")
 
-    cashflows = []
-    dates = []
-
+    cashflows, dates = [], []
     for row in rows:
-        order_date = row["date_col"]
-        order_type = (row.get("order_type") or "").strip().lower()
-        amount_in = float(row.get("amount_in") or 0)
-        amount_out = float(row.get("amount_out") or 0)
+        order_date = row["order_date"]
+        order_type = row["order_type"]
+        purchase_amount = float(row.get("purchase_amount") or 0)
+        redeem_amount = float(row.get("redeem_amount") or 0)
 
-        # Decide cashflow
-        if order_type in ["purchase", "buy"]:
-            cf = -amount_in
-        elif order_type in ["sell", "redemption"]:
-            cf = amount_out
+        if order_type.lower() in ("purchase", "buy"):
+            cf = -purchase_amount
+        elif order_type.lower() in ("sell", "redemption"):
+            cf = redeem_amount
         else:
             cf = 0
 
         if cf != 0:
             cashflows.append(cf)
             dates.append(order_date)
+    return cashflows, dates
 
-    if not cashflows:
-        raise ValueError(f"No valid cashflows found for entityid={entityid} in table {table_name}")
 
+# Direct Equity
+def get_cashflows_direct_equity(entityid):
+    sql = """
+        SELECT trade_date::date AS trade_date,
+               order_type,
+               trade_price AS amount
+        FROM tbl_direct_equity
+        WHERE TRIM(UPPER(entityid)) = UPPER(%s)
+        ORDER BY trade_date;
+    """
+    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
+    if not rows:
+        raise ValueError(f"No rows found for entityid={entityid} in tbl_direct_equity")
+
+    cashflows, dates = [], []
+    for row in rows:
+        trade_date = row["trade_date"]
+        order_type = row["order_type"]
+        amount = float(row.get("amount") or 0)
+
+        if order_type.lower() in ("buy", "purchase"):
+            cf = -amount
+        elif order_type.lower() in ("sell", "redemption"):
+            cf = amount
+        else:
+            cf = 0
+
+        if cf != 0:
+            cashflows.append(cf)
+            dates.append(trade_date)
+    return cashflows, dates
+
+
+# AIF
+def get_cashflows_aif(entityid):
+    sql = """
+        SELECT trans_date::date AS trans_date,
+               contribution_amount
+        FROM tbl_aif
+        WHERE TRIM(UPPER(entityid)) = UPPER(%s)
+        ORDER BY trans_date;
+    """
+    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
+    if not rows:
+        raise ValueError(f"No rows found for entityid={entityid} in tbl_aif")
+
+    cashflows, dates = [], []
+    for row in rows:
+        trans_date = row["trans_date"]
+        contribution_amount = float(row.get("contribution_amount") or 0)
+        if contribution_amount != 0:
+            cashflows.append(-contribution_amount)  # always outflow
+            dates.append(trans_date)
     return cashflows, dates
 
 # ======================================calculate Xirr (IRR)======================================

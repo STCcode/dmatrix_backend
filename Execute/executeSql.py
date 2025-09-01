@@ -271,3 +271,34 @@ def ExecuteAllNew(query, data):
     except Exception as e:
         print("Error in ExecuteAllNew=============================", e)
         return middleware.exe_msgs(responses.execution_501, str(e.args), '1023300')
+    
+
+
+    # SELECT ALL with headers (safe version for IRR queries)
+def ExecuteAllWithHeaders(query, data):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(query, data)
+        rows = cur.fetchall()
+
+        # if no rows, return empty list
+        if not rows:
+            cur.close()
+            conn.close()
+            return []
+
+        # extract column names
+        headers = [desc[0] for desc in cur.description]
+
+        # convert each row to dict
+        payload = [dict(zip(headers, row)) for row in rows]
+
+        cur.close()
+        conn.close()
+        return payload
+
+    except Exception as e:
+        print("Error in ExecuteAllWithHeaders =============================", e)
+        return []
+

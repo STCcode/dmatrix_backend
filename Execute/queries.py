@@ -795,9 +795,25 @@ def getAllActionInstrument():
 
 
 def get_cashflows_action(entityid):
-    sql = "SELECT CASE WHEN pg_typeof(order_date)::text IN ('date','timestamp','timestamptz') THEN order_date::date ELSE TO_DATE(order_date, 'MM/DD/YYYY') END AS order_date, CASE WHEN pg_typeof(purchase_amount)::text IN ('numeric','integer','double precision')THEN purchase_amount::numeric ELSE NULLIF(REGEXP_REPLACE(purchase_amount, '[^0-9.-]', '', 'g'), '')::numeric END AS purchase_amount FROM tbl_action_table WHERE TRIM(entityid) = %s ORDER BY order_date;"
-    rows = executeSql.ExecuteAllNew(sql, (entityid,))
+    sql = """
+        SELECT 
+            CASE
+                WHEN pg_typeof(order_date)::text IN ('date','timestamp','timestamptz')
+                THEN order_date::date
+                ELSE TO_DATE(order_date, 'MM/DD/YYYY')
+            END AS order_date,
 
+            CASE
+                WHEN pg_typeof(purchase_amount)::text IN ('numeric','integer','double precision')
+                THEN purchase_amount::numeric
+                ELSE NULLIF(REGEXP_REPLACE(purchase_amount, '[^0-9.-]', '', 'g'), '')::numeric
+            END AS purchase_amount
+        FROM tbl_action_table
+        WHERE TRIM(entityid) = %s
+        ORDER BY order_date;
+    """
+
+    rows = executeSql.ExecuteAllNew(sql, (entityid,))
     print("DEBUG rows for", entityid, "=>", type(rows), rows)
 
     if not rows or not isinstance(rows, list):
@@ -805,19 +821,18 @@ def get_cashflows_action(entityid):
 
     cashflows, dates = [], []
 
-    for row in rows:  # row is a dict
+    for row in rows:
         order_date = row["order_date"]
         purchase_amount = float(row["purchase_amount"] or 0)
 
         if purchase_amount != 0:
-            cashflows.append(-purchase_amount)
+            cashflows.append(-purchase_amount)  # purchase is cash outflow
             dates.append(order_date)
 
     if not cashflows:
         raise ValueError("No cashflows found after processing rows")
 
     return cashflows, dates
-
 
 
 

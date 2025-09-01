@@ -1721,17 +1721,12 @@ def calculate_xirr(cashflows, dates, initial_guess=0.1):
     d0 = dates[0]
 
     def xnpv(rate):
-        return sum(
-            cf / (1 + rate) ** ((d - d0).days / 365)
-            for cf, d in zip(cashflows, dates)
-        )
+        return sum(cf / (1 + rate) ** ((d - d0).days / 365) for cf, d in zip(cashflows, dates))
 
     irr = newton(lambda r: xnpv(r), initial_guess)
     return irr
 
-
-
-# Calculate IRR for Action (Mutual Fund) Table
+#  Calculate IRR for action(mutual fund) Table
 def getActionIRR():
     try:
         entityid = request.args.get("entityid")
@@ -1741,15 +1736,10 @@ def getActionIRR():
                 400
             )
 
-        # Fetch cashflows and dates
+        # fetch cashflows and dates
         cashflows, dates = queries.get_cashflows_action(entityid)
 
-        if not cashflows or not dates:
-            return make_response(
-                middleware.exe_msgs(responses.getAll_501, "No cashflows found", "1023502"),
-                404
-            )
-
+        # calculate IRR
         irr = calculate_xirr(cashflows, dates)
 
         result = {
@@ -1757,19 +1747,25 @@ def getActionIRR():
             "successmsgs": responses.getAll_200,
             "entityid": entityid,
             "annualized_irr_percent": round(irr * 100, 2),
-            "total_invested": round(-sum(cf for cf in cashflows if cf < 0), 2),
+            "total_invested": round(-sum(cf for cf in cashflows if cf < 0), 2),  # make positive
             "total_redemption": round(sum(cf for cf in cashflows if cf > 0), 2),
             "cashflows": cashflows,
-            "dates": [str(d) for d in dates]  # convert date objects to string
+            "dates": [str(d) for d in dates]  # convert datetime to string
         }
+
         return make_response(result, 200)
 
     except Exception as e:
         print("Error in getActionIRR =============================", e)
         return make_response(
-            middleware.exe_msgs(responses.getAll_501, str(e), "1023500"),
+            middleware.exe_msgs(responses.getAll_501, str(e.args), "1023500"),
             500
         )
+    
+
+
+
+
 #  Calculate IRR for AIF Table
 # def getAifIRR():
    

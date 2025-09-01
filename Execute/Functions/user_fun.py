@@ -1724,7 +1724,7 @@ def calculate_xirr(cashflows, dates, initial_guess=0.1):
     for d in dates:
         if isinstance(d, str):
             try:
-                parsed_dates.append(datetime.strptime(d, "%m/%d/%Y").date())
+                parsed_dates.append(datetime.strptime(d, "%Y/%m/%d").date())
             except ValueError:
                 parsed_dates.append(datetime.strptime(d, "%Y-%m-%d").date())
         else:
@@ -1738,6 +1738,8 @@ def calculate_xirr(cashflows, dates, initial_guess=0.1):
 
     irr = newton(lambda r: xnpv(r), initial_guess)
     return irr
+
+
 
 # Calculate IRR for Action (Mutual Fund) Table
 def getActionIRR():

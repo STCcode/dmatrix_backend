@@ -769,6 +769,39 @@ def getAllActionInstrument():
 
 
 
+# ======================================calculate Xirr (IRR)======================================
+
+def get_cashflows_action(entityid):
+    sql = "SELECT order_date, purchase_amount FROM tbl_action_table WHERE entityid = %s ORDER BY order_date;"
+    data = (entityid,)
+    msgs = executeSql.ExecuteAllNew(sql, data)
+    dates = [row[0] for row in msgs]
+    cashflows = [float(row[1]) for row in msgs]
+    return cashflows, dates
+
+
+# def get_cashflows_aif(entityid):
+#     sql = "SELECT trans_date, contribution_amount FROM tbl_aif WHERE entityid = %s ORDER BY trans_date;"
+#     data = (entityid,)
+#     msgs = executeSql.ExecuteAllNew(sql, data)
+#     dates = [row[0] for row in msgs]
+#     cashflows = [float(row[1]) for row in msgs]
+#     return cashflows, dates
+
+
+# def get_cashflows_equity(entityid):
+#     sql = "SELECT trade_date, trade_price FROM tbl_direct_equity WHERE entityid = %s ORDER BY trade_date;"
+#     data = (entityid,)
+#     msgs = executeSql.ExecuteAllNew(sql, data)
+#     dates = [row[0] for row in msgs]
+#     cashflows = [float(row[1]) for row in msgs]
+#     return cashflows, dates
+
+
+# ======================================calculate Xirr (IRR)======================================
+
+
+
 
 
 

@@ -195,6 +195,15 @@ app.add_url_rule('/getAllActionInstrument',view_func=user_fun.getAllActionInstru
 
 
 
+# ======================================calculate Xirr (IRR)======================================
+app.add_url_rule('/getActionIRR', view_func=user_fun.getActionIRR, methods=['GET'])
+# app.add_url_rule('/getAifIRR', view_func=user_fun.getAifIRR, methods=['GET'])
+# app.add_url_rule('/getEquityIRR', view_func=user_fun.getEquityIRR, methods=['GET'])
+
+# ======================================calculate Xirr (IRR)======================================
+
+
+
 
 
 

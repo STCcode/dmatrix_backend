@@ -806,28 +806,29 @@ def getAllActionInstrument():
 # Action (Mutual Fund)
 def get_cashflows_action(entityid):
     sql = """
-        SELECT order_date::date AS order_date,
-               order_type,
-               purchase_amount,
-               redeem_amount
+        SELECT order_date::date, order_type, purchase_amount, redeem_amount
         FROM tbl_action_table
-        WHERE TRIM(UPPER(entityid)) = UPPER(%s)
+        WHERE TRIM(entityid) = TRIM(%s)
         ORDER BY order_date;
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
+    print("DEBUG rows for", entityid, "=>", rows)
+
     if not rows:
         raise ValueError(f"No rows found for entityid={entityid} in tbl_action_table")
 
     cashflows, dates = [], []
+
     for row in rows:
-        order_date = row["order_date"]
-        order_type = row["order_type"]
+        order_date = row.get("order_date")
+        order_type = str(row.get("order_type", "")).lower()
         purchase_amount = float(row.get("purchase_amount") or 0)
         redeem_amount = float(row.get("redeem_amount") or 0)
 
-        if order_type.lower() in ("purchase", "buy"):
+        # Calculate cashflow: purchases = outflow, sells = inflow
+        if order_type == "purchase" or order_type == "buy":
             cf = -purchase_amount
-        elif order_type.lower() in ("sell", "redemption"):
+        elif order_type == "sell":
             cf = redeem_amount
         else:
             cf = 0
@@ -835,6 +836,10 @@ def get_cashflows_action(entityid):
         if cf != 0:
             cashflows.append(cf)
             dates.append(order_date)
+
+    if not cashflows:
+        raise ValueError(f"No valid cashflows found for entityid={entityid} in tbl_action_table")
+
     return cashflows, dates
 
 

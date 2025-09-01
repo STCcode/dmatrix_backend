@@ -771,22 +771,42 @@ def getAllActionInstrument():
 
 # ======================================calculate Xirr (IRR)======================================
 
+# def get_cashflows_action(entityid):
+#     try:
+#         sql = """
+#             SELECT order_date, purchase_amount 
+#             FROM tbl_action_table 
+#             WHERE entityid = %s 
+#             ORDER BY order_date;
+#         """
+#         data = (entityid,)
+#         msgs = executeSql.ExecuteAllNew(sql, data)
+
+#         if not msgs:   # no rows found
+#             return [], []
+
+#         dates = [row[0] for row in msgs]
+#         cashflows = [-float(row[1]) for row in msgs]  # purchases as negative
+#         return cashflows, dates
+
+#     except Exception as e:
+#         print("Error in get_cashflows_action =================", e)
+#         return [], []
+
+
 def get_cashflows_action(entityid):
     try:
-        sql = """
-            SELECT order_date, purchase_amount 
-            FROM tbl_action_table 
-            WHERE entityid = %s 
-            ORDER BY order_date;
-        """
+        sql = "SELECT order_date, CASE WHEN order_type ILIKE 'Purchase' THEN -purchase_amount WHEN order_type ILIKE 'Sell' THEN redeem_amount ELSE 0 END AS cashflow FROM tbl_action_table WHERE entityid = %s ORDER BY order_date;"
         data = (entityid,)
         msgs = executeSql.ExecuteAllNew(sql, data)
 
-        if not msgs:   # no rows found
+        if not msgs:  # no rows
             return [], []
 
-        dates = [row[0] for row in msgs]
-        cashflows = [-float(row[1]) for row in msgs]  # purchases as negative
+        # ✅ If msgs is a list of dicts
+        dates = [row['order_date'] for row in msgs]
+        cashflows = [float(row['cashflow']) for row in msgs]
+
         return cashflows, dates
 
     except Exception as e:

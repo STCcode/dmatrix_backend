@@ -772,12 +772,27 @@ def getAllActionInstrument():
 # ======================================calculate Xirr (IRR)======================================
 
 def get_cashflows_action(entityid):
-    sql = "SELECT order_date, purchase_amount FROM tbl_action_table WHERE entityid = %s ORDER BY order_date;"
-    data = (entityid,)
-    msgs = executeSql.ExecuteAllNew(sql, data)
-    dates = [row[0] for row in msgs]
-    cashflows = [float(row[1]) for row in msgs]
-    return cashflows, dates
+    try:
+        sql = """
+            SELECT order_date, purchase_amount 
+            FROM tbl_action_table 
+            WHERE entityid = %s 
+            ORDER BY order_date;
+        """
+        data = (entityid,)
+        msgs = executeSql.ExecuteAllNew(sql, data)
+
+        if not msgs:   # no rows found
+            return [], []
+
+        dates = [row[0] for row in msgs]
+        cashflows = [-float(row[1]) for row in msgs]  # purchases as negative
+        return cashflows, dates
+
+    except Exception as e:
+        print("Error in get_cashflows_action =================", e)
+        return [], []
+
 
 
 # def get_cashflows_aif(entityid):

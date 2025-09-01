@@ -796,62 +796,62 @@ def getAllActionInstrument():
 
 def get_cashflows_action(entityid):
     sql = """
-        SELECT 
-            CASE
-                WHEN pg_typeof(order_date)::text IN ('date','timestamp','timestamptz')
-                THEN order_date::date
-                ELSE TO_DATE(order_date, 'MM/DD/YYYY')
-            END AS order_date,
-
-            CASE
-                WHEN pg_typeof(purchase_amount)::text IN ('numeric','integer','double precision')
-                THEN purchase_amount::numeric
-                ELSE NULLIF(REGEXP_REPLACE(purchase_amount, '[^0-9.-]', '', 'g'), '')::numeric
-            END AS purchase_amount
+        SELECT order_date::date, purchase_amount
         FROM tbl_action_table
         WHERE TRIM(entityid) = %s
         ORDER BY order_date;
     """
-
-    rows = executeSql.ExecuteAllNew(sql, (entityid,))
-    print("DEBUG rows for", entityid, "=>", type(rows), rows)
-
-    if not rows or not isinstance(rows, list):
-        raise ValueError(f"No rows returned from DB for entityid={entityid}")
-
+    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
     cashflows, dates = [], []
 
     for row in rows:
-        order_date = row["order_date"]
-        purchase_amount = float(row["purchase_amount"] or 0)
-
-        if purchase_amount != 0:
-            cashflows.append(-purchase_amount)  # purchase is cash outflow
-            dates.append(order_date)
-
-    if not cashflows:
-        raise ValueError("No cashflows found after processing rows")
+        amt = float(row.get("purchase_amount") or 0)
+        if amt != 0:
+            cashflows.append(-amt)  # purchases are outflow
+            dates.append(row.get("order_date"))
 
     return cashflows, dates
 
 
+def get_cashflows_direct_equity(entityid):
+    sql = """
+        SELECT trade_date::date AS trade_date,
+               trade_price::numeric AS trade_price
+        FROM tbl_direct_equity
+        WHERE TRIM(entityid) = %s
+        ORDER BY trade_date;
+    """
+    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
+    cashflows, dates = [], []
 
-# def get_cashflows_aif(entityid):
-#     sql = "SELECT trans_date, contribution_amount FROM tbl_aif WHERE entityid = %s ORDER BY trans_date;"
-#     data = (entityid,)
-#     msgs = executeSql.ExecuteAllNew(sql, data)
-#     dates = [row[0] for row in msgs]
-#     cashflows = [float(row[1]) for row in msgs]
-#     return cashflows, dates
+    for row in rows:
+        amt = float(row.get("trade_price") or 0)
+        if amt != 0:
+            cashflows.append(-amt)
+            dates.append(row.get("trade_date"))
+
+    return cashflows, dates
 
 
-# def get_cashflows_equity(entityid):
-#     sql = "SELECT trade_date, trade_price FROM tbl_direct_equity WHERE entityid = %s ORDER BY trade_date;"
-#     data = (entityid,)
-#     msgs = executeSql.ExecuteAllNew(sql, data)
-#     dates = [row[0] for row in msgs]
-#     cashflows = [float(row[1]) for row in msgs]
-#     return cashflows, dates
+def get_cashflows_aif(entityid):
+    sql = """
+        SELECT trans_date::date AS trans_date,
+               contribution_amount::numeric AS contribution_amount
+        FROM tbl_aif
+        WHERE TRIM(entityid) = %s
+        ORDER BY trans_date;
+    """
+    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
+    cashflows, dates = [], []
+
+    for row in rows:
+        amt = float(row.get("contribution_amount") or 0)
+        if amt != 0:
+            cashflows.append(-amt)
+            dates.append(row.get("trans_date"))
+
+    return cashflows, dates
+
 
 
 # ======================================calculate Xirr (IRR)======================================

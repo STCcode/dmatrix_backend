@@ -795,11 +795,17 @@ def getAllActionInstrument():
 
 
 def get_cashflows_action(entityid):
-    sql = "SELECT order_date::date, purchase_amount FROM tbl_action_table WHERE   WHERE TRIM(entityid) = %s ORDER BY order_date;"
+    sql = """
+        SELECT order_date::date, purchase_amount
+        FROM tbl_action_table
+        WHERE TRIM(entityid) = %s
+        ORDER BY order_date;
+    """
     rows = executeSql.ExecuteAllNew(sql, (entityid,))
-    print("DEBUG rows for", entityid, "=>", rows) 
+    print("DEBUG rows for", entityid, "=>", type(rows), rows)
 
-    if not rows:
+    # Ensure we got actual rows
+    if not rows or not isinstance(rows, (list, tuple)):
         raise ValueError(f"No rows returned from DB for entityid={entityid}")
 
     cashflows, dates = [], []
@@ -807,14 +813,16 @@ def get_cashflows_action(entityid):
     for order_date, purchase_amount in rows:
         purchase_amount = float(purchase_amount or 0)
 
+        # Always treat purchase as cash outflow
         if purchase_amount != 0:
-            cashflows.append(-purchase_amount)  # always outflow
+            cashflows.append(-purchase_amount)
             dates.append(order_date)
 
     if not cashflows:
         raise ValueError("No cashflows found after processing rows")
 
     return cashflows, dates
+
 
 # def get_cashflows_aif(entityid):
 #     sql = "SELECT trans_date, contribution_amount FROM tbl_aif WHERE entityid = %s ORDER BY trans_date;"

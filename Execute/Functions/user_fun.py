@@ -1741,7 +1741,7 @@ def getActionIRR():
                 400
             )
 
-        # 🔹 Fetch clean cashflows and dates
+        # Fetch cashflows and dates
         cashflows, dates = queries.get_cashflows_action(entityid)
 
         if not cashflows or not dates:
@@ -1757,22 +1757,19 @@ def getActionIRR():
             "successmsgs": responses.getAll_200,
             "entityid": entityid,
             "annualized_irr_percent": round(irr * 100, 2),
-            # 🔹 flip invested to positive for readability
             "total_invested": round(-sum(cf for cf in cashflows if cf < 0), 2),
             "total_redemption": round(sum(cf for cf in cashflows if cf > 0), 2),
             "cashflows": cashflows,
-            "dates": [str(d) for d in dates]
+            "dates": [str(d) for d in dates]  # convert date objects to string
         }
         return make_response(result, 200)
 
     except Exception as e:
         print("Error in getActionIRR =============================", e)
         return make_response(
-            middleware.exe_msgs(responses.getAll_501, str(e.args), "1023500"),
+            middleware.exe_msgs(responses.getAll_501, str(e), "1023500"),
             500
         )
-
-
 #  Calculate IRR for AIF Table
 # def getAifIRR():
    

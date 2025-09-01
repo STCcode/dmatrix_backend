@@ -820,7 +820,7 @@ def get_cashflows_action(entityid):
         redeem_amount = float(row.get("redeem_amount") or 0)
         order_date = row.get("date")
 
-        if order_type == "purchase" and purchase_amount != 0:
+        if order_type in ["purchase", "buy"] and purchase_amount != 0:
             cashflows.append(-purchase_amount)
             dates.append(order_date)
         elif order_type == "sell" and redeem_amount != 0:
@@ -845,7 +845,7 @@ def get_cashflows_direct_equity(entityid):
         order_type = row.get("order_type", "").lower()
         trade_date = row.get("date")
 
-        if order_type == "purchase" and trade_price != 0:
+        if order_type in ["purchase", "buy"] and trade_price != 0:
             cashflows.append(-trade_price)
             dates.append(trade_date)
         elif order_type == "sell" and trade_price != 0:

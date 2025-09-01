@@ -803,76 +803,94 @@ def getAllActionInstrument():
 # --- Fetch cashflows from a table ---
 
 # Queries to fetch cashflows per table
+# Action IRR
 def get_cashflows_action(entityid):
     sql = """
-        SELECT order_date::date AS date, purchase_amount, redeem_amount, order_type
+        SELECT order_date::date, order_type, purchase_amount, redeem_amount
         FROM tbl_action_table
-        WHERE TRIM(LOWER(entityid)) = LOWER(%s)
+        WHERE TRIM(entityid) = %s
         ORDER BY order_date;
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
     if not rows:
-        return [], []
+        raise ValueError(f"No rows found for entityid={entityid}")
+
     cashflows, dates = [], []
     for row in rows:
-        order_type = row.get("order_type", "").lower()
+        order_date = row["order_date"]
+        order_type = row["order_type"].strip().lower()
         purchase_amount = float(row.get("purchase_amount") or 0)
         redeem_amount = float(row.get("redeem_amount") or 0)
-        order_date = row.get("date")
 
-        if order_type in ["purchase", "buy"] and purchase_amount != 0:
+        if order_type in ["purchase", "buy"] and purchase_amount > 0:
             cashflows.append(-purchase_amount)
             dates.append(order_date)
-        elif order_type == "sell" and redeem_amount != 0:
+        elif order_type in ["sell"] and redeem_amount > 0:
             cashflows.append(redeem_amount)
             dates.append(order_date)
+
+    if not cashflows:
+        raise ValueError(f"No valid cashflows found for entityid={entityid}")
+
     return cashflows, dates
 
 
+# Direct Equity IRR
 def get_cashflows_direct_equity(entityid):
     sql = """
-        SELECT trade_date::date AS date, trade_price, order_type
+        SELECT trade_date::date, order_type, trade_price
         FROM tbl_direct_equity
-        WHERE TRIM(LOWER(entityid)) = LOWER(%s)
+        WHERE TRIM(entityid) = %s
         ORDER BY trade_date;
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
     if not rows:
-        return [], []
+        raise ValueError(f"No rows found for entityid={entityid}")
+
     cashflows, dates = [], []
     for row in rows:
+        trade_date = row["trade_date"]
+        order_type = row["order_type"].strip().lower()
         trade_price = float(row.get("trade_price") or 0)
-        order_type = row.get("order_type", "").lower()
-        trade_date = row.get("date")
 
-        if order_type in ["purchase", "buy"] and trade_price != 0:
+        if order_type in ["buy"] and trade_price > 0:
             cashflows.append(-trade_price)
             dates.append(trade_date)
-        elif order_type == "sell" and trade_price != 0:
+        elif order_type in ["sell"] and trade_price > 0:
             cashflows.append(trade_price)
             dates.append(trade_date)
+
+    if not cashflows:
+        raise ValueError(f"No valid cashflows found for entityid={entityid}")
+
     return cashflows, dates
 
 
+# AIF IRR
 def get_cashflows_aif(entityid):
     sql = """
-        SELECT trans_date::date AS date, contribution_amount
+        SELECT trans_date::date, contribution_amount
         FROM tbl_aif
-        WHERE TRIM(LOWER(entityid)) = LOWER(%s)
+        WHERE TRIM(entityid) = %s
         ORDER BY trans_date;
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
     if not rows:
-        return [], []
+        raise ValueError(f"No rows found for entityid={entityid}")
+
     cashflows, dates = [], []
     for row in rows:
+        trans_date = row["trans_date"]
         contribution_amount = float(row.get("contribution_amount") or 0)
-        trans_date = row.get("date")
-        if contribution_amount != 0:
-            cashflows.append(-contribution_amount)
-            dates.append(trans_date)
-    return cashflows, dates
 
+        if contribution_amount != 0:
+            cashflows.append(-contribution_amount)  # contributions are outflows
+            dates.append(trans_date)
+
+    if not cashflows:
+        raise ValueError(f"No valid cashflows found for entityid={entityid}")
+
+    return cashflows, dates
 
 
 # ======================================calculate Xirr (IRR)======================================

@@ -1780,7 +1780,7 @@ def getDirectEquityIRR():
         return make_response({"error": str(e)}, 500)
 
 
-def getAIFIRR():
+def getAifIRR():
     try:
         entityid = request.args.get("entityid")
         if not entityid:

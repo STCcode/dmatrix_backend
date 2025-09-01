@@ -795,23 +795,23 @@ def getAllActionInstrument():
 
 
 def get_cashflows_action(entityid):
-    sql = "SELECT order_date::date, order_type, purchase_amount, redeem_amount FROM tbl_action_table  WHERE entityid = %s ORDER BY order_date;"
+    sql = "SELECT order_date::date, purchase_amount FROM tbl_action_table WHERE entityid = %s ORDER BY order_date;"
     rows = executeSql.ExecuteAllNew(sql, (entityid,))
+
+    if not rows:
+        raise ValueError(f"No rows returned from DB for entityid={entityid}")
 
     cashflows, dates = [], []
 
-    for r in rows:
-        date, otype, purchase, redeem = r
-        if otype.lower() == "purchase":
-            cf = -(float(purchase or 0))
-        elif otype.lower() == "sell":
-            cf = float(redeem or 0)
-        else:
-            cf = 0
+    for order_date, purchase_amount in rows:
+        purchase_amount = float(purchase_amount or 0)
 
-        if cf != 0:
-            cashflows.append(cf)
-            dates.append(date)
+        if purchase_amount != 0:
+            cashflows.append(-purchase_amount)  # always outflow
+            dates.append(order_date)
+
+    if not cashflows:
+        raise ValueError("No cashflows found after processing rows")
 
     return cashflows, dates
 

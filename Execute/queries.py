@@ -802,95 +802,79 @@ def getAllActionInstrument():
 #     """
 # --- Fetch cashflows from a table ---
 
-# Action (Mutual Fund)
+# Queries to fetch cashflows per table
 def get_cashflows_action(entityid):
     sql = """
         SELECT order_date::date AS date, purchase_amount, redeem_amount, order_type
         FROM tbl_action_table
-        WHERE TRIM(entityid) = %s
+        WHERE TRIM(LOWER(entityid)) = LOWER(%s)
         ORDER BY order_date;
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
     if not rows:
-        raise ValueError(f"No rows found for entityid={entityid}")
-
+        return [], []
     cashflows, dates = [], []
     for row in rows:
+        order_type = row.get("order_type", "").lower()
         purchase_amount = float(row.get("purchase_amount") or 0)
         redeem_amount = float(row.get("redeem_amount") or 0)
-        order_type = (row.get("order_type") or "").lower()
+        order_date = row.get("date")
 
-        if order_type == "purchase":
-            cf = -purchase_amount
-        elif order_type == "sell":
-            cf = redeem_amount
-        else:
-            cf = 0
-
-        if cf != 0:
-            cashflows.append(cf)
-            dates.append(row["date"])
-
-    if not cashflows:
-        raise ValueError("No cashflows found for this entity")
+        if order_type == "purchase" and purchase_amount != 0:
+            cashflows.append(-purchase_amount)
+            dates.append(order_date)
+        elif order_type == "sell" and redeem_amount != 0:
+            cashflows.append(redeem_amount)
+            dates.append(order_date)
     return cashflows, dates
 
 
-# Direct Equity
 def get_cashflows_direct_equity(entityid):
     sql = """
         SELECT trade_date::date AS date, trade_price, order_type
         FROM tbl_direct_equity
-        WHERE TRIM(entityid) = %s
+        WHERE TRIM(LOWER(entityid)) = LOWER(%s)
         ORDER BY trade_date;
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
     if not rows:
-        raise ValueError(f"No rows found for entityid={entityid}")
-
+        return [], []
     cashflows, dates = [], []
     for row in rows:
         trade_price = float(row.get("trade_price") or 0)
-        order_type = (row.get("order_type") or "").lower()
+        order_type = row.get("order_type", "").lower()
+        trade_date = row.get("date")
 
-        if order_type == "buy":
-            cf = -trade_price
-        elif order_type == "sell":
-            cf = trade_price
-        else:
-            cf = 0
-
-        if cf != 0:
-            cashflows.append(cf)
-            dates.append(row["date"])
-
-    if not cashflows:
-        raise ValueError("No cashflows found for this entity")
+        if order_type == "purchase" and trade_price != 0:
+            cashflows.append(-trade_price)
+            dates.append(trade_date)
+        elif order_type == "sell" and trade_price != 0:
+            cashflows.append(trade_price)
+            dates.append(trade_date)
     return cashflows, dates
 
 
-# AIF
 def get_cashflows_aif(entityid):
     sql = """
         SELECT trans_date::date AS date, contribution_amount
         FROM tbl_aif
-        WHERE TRIM(entityid) = %s
+        WHERE TRIM(LOWER(entityid)) = LOWER(%s)
         ORDER BY trans_date;
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
     if not rows:
-        raise ValueError(f"No rows found for entityid={entityid}")
-
+        return [], []
     cashflows, dates = [], []
     for row in rows:
         contribution_amount = float(row.get("contribution_amount") or 0)
+        trans_date = row.get("date")
         if contribution_amount != 0:
             cashflows.append(-contribution_amount)
-            dates.append(row["date"])
-
-    if not cashflows:
-        raise ValueError("No cashflows found for this entity")
+            dates.append(trans_date)
     return cashflows, dates
+
+
+
 # ======================================calculate Xirr (IRR)======================================
 
 

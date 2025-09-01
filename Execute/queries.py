@@ -795,27 +795,22 @@ def getAllActionInstrument():
 
 
 def get_cashflows_action(entityid):
-    sql = """
-        SELECT order_date::date, purchase_amount
-        FROM tbl_action_table
-        WHERE TRIM(entityid) = %s
-        ORDER BY order_date;
-    """
+    sql = "SELECT CASE WHEN pg_typeof(order_date)::text IN ('date','timestamp','timestamptz') THEN order_date::date ELSE TO_DATE(order_date, 'MM/DD/YYYY') END AS order_date, CASE WHEN pg_typeof(purchase_amount)::text IN ('numeric','integer','double precision')THEN purchase_amount::numeric ELSE NULLIF(REGEXP_REPLACE(purchase_amount, '[^0-9.-]', '', 'g'), '')::numeric END AS purchase_amount FROM tbl_action_table WHERE TRIM(entityid) = %s ORDER BY order_date;"
     rows = executeSql.ExecuteAllNew(sql, (entityid,))
+
     print("DEBUG rows for", entityid, "=>", type(rows), rows)
 
-    # 🔹 Only check if list is empty
-    if rows is None or len(rows) == 0:
+    if not rows or not isinstance(rows, list):
         raise ValueError(f"No rows returned from DB for entityid={entityid}")
 
     cashflows, dates = [], []
 
     for row in rows:  # row is a dict
-        order_date = row.get("order_date")
-        purchase_amount = float(row.get("purchase_amount") or 0)
+        order_date = row["order_date"]
+        purchase_amount = float(row["purchase_amount"] or 0)
 
         if purchase_amount != 0:
-            cashflows.append(-purchase_amount)  # purchases are outflow
+            cashflows.append(-purchase_amount)
             dates.append(order_date)
 
     if not cashflows:

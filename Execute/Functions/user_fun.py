@@ -1741,7 +1741,15 @@ def getActionIRR():
                 400
             )
 
+        # 🔹 Fetch clean cashflows and dates
         cashflows, dates = queries.get_cashflows_action(entityid)
+
+        if not cashflows or not dates:
+            return make_response(
+                middleware.exe_msgs(responses.getAll_501, "No cashflows found", "1023502"),
+                404
+            )
+
         irr = calculate_xirr(cashflows, dates)
 
         result = {
@@ -1749,8 +1757,11 @@ def getActionIRR():
             "successmsgs": responses.getAll_200,
             "entityid": entityid,
             "annualized_irr_percent": round(irr * 100, 2),
-            "total_invested": round(sum([cf for cf in cashflows if cf < 0]), 2),
-            "total_redemption": round(sum([cf for cf in cashflows if cf > 0]), 2),
+            # 🔹 flip invested to positive for readability
+            "total_invested": round(-sum(cf for cf in cashflows if cf < 0), 2),
+            "total_redemption": round(sum(cf for cf in cashflows if cf > 0), 2),
+            "cashflows": cashflows,
+            "dates": [str(d) for d in dates]
         }
         return make_response(result, 200)
 

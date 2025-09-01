@@ -795,36 +795,25 @@ def getAllActionInstrument():
 
 
 def get_cashflows_action(entityid):
-    try:
-        sql = "SELECT order_date::DATE AS order_date,   -- ✅ force into DATE CASE WHEN order_type ILIKE 'Purchase' THEN -purchase_amountWHEN order_type ILIKE 'Sell' THEN redeem_amount ELSE 0 END AS cashflow FROM tbl_action_table WHERE entityid = %s ORDER BY order_date::DATE;"
-        data = (entityid,)
-        msgs = executeSql.ExecuteAllNew(sql, data)
+    sql = "SELECT order_date::date, order_type, purchase_amount, redeem_amount FROM tbl_action_table  WHERE entityid = %s ORDER BY order_date;"
+    rows = executeSql.ExecuteAllNew(sql, (entityid,))
 
-        if not msgs:
-            print(f"⚠️ No rows found for entityid={entityid}")
-            return [], []
+    cashflows, dates = [], []
 
-        dates = []
-        cashflows = []
-        for row in msgs:
-            if isinstance(row, dict):
-                dates.append(row.get("order_date"))   # already a DATE
-                cashflows.append(float(row.get("cashflow", 0)))
-            elif isinstance(row, (list, tuple)):
-                dates.append(row[0])  # already a DATE
-                cashflows.append(float(row[1]))
-            else:
-                print(" Unexpected row format:", row)
+    for r in rows:
+        date, otype, purchase, redeem = r
+        if otype.lower() == "purchase":
+            cf = -(float(purchase or 0))
+        elif otype.lower() == "sell":
+            cf = float(redeem or 0)
+        else:
+            cf = 0
 
-        if not dates or not cashflows:
-            raise ValueError("Cashflows and dates could not be parsed")
+        if cf != 0:
+            cashflows.append(cf)
+            dates.append(date)
 
-        return cashflows, dates
-
-    except Exception as e:
-        print(" Error in get_cashflows_action:", e)
-        raise
-
+    return cashflows, dates
 
 # def get_cashflows_aif(entityid):
 #     sql = "SELECT trans_date, contribution_amount FROM tbl_aif WHERE entityid = %s ORDER BY trans_date;"

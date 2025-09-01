@@ -1772,7 +1772,7 @@ def getDirectEquityIRR():
 
 
 # AIF IRR
-def getAIFIRR():
+def getAifIRR():
     try:
         entityid = request.args.get("entityid")
         if not entityid:

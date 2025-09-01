@@ -796,7 +796,7 @@ def getAllActionInstrument():
 
 def get_cashflows_action(entityid):
     try:
-        sql = "SELECT order_date,CASE WHEN order_type ILIKE 'Purchase' THEN -purchase_amount WHEN order_type ILIKE 'Sell' THEN redeem_amount ELSE 0 END AS cashflow FROM tbl_action_table WHERE entityid = %s ORDER BY order_date;"
+        sql = "SELECT order_date::DATE AS order_date,   -- ✅ force into DATE CASE WHEN order_type ILIKE 'Purchase' THEN -purchase_amountWHEN order_type ILIKE 'Sell' THEN redeem_amount ELSE 0 END AS cashflow FROM tbl_action_table WHERE entityid = %s ORDER BY order_date::DATE;"
         data = (entityid,)
         msgs = executeSql.ExecuteAllNew(sql, data)
 
@@ -804,20 +804,18 @@ def get_cashflows_action(entityid):
             print(f"⚠️ No rows found for entityid={entityid}")
             return [], []
 
-        # handle both dict and tuple rows
         dates = []
         cashflows = []
         for row in msgs:
             if isinstance(row, dict):
-                dates.append(row.get("order_date"))
+                dates.append(row.get("order_date"))   # already a DATE
                 cashflows.append(float(row.get("cashflow", 0)))
             elif isinstance(row, (list, tuple)):
-                dates.append(row[0])
+                dates.append(row[0])  # already a DATE
                 cashflows.append(float(row[1]))
             else:
                 print(" Unexpected row format:", row)
 
-        # sanity check
         if not dates or not cashflows:
             raise ValueError("Cashflows and dates could not be parsed")
 
@@ -825,8 +823,7 @@ def get_cashflows_action(entityid):
 
     except Exception as e:
         print(" Error in get_cashflows_action:", e)
-        raise  # let the caller see the real error
-
+        raise
 
 
 # def get_cashflows_aif(entityid):

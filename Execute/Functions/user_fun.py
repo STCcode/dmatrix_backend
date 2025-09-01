@@ -1697,18 +1697,47 @@ def getAllActionInstrument():
 
 # ======================================calculate Xirr (IRR)======================================
 
+# def calculate_xirr(cashflows, dates, initial_guess=0.1):
+#     """Calculate annualized IRR (XIRR)."""
+#     if len(cashflows) != len(dates):
+#         raise ValueError("Number of cashflows must match number of dates")
+
+#     def xnpv(rate):
+#         d0 = dates[0]
+#         return sum(cf / (1 + rate)**((d - d0).days / 365) for cf, d in zip(cashflows, dates))
+
+#     irr = newton(lambda r: xnpv(r), initial_guess)
+#     return irr
+
+
+#   Calculate annualized IRR (XIRR).
 def calculate_xirr(cashflows, dates, initial_guess=0.1):
-    """Calculate annualized IRR (XIRR)."""
+  
+    if not cashflows or not dates:
+        raise ValueError("Cashflows and dates cannot be empty")
+
     if len(cashflows) != len(dates):
         raise ValueError("Number of cashflows must match number of dates")
 
+    # ✅ Ensure all dates are datetime.date
+    parsed_dates = []
+    for d in dates:
+        if isinstance(d, str):
+            try:
+                parsed_dates.append(datetime.strptime(d, "%m/%d/%Y").date())
+            except ValueError:
+                parsed_dates.append(datetime.strptime(d, "%Y-%m-%d").date())
+        else:
+            parsed_dates.append(d)
+    dates = parsed_dates
+
+    d0 = dates[0]
+
     def xnpv(rate):
-        d0 = dates[0]
-        return sum(cf / (1 + rate)**((d - d0).days / 365) for cf, d in zip(cashflows, dates))
+        return sum(cf / (1 + rate) ** ((d - d0).days / 365) for cf, d in zip(cashflows, dates))
 
     irr = newton(lambda r: xnpv(r), initial_guess)
     return irr
-
 
 # Calculate IRR for Action (Mutual Fund) Table
 def getActionIRR():

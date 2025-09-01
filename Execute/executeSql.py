@@ -279,47 +279,34 @@ def ExecuteAllNew(query, data):
     # Executes a SQL query and returns all rows as a list of dicts.
     # Always returns a list (empty if no rows) to avoid errors.
     # """
-def ExecuteAllWithHeaders(query, data=None):
+def ExecuteAllWithHeaders(query, params=None):
     """
-    Executes a query and returns a list of dicts with column headers.
-    Automatically handles TEXT and NUMERIC columns.
-    Always returns a list; never returns a Response object.
+    Executes a SELECT query and returns list of dictionaries with column headers.
+    Always returns a list. Never returns a Response object.
     """
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute(query, data)
-        results = cur.fetchall()
+        cur.execute(query, params or ())
+        rows = cur.fetchall()
 
-        # Always return a list
-        if not results:
+        # If no rows, return empty list
+        if not rows:
+            cur.close()
+            conn.close()
             return []
 
-        # Get column names
-        row_headers = [desc[0] for desc in cur.description]
+        # Extract column names
+        columns = [desc[0] for desc in cur.description]
 
-        # Convert each row into a dict
-        payload = []
-        for row in results:
-            row_dict = {}
-            for i, value in enumerate(row):
-                # Auto-convert numbers stored as text
-                if isinstance(value, str):
-                    try:
-                        if '.' in value:
-                            value = float(value)
-                        else:
-                            value = int(value)
-                    except ValueError:
-                        pass  # leave as string if not a number
-                row_dict[row_headers[i]] = value
-            payload.append(row_dict)
+        # Convert to list of dictionaries
+        result = [dict(zip(columns, row)) for row in rows]
 
         cur.close()
         conn.close()
-
-        return payload
+        return result
 
     except Exception as e:
-        print("Error in ExecuteAllWithHeaders =============================", e)
+        print("Error in ExecuteAllWithHeaders ===================", e)
+        # Return empty list on error, do not break other functions
         return []

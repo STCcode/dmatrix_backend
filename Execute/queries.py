@@ -802,27 +802,27 @@ def get_cashflows_action(entityid):
         ORDER BY order_date;
     """
     rows = executeSql.ExecuteAllNew(sql, (entityid,))
-
     print("DEBUG rows for", entityid, "=>", type(rows), rows)
 
-    if not rows or not isinstance(rows, list):
+    # 🔹 Only check if list is empty
+    if rows is None or len(rows) == 0:
         raise ValueError(f"No rows returned from DB for entityid={entityid}")
 
     cashflows, dates = [], []
 
-    for row in rows:  # row is a dict now
-        order_date = row["order_date"]
-        purchase_amount = float(row["purchase_amount"] or 0)
+    for row in rows:  # row is a dict
+        order_date = row.get("order_date")
+        purchase_amount = float(row.get("purchase_amount") or 0)
 
-        # Always treat purchase as cash outflow
         if purchase_amount != 0:
-            cashflows.append(-purchase_amount)
+            cashflows.append(-purchase_amount)  # purchases are outflow
             dates.append(order_date)
 
     if not cashflows:
         raise ValueError("No cashflows found after processing rows")
 
     return cashflows, dates
+
 
 
 

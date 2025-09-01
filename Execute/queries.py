@@ -796,22 +796,36 @@ def getAllActionInstrument():
 
 def get_cashflows_action(entityid):
     try:
-        sql = "SELECT order_date, CASE WHEN order_type ILIKE 'Purchase' THEN -purchase_amount WHEN order_type ILIKE 'Sell' THEN redeem_amount ELSE 0 END AS cashflow FROM tbl_action_table WHERE entityid = %s ORDER BY order_date;"
+        sql = "SELECT order_date,CASE WHEN order_type ILIKE 'Purchase' THEN -purchase_amount WHEN order_type ILIKE 'Sell' THEN redeem_amount ELSE 0 END AS cashflow FROM tbl_action_table WHERE entityid = %s ORDER BY order_date;"
         data = (entityid,)
         msgs = executeSql.ExecuteAllNew(sql, data)
 
-        if not msgs:  # no rows
+        if not msgs:
+            print(f"⚠️ No rows found for entityid={entityid}")
             return [], []
 
-        # ✅ If msgs is a list of dicts
-        dates = [row['order_date'] if isinstance(row, dict) else row[0] for row in msgs]
-        cashflows = [float(row['cashflow'] if isinstance(row, dict) else row[1]) for row in msgs]
+        # handle both dict and tuple rows
+        dates = []
+        cashflows = []
+        for row in msgs:
+            if isinstance(row, dict):
+                dates.append(row.get("order_date"))
+                cashflows.append(float(row.get("cashflow", 0)))
+            elif isinstance(row, (list, tuple)):
+                dates.append(row[0])
+                cashflows.append(float(row[1]))
+            else:
+                print(" Unexpected row format:", row)
+
+        # sanity check
+        if not dates or not cashflows:
+            raise ValueError("Cashflows and dates could not be parsed")
 
         return cashflows, dates
 
     except Exception as e:
-        print("Error in get_cashflows_action =================", e)
-        return [], []
+        print(" Error in get_cashflows_action:", e)
+        raise  # let the caller see the real error
 
 
 

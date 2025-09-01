@@ -795,8 +795,9 @@ def getAllActionInstrument():
 
 
 def get_cashflows_action(entityid):
-    sql = "SELECT order_date::date, purchase_amount FROM tbl_action_table WHERE entityid = %s ORDER BY order_date;"
+    sql = "SELECT order_date::date, purchase_amount FROM tbl_action_table WHERE   WHERE TRIM(entityid) = %s ORDER BY order_date;"
     rows = executeSql.ExecuteAllNew(sql, (entityid,))
+    print("DEBUG rows for", entityid, "=>", rows) 
 
     if not rows:
         raise ValueError(f"No rows returned from DB for entityid={entityid}")

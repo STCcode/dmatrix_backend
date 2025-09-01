@@ -275,30 +275,40 @@ def ExecuteAllNew(query, data):
 
 
     # SELECT ALL with headers (safe version for IRR queries)
-def ExecuteAllWithHeaders(query, data):
+def ExecuteAllWithHeaders(query, params=None):
+    """
+    Executes a SQL query and returns a list of dicts with column headers.
+    Works for any table, any query.
+    
+    :param query: SQL query string with placeholders
+    :param params: tuple of parameters to pass into execute()
+    :return: list of dicts [{col1: val1, col2: val2}, ...]
+    """
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute(query, data)
-        rows = cur.fetchall()
+        cur.execute(query, params or ())
 
-        # if no rows, return empty list
-        if not rows:
-            cur.close()
-            conn.close()
+        # fetch results
+        results = cur.fetchall()
+        if not results:
             return []
 
-        # extract column names
-        headers = [desc[0] for desc in cur.description]
+        # get column names
+        row_headers = [desc[0] for desc in cur.description]
 
-        # convert each row to dict
-        payload = [dict(zip(headers, row)) for row in rows]
+        # convert to list of dicts
+        payload = [dict(zip(row_headers, row)) for row in results]
 
+        # cleanup
+        conn.commit()
         cur.close()
         conn.close()
+
         return payload
 
     except Exception as e:
-        print("Error in ExecuteAllWithHeaders =============================", e)
-        return []
+        print("Error in ExecuteAllWithHeaders:", e)
+        # Return structured error for consistency
+        return middleware.exe_msgs(responses.execution_501, str(e.args), '1023300')
 

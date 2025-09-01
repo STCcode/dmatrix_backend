@@ -802,28 +802,52 @@ def getAllActionInstrument():
 #     """
 # --- Fetch cashflows from a table ---
 
-def get_cashflows(entityid, table, date_col, amount_col, outflow_only=True):
-    sql = f"""
-        SELECT {date_col}::date AS date_col, {amount_col} AS amount_col
-        FROM {table}
+def get_cashflows_action(entityid):
+    sql = """
+        SELECT order_date::date AS date_col, purchase_amount AS amount_col
+        FROM tbl_action_table
         WHERE TRIM(entityid) = %s
-        ORDER BY {date_col};
+        ORDER BY order_date;
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
-    if not rows:
-        return [], []
-
-    cashflows = []
-    dates = []
+    cashflows, dates = [], []
     for row in rows:
-        amt = row[amount_col]
-        if amt is None:
-            continue
-        amt = float(amt)
-        if outflow_only:
-            amt = -amt
+        amt = float(row["amount_col"] or 0)
         if amt != 0:
-            cashflows.append(amt)
+            cashflows.append(-amt)  # purchases are outflow
+            dates.append(row["date_col"])
+    return cashflows, dates
+
+def get_cashflows_aif(entityid):
+    sql = """
+        SELECT trans_date::date AS date_col, contribution_amount AS amount_col
+        FROM tbl_aif
+        WHERE TRIM(entityid) = %s
+        ORDER BY trans_date;
+    """
+    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
+    cashflows, dates = [], []
+    for row in rows:
+        amt = float(row["amount_col"] or 0)
+        if amt != 0:
+            cashflows.append(-amt)  # contribution is outflow
+            dates.append(row["date_col"])
+    return cashflows, dates
+
+def get_cashflows_direct_equity(entityid):
+    sql = """
+        SELECT trade_date::date AS date_col, trade_price AS amount_col
+        FROM tbl_direct_equity
+        WHERE TRIM(entityid) = %s
+        ORDER BY trade_date;
+    """
+    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
+    cashflows, dates = [], []
+    for row in rows:
+        amt = float(row["amount_col"] or 0)
+        if amt != 0:
+            # You can decide if purchases are negative, sales positive
+            cashflows.append(-amt)  
             dates.append(row["date_col"])
     return cashflows, dates
 

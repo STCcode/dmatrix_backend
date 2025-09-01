@@ -800,47 +800,32 @@ def getAllActionInstrument():
 #     - amount_col: numeric column for cashflow (if only one)
 #     - purchase_col / sell_col: for tables like action table with separate purchase/redeem
 #     """
-def get_cashflows(entityid, table_name, date_col, amount_col, purchase_col=None, sell_col=None):
-   
-    if table_name.lower() == "tbl_action_table":
-        sql = f"""
-            SELECT {date_col}::date, 
-                   CASE 
-                       WHEN order_type ILIKE 'Purchase' THEN -{purchase_col}
-                       WHEN order_type ILIKE 'Sell' THEN {sell_col}
-                       ELSE 0
-                   END AS cashflow
-            FROM {table_name}
-            WHERE TRIM(entityid) = %s
-            ORDER BY {date_col};
-        """
-    else:
-        sql = f"""
-            SELECT {date_col}::date, {amount_col} AS cashflow
-            FROM {table_name}
-            WHERE TRIM(entityid) = %s
-            ORDER BY {date_col};
-        """
+# --- Fetch cashflows from a table ---
+
+def get_cashflows(entityid, table, date_col, amount_col, outflow_only=True):
+    sql = f"""
+        SELECT {date_col}::date AS date_col, {amount_col} AS amount_col
+        FROM {table}
+        WHERE TRIM(entityid) = %s
+        ORDER BY {date_col};
+    """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
-    
     if not rows:
         return [], []
-    
-    dates, cashflows = [], []
-    for row in rows:
-        order_date = row[date_col]
-        cf = row.get('cashflow') if 'cashflow' in row else row.get(amount_col)
-        if cf is None:
-            continue
-        try:
-            cf = float(cf)
-        except:
-            continue
-        if cf != 0:
-            cashflows.append(cf)
-            dates.append(order_date)
-    return cashflows, dates
 
+    cashflows = []
+    dates = []
+    for row in rows:
+        amt = row[amount_col]
+        if amt is None:
+            continue
+        amt = float(amt)
+        if outflow_only:
+            amt = -amt
+        if amt != 0:
+            cashflows.append(amt)
+            dates.append(row["date_col"])
+    return cashflows, dates
 
 # ======================================calculate Xirr (IRR)======================================
 

@@ -1714,64 +1714,88 @@ def getAllActionInstrument():
 # --- XIRR calculation ---
 def calculate_xirr(cashflows, dates, initial_guess=0.1):
     if not cashflows or not dates:
-        return None
+        raise ValueError("Cashflows and dates cannot be empty")
     if len(cashflows) != len(dates):
-        return None
+        raise ValueError("Number of cashflows must match number of dates")
+
+    parsed_dates = []
+    for d in dates:
+        if isinstance(d, str):
+            try:
+                parsed_dates.append(datetime.strptime(d, "%Y-%m-%d").date())
+            except:
+                parsed_dates.append(datetime.strptime(d, "%m/%d/%Y").date())
+        else:
+            parsed_dates.append(d)
+    dates = parsed_dates
     d0 = dates[0]
+
     def xnpv(rate):
         return sum(cf / (1 + rate) ** ((d - d0).days / 365) for cf, d in zip(cashflows, dates))
-    try:
-        irr = newton(lambda r: xnpv(r), initial_guess)
-        return irr
-    except:
-        return None
 
-# --- Main endpoint ---
+    return newton(lambda r: xnpv(r), initial_guess)
+
+
+# Generic IRR endpoint generator
+def generate_irr_response(entityid, cashflows, dates):
+    irr = calculate_xirr(cashflows, dates) if cashflows else None
+    return {
+        "annualized_irr_percent": round(irr * 100, 2) if irr is not None else None,
+        "total_invested": round(-sum(cf for cf in cashflows if cf < 0), 2),
+        "total_redemption": round(sum(cf for cf in cashflows if cf > 0), 2),
+    }
+
+
+# Action IRR
 def getActionIRR():
-    entityid = request.args.get("entityid")
-    if not entityid:
-        return make_response(
-            middleware.exe_msgs(responses.getAll_501, "entityid is required", "1023501"),
-            400
-        )
-    cashflows, dates = queries.get_cashflows_action(entityid)
-    irr = calculate_xirr(cashflows, dates)
-    result = {
-        "code": "1023200",
-        "successmsgs": responses.getAll_200,
-        "entityid": entityid,
-        "annualized_irr_percent": round(irr*100, 2) if irr else None,
-        "total_invested": round(-sum(cf for cf in cashflows if cf < 0),2),
-        "total_redemption": round(sum(cf for cf in cashflows if cf > 0),2)
-    }
-    return make_response(result, 200)
+    try:
+        entityid = request.args.get("entityid")
+        if not entityid:
+            return make_response({"error": "entityid is required"}, 400)
 
-def getAifIRR():
-    entityid = request.args.get("entityid")
-    cashflows, dates = queries.get_cashflows_aif(entityid)
-    irr = calculate_xirr(cashflows, dates)
-    result = {
-        "code": "1023200",
-        "successmsgs": responses.getAll_200,
-        "entityid": entityid,
-        "annualized_irr_percent": round(irr*100, 2) if irr else None,
-        "total_invested": round(-sum(cf for cf in cashflows if cf < 0),2),
-        "total_redemption": round(sum(cf for cf in cashflows if cf > 0),2)
-    }
-    return make_response(result, 200)
+        cashflows, dates = queries.get_cashflows_action(entityid)
+        result = generate_irr_response(entityid, cashflows, dates)
+        result["code"] = "1023200"
+        result["entityid"] = entityid
+        return make_response(result, 200)
 
+    except Exception as e:
+        print("Error in getActionIRR:", e)
+        return make_response({"error": str(e)}, 500)
+
+
+# Direct Equity IRR
 def getDirectEquityIRR():
-    entityid = request.args.get("entityid")
-    cashflows, dates = queries.get_cashflows_direct_equity(entityid)
-    irr = calculate_xirr(cashflows, dates)
-    result = {
-        "code": "1023200",
-        "successmsgs": responses.getAll_200,
-        "entityid": entityid,
-        "annualized_irr_percent": round(irr*100, 2) if irr else None,
-        "total_invested": round(-sum(cf for cf in cashflows if cf < 0),2),
-        "total_redemption": round(sum(cf for cf in cashflows if cf > 0),2)
-    }
-    return make_response(result, 200)
+    try:
+        entityid = request.args.get("entityid")
+        if not entityid:
+            return make_response({"error": "entityid is required"}, 400)
 
+        cashflows, dates = queries.get_cashflows_direct_equity(entityid)
+        result = generate_irr_response(entityid, cashflows, dates)
+        result["code"] = "1023200"
+        result["entityid"] = entityid
+        return make_response(result, 200)
+
+    except Exception as e:
+        print("Error in getDirectEquityIRR:", e)
+        return make_response({"error": str(e)}, 500)
+
+
+# AIF IRR
+def getAifIRR():
+    try:
+        entityid = request.args.get("entityid")
+        if not entityid:
+            return make_response({"error": "entityid is required"}, 400)
+
+        cashflows, dates = queries.get_cashflows_aif(entityid)
+        result = generate_irr_response(entityid, cashflows, dates)
+        result["code"] = "1023200"
+        result["entityid"] = entityid
+        return make_response(result, 200)
+
+    except Exception as e:
+        print("Error in getAIFIRR:", e)
+        return make_response({"error": str(e)}, 500)
 # ======================================calculate Xirr (IRR)======================================

@@ -877,8 +877,9 @@ def get_cashflows_direct_equity(entityid):
 
 def get_cashflows_aif(entityid):
     sql = """
-        SELECT trans_date::date, trans_type,
-               amount_invested, distribution_amount
+        SELECT trans_date::date, trans_type, 
+               contribution_amount, amount_invested, 
+               setup_expense, stamp_duty
         FROM tbl_aif
         WHERE TRIM(entityid) ILIKE %s
         ORDER BY trans_date
@@ -887,19 +888,22 @@ def get_cashflows_aif(entityid):
     cashflows, dates = [], []
 
     for r in rows:
-        trans_type = (r.get("trans_type") or "").strip().lower()
+        ttype = (r["trans_type"] or "").lower()
 
-        if trans_type in ("subscription", "commitment", "contribution"):
-            amt = float(r.get("amount_invested") or 0)
-            if amt > 0:
-                cashflows.append(-amt)   # outflow
-                dates.append(r["trans_date"])
+        if ttype == "subscription":
+            # Treat subscription as cash outflow
+            invested = float(r.get("amount_invested") or 0)
+            cashflows.append(-invested)
+        elif ttype == "distribution":
+            # Treat distribution as inflow
+            # if you have distribution_amount column, use it;
+            # otherwise assume "contribution_amount" is 0 and NAV payout is external
+            distributed = float(r.get("post_tax_nav") or 0)
+            cashflows.append(distributed)
+        else:
+            continue
 
-        elif trans_type in ("distribution", "redemption", "payout"):
-            amt = float(r.get("distribution_amount") or 0)
-            if amt > 0:
-                cashflows.append(amt)    # inflow
-                dates.append(r["trans_date"])
+        dates.append(r["trans_date"])
 
     return cashflows, dates
 

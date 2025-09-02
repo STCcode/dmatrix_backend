@@ -793,14 +793,12 @@ def getAllActionInstrument():
 #         print("Error in get_cashflows_action =================", e)
 #         return [], []
 
-# -----------------------
-# Action Cashflows
-# -----------------------
+# -------------------- Action --------------------
 def get_cashflows_action(entityid):
     sql = """
         SELECT order_date::date, order_type, purchase_amount, redeem_amount
         FROM tbl_action_table
-        WHERE TRIM(entityid) = TRIM(%s)
+        WHERE TRIM(UPPER(entityid)) = UPPER(TRIM(%s))
         ORDER BY order_date;
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
@@ -809,8 +807,8 @@ def get_cashflows_action(entityid):
 
     cashflows, dates = [], []
     for row in rows:
-        order_date = row.get("order_date")
-        order_type = str(row.get("order_type", "")).lower()
+        order_date = row["order_date"]
+        order_type = str(row.get("order_type") or "").lower()
         purchase_amount = float(row.get("purchase_amount") or 0)
         redeem_amount = float(row.get("redeem_amount") or 0)
 
@@ -824,19 +822,16 @@ def get_cashflows_action(entityid):
         if cf != 0:
             cashflows.append(cf)
             dates.append(order_date)
-    if not cashflows:
-        raise ValueError(f"No valid cashflows found for entityid={entityid} in tbl_action_table")
+
     return cashflows, dates
 
 
-# -----------------------
-# Direct Equity Cashflows
-# -----------------------
+# -------------------- Direct Equity --------------------
 def get_cashflows_direct_equity(entityid):
     sql = """
         SELECT trade_date::date AS trade_date, order_type, trade_price AS amount
         FROM tbl_direct_equity
-        WHERE TRIM(UPPER(entityid)) = UPPER(%s)
+        WHERE TRIM(UPPER(entityid)) = UPPER(TRIM(%s))
         ORDER BY trade_date;
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
@@ -845,8 +840,8 @@ def get_cashflows_direct_equity(entityid):
 
     cashflows, dates = [], []
     for row in rows:
-        trade_date = row.get("trade_date")
-        order_type = str(row.get("order_type", "")).lower()
+        trade_date = row["trade_date"]
+        order_type = str(row.get("order_type") or "").lower()
         amount = float(row.get("amount") or 0)
 
         if order_type in ("buy", "purchase"):
@@ -859,17 +854,16 @@ def get_cashflows_direct_equity(entityid):
         if cf != 0:
             cashflows.append(cf)
             dates.append(trade_date)
+
     return cashflows, dates
 
 
-# -----------------------
-# AIF Cashflows
-# -----------------------
+# -------------------- AIF --------------------
 def get_cashflows_aif(entityid):
     sql = """
         SELECT trans_date::date AS trans_date, contribution_amount
         FROM tbl_aif
-        WHERE TRIM(UPPER(entityid)) = UPPER(%s)
+        WHERE TRIM(UPPER(entityid)) = UPPER(TRIM(%s))
         ORDER BY trans_date;
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
@@ -878,11 +872,12 @@ def get_cashflows_aif(entityid):
 
     cashflows, dates = [], []
     for row in rows:
-        trans_date = row.get("trans_date")
-        contribution_amount = float(row.get("contribution_amount") or 0)
-        if contribution_amount != 0:
-            cashflows.append(-contribution_amount)
+        trans_date = row["trans_date"]
+        amount = float(row.get("contribution_amount") or 0)
+        if amount != 0:
+            cashflows.append(-amount)  # always outflow
             dates.append(trans_date)
+
     return cashflows, dates
 
 # ======================================calculate Xirr (IRR)======================================

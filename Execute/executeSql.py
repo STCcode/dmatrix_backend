@@ -297,19 +297,19 @@ def ExecuteAllWithHeaders(query, params=None):
         cur.execute(query, params or ())
         rows = cur.fetchall()
 
-        # Return empty list if no results
         if not rows:
             return []
 
-        # Convert all numeric strings to float automatically
         result = []
         for row in rows:
             clean_row = {}
             for k, v in row.items():
                 if v is None:
                     clean_row[k] = None
+                elif isinstance(v, (int, float)):
+                    clean_row[k] = v
                 else:
-                    # Auto-convert numeric strings to float
+                    # Try auto-convert numeric strings to float
                     try:
                         clean_row[k] = float(v)
                     except (ValueError, TypeError):
@@ -320,8 +320,8 @@ def ExecuteAllWithHeaders(query, params=None):
 
     except Exception as e:
         print("Error in ExecuteAllWithHeaders =============================", e)
-        # Always return list to avoid 'Response object is not iterable'
         return []
+
     finally:
         if cur:
             cur.close()

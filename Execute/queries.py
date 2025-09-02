@@ -800,13 +800,7 @@ def getAllActionInstrument():
 #     return cashflows, dates
 
 def get_cashflows_action(entityid):
-    sql = """
-        SELECT order_date::date, TRIM(LOWER(order_type)) AS order_type,
-               purchase_amount, redeem_amount
-        FROM tbl_action_table
-        WHERE TRIM(entityid) ILIKE %s
-        ORDER BY order_date
-    """
+    sql = "SELECT order_date::date, TRIM(LOWER(order_type)) AS order_type,purchase_amount, redeem_amount FROM tbl_action_table WHERE TRIM(entityid) ILIKE %s ORDER BY order_date;"
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
 
     cashflows, dates = [], []
@@ -831,27 +825,31 @@ def get_cashflows_action(entityid):
     return cashflows, dates
 
 def get_cashflows_direct_equity(entityid):
-    sql = """
-        SELECT trade_date::date, transaction_type, buy_amount, sell_amount
-        FROM tbl_direct_equity
-        WHERE TRIM(entityid) ILIKE %s
-        ORDER BY trade_date
-    """
-    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
+    sql = "SELECT trade_date::date, order_type, net_total, net_amount_receivable FROM tbl_direct_equity WHERE TRIM(entityid) ILIKE %s ORDER BY trade_date;"
+    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid.strip(),))
+
     cashflows, dates = [], []
 
     for r in rows:
-        if not r["transaction_type"]:
-            continue
-        if r["transaction_type"].lower() == "buy":
-            cashflows.append(-float(r.get("buy_amount") or 0))
-        elif r["transaction_type"].lower() == "sell":
-            cashflows.append(float(r.get("sell_amount") or 0))
-        else:
-            continue
-        dates.append(r["trade_date"])
+        transaction_type = (r.get("order_type") or "").strip().lower()
+
+        if transaction_type == "buy":
+            amt = float(r.get("net_total") or 0)
+            if amt > 0:
+                cashflows.append(-amt)
+                dates.append(r["trade_date"])
+
+        elif transaction_type == "sell":
+            amt = float(r.get("net_amount_receivable") or 0)
+            if amt > 0:
+                cashflows.append(amt)
+                dates.append(r["trade_date"])
 
     return cashflows, dates
+
+
+
+
 
 
 def get_cashflows_aif(entityid):

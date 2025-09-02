@@ -1699,25 +1699,21 @@ def getAllActionInstrument():
 
 
 # Calculate XIRR
+# -------------------- Core IRR Calculation --------------------
 def calculate_xirr(cashflows, dates, guess=0.1):
-    if not cashflows or not dates:
+    if not cashflows or not dates or len(cashflows) != len(dates):
         return None
-    if len(cashflows) != len(dates):
-        return None
-
     d0 = dates[0]
 
     def xnpv(rate):
         return sum(cf / (1 + rate) ** ((d - d0).days / 365) for cf, d in zip(cashflows, dates))
 
     try:
-        irr = newton(lambda r: xnpv(r), guess)
-        return irr
+        return newton(lambda r: xnpv(r), guess)
     except Exception:
         return None
 
 
-# Format response
 def format_irr_response(cashflows, dates):
     if not cashflows or not dates:
         return {
@@ -1733,51 +1729,46 @@ def format_irr_response(cashflows, dates):
         "total_redemption": round(sum(cf for cf in cashflows if cf > 0), 2)
     }
 
-
 # -------------------- Endpoints --------------------
-
-# Action (Mutual Fund)
 def getActionIRR():
-    entityid = request.args.get("entityid")
+    entityid = request.args.get("entityid", "").strip()
     if not entityid:
         return make_response({"error": "entityid is required"}, 400)
 
-    try:
-        cashflows, dates = queries.get_cashflows_action(entityid)
-        response = format_irr_response(cashflows, dates)
-        response["entityid"] = entityid
-        return make_response({"code": "1023200", **response, "successmsgs": "Fetching Successfully"}, 200)
-    except Exception as e:
-        return make_response({"error": str(e)}, 500)
+    cashflows, dates = queries.get_cashflows_action(entityid)
+    if not cashflows:
+        return make_response({"error": f"No rows found for entityid={entityid} in tbl_action_table"}, 404)
+
+    response = format_irr_response(cashflows, dates)
+    response["entityid"] = entityid
+    return make_response({"code": "1023200", **response, "successmsgs": "Fetching Successfully"}, 200)
 
 
-# Direct Equity
 def getDirectEquityIRR():
-    entityid = request.args.get("entityid")
+    entityid = request.args.get("entityid", "").strip()
     if not entityid:
         return make_response({"error": "entityid is required"}, 400)
 
-    try:
-        cashflows, dates = queries.get_cashflows_direct_equity(entityid)
-        response = format_irr_response(cashflows, dates)
-        response["entityid"] = entityid
-        return make_response({"code": "1023200", **response, "successmsgs": "Fetching Successfully"}, 200)
-    except Exception as e:
-        return make_response({"error": str(e)}, 500)
+    cashflows, dates = queries.get_cashflows_direct_equity(entityid)
+    if not cashflows:
+        return make_response({"error": f"No rows found for entityid={entityid} in tbl_direct_equity"}, 404)
+
+    response = format_irr_response(cashflows, dates)
+    response["entityid"] = entityid
+    return make_response({"code": "1023200", **response, "successmsgs": "Fetching Successfully"}, 200)
 
 
-# AIF
 def getAifIRR():
-    entityid = request.args.get("entityid")
+    entityid = request.args.get("entityid", "").strip()
     if not entityid:
         return make_response({"error": "entityid is required"}, 400)
 
-    try:
-        cashflows, dates = queries.get_cashflows_aif(entityid)
-        response = format_irr_response(cashflows, dates)
-        response["entityid"] = entityid
-        return make_response({"code": "1023200", **response, "successmsgs": "Fetching Successfully"}, 200)
-    except Exception as e:
-        return make_response({"error": str(e)}, 500)
+    cashflows, dates = queries.get_cashflows_aif(entityid)
+    if not cashflows:
+        return make_response({"error": f"No rows found for entityid={entityid} in tbl_aif"}, 404)
+
+    response = format_irr_response(cashflows, dates)
+    response["entityid"] = entityid
+    return make_response({"code": "1023200", **response, "successmsgs": "Fetching Successfully"}, 200)
 
 # ======================================calculate Xirr (IRR)======================================

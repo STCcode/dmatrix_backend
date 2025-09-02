@@ -2,6 +2,7 @@ from datetime import datetime
 from Execute import executeSql,responses,middleware
 import platform
 from flask import jsonify, request
+import numpy as np
 import json  
 #getting all user data
 def getAllUserData():
@@ -793,90 +794,74 @@ def getAllActionInstrument():
 #         print("Error in get_cashflows_action =================", e)
 #         return [], []
 
-# -------------------- Action --------------------
 def get_cashflows_action(entityid):
     sql = """
         SELECT order_date::date, order_type, purchase_amount, redeem_amount
         FROM tbl_action_table
-        WHERE TRIM(UPPER(entityid)) = UPPER(TRIM(%s))
-        ORDER BY order_date;
+        WHERE TRIM(entityid) ILIKE %s
+        ORDER BY order_date
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
-    if not rows:
-        raise ValueError(f"No rows found for entityid={entityid} in tbl_action_table")
-
     cashflows, dates = [], []
-    for row in rows:
-        order_date = row["order_date"]
-        order_type = str(row.get("order_type") or "").lower()
-        purchase_amount = float(row.get("purchase_amount") or 0)
-        redeem_amount = float(row.get("redeem_amount") or 0)
 
-        if order_type in ("purchase", "buy"):
-            cf = -purchase_amount
-        elif order_type == "sell":
-            cf = redeem_amount
+    for r in rows:
+        if not r["order_type"]:
+            continue
+        if r["order_type"].lower() == "purchase":
+            cashflows.append(-float(r.get("purchase_amount") or 0))
+        elif r["order_type"].lower() == "sell":
+            cashflows.append(float(r.get("redeem_amount") or 0))
         else:
-            cf = 0
-
-        if cf != 0:
-            cashflows.append(cf)
-            dates.append(order_date)
+            continue
+        dates.append(r["order_date"])
 
     return cashflows, dates
 
 
-# -------------------- Direct Equity --------------------
 def get_cashflows_direct_equity(entityid):
     sql = """
-        SELECT trade_date::date AS trade_date, order_type, trade_price AS amount
+        SELECT trade_date::date, transaction_type, buy_amount, sell_amount
         FROM tbl_direct_equity
-        WHERE TRIM(UPPER(entityid)) = UPPER(TRIM(%s))
-        ORDER BY trade_date;
+        WHERE TRIM(entityid) ILIKE %s
+        ORDER BY trade_date
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
-    if not rows:
-        raise ValueError(f"No rows found for entityid={entityid} in tbl_direct_equity")
-
     cashflows, dates = [], []
-    for row in rows:
-        trade_date = row["trade_date"]
-        order_type = str(row.get("order_type") or "").lower()
-        amount = float(row.get("amount") or 0)
 
-        if order_type in ("buy", "purchase"):
-            cf = -amount
-        elif order_type in ("sell", "redemption"):
-            cf = amount
+    for r in rows:
+        if not r["transaction_type"]:
+            continue
+        if r["transaction_type"].lower() == "buy":
+            cashflows.append(-float(r.get("buy_amount") or 0))
+        elif r["transaction_type"].lower() == "sell":
+            cashflows.append(float(r.get("sell_amount") or 0))
         else:
-            cf = 0
-
-        if cf != 0:
-            cashflows.append(cf)
-            dates.append(trade_date)
+            continue
+        dates.append(r["trade_date"])
 
     return cashflows, dates
 
 
-# -------------------- AIF --------------------
 def get_cashflows_aif(entityid):
     sql = """
-        SELECT trans_date::date AS trans_date, contribution_amount
+        SELECT action_date::date, action_type, commitment_amount, distribution_amount
         FROM tbl_aif
-        WHERE TRIM(UPPER(entityid)) = UPPER(TRIM(%s))
-        ORDER BY trans_date;
+        WHERE TRIM(entityid) ILIKE %s
+        ORDER BY action_date
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
-    if not rows:
-        raise ValueError(f"No rows found for entityid={entityid} in tbl_aif")
-
     cashflows, dates = [], []
-    for row in rows:
-        trans_date = row["trans_date"]
-        amount = float(row.get("contribution_amount") or 0)
-        if amount != 0:
-            cashflows.append(-amount)  # always outflow
-            dates.append(trans_date)
+
+    for r in rows:
+        if not r["action_type"]:
+            continue
+        if r["action_type"].lower() == "commitment":
+            cashflows.append(-float(r.get("commitment_amount") or 0))
+        elif r["action_type"].lower() == "distribution":
+            cashflows.append(float(r.get("distribution_amount") or 0))
+        else:
+            continue
+        dates.append(r["action_date"])
 
     return cashflows, dates
 

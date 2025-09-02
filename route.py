@@ -206,6 +206,16 @@ app.add_url_rule('/getAifIRR', view_func=user_fun.getAifIRR, methods=['GET'])
 
 
 
+# //////////////////testing///////////////////////////////////////////
+# Temporary debug endpoint
+app.add_url_rule('/getDistinctEntityIds', view_func=user_fun.getDistinctEntityIds, methods=['GET'])
+# @app.route("/getDistinctEntityIds", methods=["GET"])
+# def get_distinct_entityids_route():
+#     return function.getDistinctEntityIds()
+
+
+
+
 
 
 

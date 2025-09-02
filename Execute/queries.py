@@ -872,9 +872,19 @@ def get_cashflows_aif(entityid):
 
 
 
+# //////////////////////////TESTING///////////////////////////////////
 
+def get_distinct_entityids_action():
+    sql = "SELECT DISTINCT TRIM(entityid) AS entityid FROM tbl_action_table ORDER BY entityid"
+    return executeSql.ExecuteAllWithHeaders(sql)
 
+def get_distinct_entityids_equity():
+    sql = "SELECT DISTINCT TRIM(entityid) AS entityid FROM tbl_direct_equity ORDER BY entityid"
+    return executeSql.ExecuteAllWithHeaders(sql)
 
+def get_distinct_entityids_aif():
+    sql = "SELECT DISTINCT TRIM(entityid) AS entityid FROM tbl_aif ORDER BY entityid"
+    return executeSql.ExecuteAllWithHeaders(sql)
 
 
 

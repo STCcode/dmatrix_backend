@@ -1772,3 +1772,20 @@ def getAifIRR():
     return make_response({"code": "1023200", **response, "successmsgs": "Fetching Successfully"}, 200)
 
 # ======================================calculate Xirr (IRR)======================================
+
+
+
+
+
+
+# /////////////////////////////TESTINg////////////////////
+
+def getDistinctEntityIds():
+    try:
+        return jsonify({
+            "action_table": queries.get_distinct_entityids_action(),
+            "direct_equity": queries.get_distinct_entityids_equity(),
+            "aif_table": queries.get_distinct_entityids_aif()
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)})

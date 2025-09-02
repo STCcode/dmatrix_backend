@@ -793,8 +793,6 @@ def getAllActionInstrument():
 #         print("Error in get_cashflows_action =================", e)
 #         return [], []
 
-import executeSql  # your db helper
-
 # -----------------------
 # Action Cashflows
 # -----------------------

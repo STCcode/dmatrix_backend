@@ -1697,34 +1697,40 @@ def getAllActionInstrument():
 
 # ======================================calculate Xirr (IRR)======================================
 
-# def calculate_xirr(cashflows, dates, initial_guess=0.1):
-#     """Calculate annualized IRR (XIRR)."""
-#     if len(cashflows) != len(dates):
-#         raise ValueError("Number of cashflows must match number of dates")
 
-#     def xnpv(rate):
-#         d0 = dates[0]
-#         return sum(cf / (1 + rate)**((d - d0).days / 365) for cf, d in zip(cashflows, dates))
-
-#     irr = newton(lambda r: xnpv(r), initial_guess)
-#     return irr
-
-
-
-# --- XIRR calculation ---
+# -----------------------
+# XIRR Calculation
+# -----------------------
 def calculate_xirr(cashflows, dates, guess=0.1):
     if not cashflows or not dates:
         raise ValueError("Cashflows and dates cannot be empty")
     if len(cashflows) != len(dates):
         raise ValueError("Number of cashflows must match number of dates")
 
+    # Ensure all dates are datetime.date
+    parsed_dates = []
+    for d in dates:
+        if isinstance(d, str):
+            try:
+                parsed_dates.append(datetime.strptime(d, "%Y-%m-%d").date())
+            except ValueError:
+                parsed_dates.append(datetime.strptime(d, "%d-%m-%Y").date())
+        elif isinstance(d, (datetime, date)):
+            parsed_dates.append(d if isinstance(d, date) else d.date())
+    dates = parsed_dates
+
     d0 = dates[0]
+
     def xnpv(rate):
         return sum(cf / (1 + rate) ** ((d - d0).days / 365) for cf, d in zip(cashflows, dates))
 
-    return newton(lambda r: xnpv(r), guess)
+    irr = newton(lambda r: xnpv(r), guess)
+    return irr
 
 
+# -----------------------
+# Response Formatter
+# -----------------------
 def format_irr_response(entityid, cashflows, dates):
     if not cashflows or not dates:
         return {
@@ -1732,16 +1738,25 @@ def format_irr_response(entityid, cashflows, dates):
             "total_invested": 0,
             "total_redemption": 0
         }
+    try:
+        irr = calculate_xirr(cashflows, dates)
+        return {
+            "annualized_irr_percent": round(irr * 100, 2),
+            "total_invested": round(-sum(cf for cf in cashflows if cf < 0), 2),
+            "total_redemption": round(sum(cf for cf in cashflows if cf > 0), 2)
+        }
+    except Exception:
+        # If XIRR fails to converge
+        return {
+            "annualized_irr_percent": None,
+            "total_invested": round(-sum(cf for cf in cashflows if cf < 0), 2),
+            "total_redemption": round(sum(cf for cf in cashflows if cf > 0), 2)
+        }
 
-    irr = calculate_xirr(cashflows, dates)
-    return {
-        "annualized_irr_percent": round(irr * 100, 2),
-        "total_invested": round(-sum(cf for cf in cashflows if cf < 0), 2),
-        "total_redemption": round(sum(cf for cf in cashflows if cf > 0), 2)
-    }
 
-# Endpoints
-# Action (Mutual Fund) IRR
+# -----------------------
+# Action IRR Endpoint
+# -----------------------
 def getActionIRR():
     try:
         entityid = request.args.get("entityid")
@@ -1756,7 +1771,9 @@ def getActionIRR():
         return make_response({"error": str(e)}, 500)
 
 
-# Direct Equity IRR
+# -----------------------
+# Direct Equity IRR Endpoint
+# -----------------------
 def getDirectEquityIRR():
     try:
         entityid = request.args.get("entityid")
@@ -1771,7 +1788,9 @@ def getDirectEquityIRR():
         return make_response({"error": str(e)}, 500)
 
 
-# AIF IRR
+# -----------------------
+# AIF IRR Endpoint
+# -----------------------
 def getAifIRR():
     try:
         entityid = request.args.get("entityid")
@@ -1784,5 +1803,4 @@ def getAifIRR():
         return make_response({"code": "1023200", **result, "successmsgs": "Fetching Successfully"}, 200)
     except Exception as e:
         return make_response({"error": str(e)}, 500)
-
 # ======================================calculate Xirr (IRR)======================================

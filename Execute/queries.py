@@ -793,17 +793,11 @@ def getAllActionInstrument():
 #         print("Error in get_cashflows_action =================", e)
 #         return [], []
 
-#  """
-#     Generic cashflow fetcher:
-#     - table_name: table to fetch
-#     - date_col: column for transaction date
-#     - amount_col: numeric column for cashflow (if only one)
-#     - purchase_col / sell_col: for tables like action table with separate purchase/redeem
-#     """
-# --- Fetch cashflows from a table ---
+import executeSql  # your db helper
 
-# Queries to fetch cashflows per table
-# Action (Mutual Fund)
+# -----------------------
+# Action Cashflows
+# -----------------------
 def get_cashflows_action(entityid):
     sql = """
         SELECT order_date::date, order_type, purchase_amount, redeem_amount
@@ -812,21 +806,17 @@ def get_cashflows_action(entityid):
         ORDER BY order_date;
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
-    print("DEBUG rows for", entityid, "=>", rows)
-
     if not rows:
         raise ValueError(f"No rows found for entityid={entityid} in tbl_action_table")
 
     cashflows, dates = [], []
-
     for row in rows:
         order_date = row.get("order_date")
         order_type = str(row.get("order_type", "")).lower()
         purchase_amount = float(row.get("purchase_amount") or 0)
         redeem_amount = float(row.get("redeem_amount") or 0)
 
-        # Calculate cashflow: purchases = outflow, sells = inflow
-        if order_type == "purchase" or order_type == "buy":
+        if order_type in ("purchase", "buy"):
             cf = -purchase_amount
         elif order_type == "sell":
             cf = redeem_amount
@@ -836,19 +826,17 @@ def get_cashflows_action(entityid):
         if cf != 0:
             cashflows.append(cf)
             dates.append(order_date)
-
     if not cashflows:
         raise ValueError(f"No valid cashflows found for entityid={entityid} in tbl_action_table")
-
     return cashflows, dates
 
 
-# Direct Equity
+# -----------------------
+# Direct Equity Cashflows
+# -----------------------
 def get_cashflows_direct_equity(entityid):
     sql = """
-        SELECT trade_date::date AS trade_date,
-               order_type,
-               trade_price AS amount
+        SELECT trade_date::date AS trade_date, order_type, trade_price AS amount
         FROM tbl_direct_equity
         WHERE TRIM(UPPER(entityid)) = UPPER(%s)
         ORDER BY trade_date;
@@ -859,13 +847,13 @@ def get_cashflows_direct_equity(entityid):
 
     cashflows, dates = [], []
     for row in rows:
-        trade_date = row["trade_date"]
-        order_type = row["order_type"]
+        trade_date = row.get("trade_date")
+        order_type = str(row.get("order_type", "")).lower()
         amount = float(row.get("amount") or 0)
 
-        if order_type.lower() in ("buy", "purchase"):
+        if order_type in ("buy", "purchase"):
             cf = -amount
-        elif order_type.lower() in ("sell", "redemption"):
+        elif order_type in ("sell", "redemption"):
             cf = amount
         else:
             cf = 0
@@ -876,11 +864,12 @@ def get_cashflows_direct_equity(entityid):
     return cashflows, dates
 
 
-# AIF
+# -----------------------
+# AIF Cashflows
+# -----------------------
 def get_cashflows_aif(entityid):
     sql = """
-        SELECT trans_date::date AS trans_date,
-               contribution_amount
+        SELECT trans_date::date AS trans_date, contribution_amount
         FROM tbl_aif
         WHERE TRIM(UPPER(entityid)) = UPPER(%s)
         ORDER BY trans_date;
@@ -891,10 +880,10 @@ def get_cashflows_aif(entityid):
 
     cashflows, dates = [], []
     for row in rows:
-        trans_date = row["trans_date"]
+        trans_date = row.get("trans_date")
         contribution_amount = float(row.get("contribution_amount") or 0)
         if contribution_amount != 0:
-            cashflows.append(-contribution_amount)  # always outflow
+            cashflows.append(-contribution_amount)
             dates.append(trans_date)
     return cashflows, dates
 

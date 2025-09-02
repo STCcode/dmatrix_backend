@@ -877,24 +877,30 @@ def get_cashflows_direct_equity(entityid):
 
 def get_cashflows_aif(entityid):
     sql = """
-        SELECT action_date::date, action_type, commitment_amount, distribution_amount
+        SELECT trans_date::date, trans_type, amount_invested, contribution_amount, setup_expense, stamp_duty
         FROM tbl_aif
         WHERE TRIM(entityid) ILIKE %s
-        ORDER BY action_date
+        ORDER BY trans_date
     """
-    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
+    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid.strip(),))
     cashflows, dates = [], []
 
     for r in rows:
-        if not r["action_type"]:
-            continue
-        if r["action_type"].lower() == "commitment":
-            cashflows.append(-float(r.get("commitment_amount") or 0))
-        elif r["action_type"].lower() == "distribution":
-            cashflows.append(float(r.get("distribution_amount") or 0))
-        else:
-            continue
-        dates.append(r["action_date"])
+        trans_type = (r.get("trans_type") or "").strip().lower()
+
+        if trans_type in ("subscription", "commitment", "contribution"):
+            # Cash outflow → negative
+            amt = float(r.get("amount_invested") or 0)
+            if amt != 0:
+                cashflows.append(-amt)
+                dates.append(r["trans_date"])
+
+        elif trans_type in ("distribution", "redemption", "payout"):
+            # Cash inflow → positive (need correct column for inflow amount)
+            amt = float(r.get("distribution_amount") or 0)  # ⚠️ placeholder
+            if amt != 0:
+                cashflows.append(amt)
+                dates.append(r["trans_date"])
 
     return cashflows, dates
 

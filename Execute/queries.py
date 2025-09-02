@@ -824,6 +824,29 @@ def get_cashflows_action(entityid):
 
     return cashflows, dates
 
+# def get_cashflows_direct_equity(entityid):
+#     sql = "SELECT trade_date::date, order_type, net_total, net_amount_receivable FROM tbl_direct_equity WHERE TRIM(entityid) ILIKE %s ORDER BY trade_date;"
+#     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid.strip(),))
+
+#     cashflows, dates = [], []
+
+#     for r in rows:
+#         transaction_type = (r.get("order_type") or "").strip().lower()
+
+#         if transaction_type == "buy":
+#             amt = float(r.get("net_total") or 0)
+#             if amt > 0:
+#                 cashflows.append(-amt)
+#                 dates.append(r["trade_date"])
+
+#         elif transaction_type == "sell":
+#             amt = float(r.get("net_amount_receivable") or 0)
+#             if amt > 0:
+#                 cashflows.append(amt)
+#                 dates.append(r["trade_date"])
+
+#     return cashflows, dates
+
 def get_cashflows_direct_equity(entityid):
     sql = "SELECT trade_date::date, order_type, net_total, net_amount_receivable FROM tbl_direct_equity WHERE TRIM(entityid) ILIKE %s ORDER BY trade_date;"
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid.strip(),))
@@ -831,22 +854,22 @@ def get_cashflows_direct_equity(entityid):
     cashflows, dates = [], []
 
     for r in rows:
-        transaction_type = (r.get("order_type") or "").strip().lower()
+        order_type = (r.get("order_type") or "").strip().lower()
 
-        if transaction_type == "buy":
+        if order_type in ("purchase", "buy"):
+            # net_total is already negative in DB
             amt = float(r.get("net_total") or 0)
-            if amt > 0:
-                cashflows.append(-amt)
+            if amt != 0:
+                cashflows.append(amt)   # use as-is
                 dates.append(r["trade_date"])
 
-        elif transaction_type == "sell":
+        elif order_type in ("sell", "redeem", "redemption"):
             amt = float(r.get("net_amount_receivable") or 0)
-            if amt > 0:
-                cashflows.append(amt)
+            if amt != 0:
+                cashflows.append(amt)   # positive inflow
                 dates.append(r["trade_date"])
 
     return cashflows, dates
-
 
 
 

@@ -798,16 +798,15 @@ def get_cashflows_action(entityid):
     sql = """
         SELECT order_date::date, order_type, purchase_amount, redeem_amount
         FROM tbl_action_table
-        WHERE TRIM(entityid) ILIKE %s
+        WHERE TRIM(entityid) ILIKE TRIM(%s)
         ORDER BY order_date
     """
-    # ✅ Use %wildcard% so ILIKE works properly
-    rows = executeSql.ExecuteAllWithHeaders(sql, (f"%{entityid.strip()}%",))
-    
+    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid.strip(),))
+
     cashflows, dates = [], []
 
     for r in rows:
-        if not r.get("order_type"):   # safer null check
+        if not r.get("order_type"):
             continue
         order_type = r["order_type"].lower()
         if order_type == "purchase":

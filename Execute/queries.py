@@ -770,55 +770,60 @@ def getAllActionInstrument():
 
 
 
+
+
 # ======================================calculate Xirr (IRR)======================================
 
 # def get_cashflows_action(entityid):
-#     try:
-#         sql = """
-#             SELECT order_date, purchase_amount 
-#             FROM tbl_action_table 
-#             WHERE entityid = %s 
-#             ORDER BY order_date;
-#         """
-#         data = (entityid,)
-#         msgs = executeSql.ExecuteAllNew(sql, data)
+#     sql = """
+#         SELECT order_date::date, order_type, purchase_amount, redeem_amount
+#         FROM tbl_action_table
+#         WHERE TRIM(entityid) ILIKE TRIM(%s)
+#         ORDER BY order_date
+#     """
+#     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid.strip(),))
 
-#         if not msgs:   # no rows found
-#             return [], []
+#     cashflows, dates = [], []
 
-#         dates = [row[0] for row in msgs]
-#         cashflows = [-float(row[1]) for row in msgs]  # purchases as negative
-#         return cashflows, dates
+#     for r in rows:
+#         if not r.get("order_type"):
+#             continue
+#         order_type = r["order_type"].lower()
+#         if order_type == "purchase":
+#             cashflows.append(-float(r.get("purchase_amount") or 0))
+#         elif order_type == "sell":
+#             cashflows.append(float(r.get("redeem_amount") or 0))
+#         else:
+#             continue
+#         dates.append(r["order_date"])
 
-#     except Exception as e:
-#         print("Error in get_cashflows_action =================", e)
-#         return [], []
+#     return cashflows, dates
 
 def get_cashflows_action(entityid):
     sql = """
-        SELECT order_date::date, order_type, purchase_amount, redeem_amount
+        SELECT order_date::date, TRIM(LOWER(order_type)) AS order_type,
+               purchase_amount, redeem_amount
         FROM tbl_action_table
-        WHERE TRIM(entityid) ILIKE TRIM(%s)
+        WHERE TRIM(entityid) ILIKE %s
         ORDER BY order_date
     """
-    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid.strip(),))
+    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
 
     cashflows, dates = [], []
-
     for r in rows:
-        if not r.get("order_type"):
-            continue
-        order_type = r["order_type"].lower()
-        if order_type == "purchase":
-            cashflows.append(-float(r.get("purchase_amount") or 0))
-        elif order_type == "sell":
-            cashflows.append(float(r.get("redeem_amount") or 0))
-        else:
-            continue
-        dates.append(r["order_date"])
+        order_type = (r.get("order_type") or "").strip().lower()
+        if order_type in ("purchase", "buy"):  # cover synonyms
+            amt = float(r.get("purchase_amount") or 0)
+            if amt > 0:
+                cashflows.append(-amt)
+                dates.append(r["order_date"])
+        elif order_type in ("sell", "redeem", "redemption"):  # cover synonyms
+            amt = float(r.get("redeem_amount") or 0)
+            if amt > 0:
+                cashflows.append(amt)
+                dates.append(r["order_date"])
 
     return cashflows, dates
-
 
 def get_cashflows_direct_equity(entityid):
     sql = """

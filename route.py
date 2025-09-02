@@ -6,12 +6,14 @@ import time
 from datetime import datetime as dt,date
 import yaml
 # import platform
+from json_custom import init_json
 import os
 
 print(os.getcwd())
 
 app = Flask(__name__)
 CORS(app)
+init_json(app)  # ✅ enable custom JSON globally
 app.secret_key = 'super secret key'
 
 db = yaml.full_load(open('db.yaml'))

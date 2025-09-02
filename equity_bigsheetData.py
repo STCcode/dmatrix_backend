@@ -105,6 +105,16 @@ def main():
             left_on="isin",
             right_on=tag_isin
         ).drop(columns=[tag_isin])
+
+         # 🔹 Normalize tag values (case-insensitive)
+        merged["tag"] = merged["tag"].str.lower().str.strip()
+        tag_map = {
+            "lcap": "large cap",
+            "scap": "small cap",
+            "mcap": "mid cap"
+        }
+        merged["tag"] = merged["tag"].map(tag_map).fillna("small cap")
+
     else:
         print("⚠️ 'tag' column not found in bigsheet_with_tags.xlsx")
 

@@ -812,13 +812,18 @@ def get_cashflows_action(entityid):
     cashflows, dates = [], []
     for r in rows:
         order_type = (r.get("order_type") or "").strip().lower()
-        if order_type in ("purchase", "buy"):  # cover synonyms
+
+        if order_type in ("purchase", "buy"):
             amt = float(r.get("purchase_amount") or 0)
             if amt > 0:
                 cashflows.append(-amt)
                 dates.append(r["order_date"])
-        elif order_type in ("sell", "redeem", "redemption"):  # cover synonyms
+
+        elif order_type in ("sell", "redeem", "redemption"):
+            # first try redeem_amount, but if it's 0 and purchase_amount > 0, use that
             amt = float(r.get("redeem_amount") or 0)
+            if amt <= 0:
+                amt = float(r.get("purchase_amount") or 0)
             if amt > 0:
                 cashflows.append(amt)
                 dates.append(r["order_date"])

@@ -1760,7 +1760,7 @@ def format_irr_response(cashflows, dates):
             "total_redemption": 0
         }
 
-    irr = calculate_xirr(cashflows, dates)
+    irr = calculate_irr(cashflows, dates)
     return {
         "annualized_irr_percent": round(irr * 100, 2) if irr is not None else None,
         "total_invested": round(-sum(cf for cf in cashflows if cf < 0), 2),

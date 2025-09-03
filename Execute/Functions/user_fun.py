@@ -1731,7 +1731,7 @@ def calculate_xirr(cashflows, dates, guess=0.1):
         f_derivative = d_npv(rate)
 
         if abs(f_value) < 1e-6:  # Converged
-            return round(rate * 100, 2)
+            return round(rate * 100, 2)  # return % directly
 
         if f_derivative == 0:
             break  # Avoid divide by zero
@@ -1742,65 +1742,34 @@ def calculate_xirr(cashflows, dates, guess=0.1):
     try:
         irr = np.irr(amounts)
         if irr is not None:
-            return round(irr * 100, 2)
+            return round(irr * 100, 2)  # return % directly
     except Exception:
         pass
 
     return None
 
 
-# --- Robust XIRR Calculation ---
-# def calculate_irr(cashflows, dates):
-#     if not cashflows or not dates or len(cashflows) != len(dates):
-#         return None
+def format_irr_response(cashflows, dates, code="1023200", entityid=None):
+    if not cashflows or not dates:
+        return {
+            "code": code,
+            "annualized_irr_percent": 0.0,
+            "total_invested": 0,
+            "total_redemption": 0,
+            "entityid": entityid,
+            "successmsgs": "No cashflows found"
+        }
 
-#     # Convert to numpy datetime64
-#     try:
-#         amounts = np.array(cashflows, dtype=float)
-#         d0 = dates[0]
-#         days = np.array([(d - d0).days for d in dates], dtype=float)
+    irr = calculate_xirr(cashflows, dates)
 
-#         # Define XNPV
-#         def xnpv(rate):
-#             return np.sum(amounts / (1 + rate) ** (days / 365.0))
-
-#         # Define XIRR
-#         def xirr():
-#             try:
-#                 from scipy.optimize import newton
-#                 return newton(lambda r: xnpv(r), 0.1)
-#             except Exception:
-#                 # fallback: brute force search
-#                 rates = np.linspace(-0.9999, 5, 10000)  # from -100% to 500%
-#                 values = [xnpv(r) for r in rates]
-#                 # find sign change
-#                 for i in range(len(values) - 1):
-#                     if values[i] * values[i+1] < 0:
-#                         return rates[i]
-#                 return None
-
-#         irr = xirr()
-#         return round(irr * 100, 2) if irr is not None else None
-
-#     except Exception as e:
-#         print("Error in calculate_irr:", e)
-#         return None
-
-
-# def format_irr_response(cashflows, dates):
-#     if not cashflows or not dates:
-#         return {
-#             "annualized_irr_percent": None,
-#             "total_invested": 0,
-#             "total_redemption": 0
-#         }
-
-#     irr = calculate_irr(cashflows, dates)
-#     return {
-#         "annualized_irr_percent": round(irr * 100, 2) if irr is not None else None,
-#         "total_invested": round(-sum(cf for cf in cashflows if cf < 0), 2),
-#         "total_redemption": round(sum(cf for cf in cashflows if cf > 0), 2)
-#     }
+    return {
+        "code": code,
+        "annualized_irr_percent": irr if irr is not None else 0.0,  # already %
+        "total_invested": round(-sum(cf for cf in cashflows if cf < 0), 2),
+        "total_redemption": round(sum(cf for cf in cashflows if cf > 0), 2),
+        "entityid": entityid,
+        "successmsgs": "Fetching Successfully"
+    }
 
 # -------------------- Endpoints --------------------
 def getActionIRR():

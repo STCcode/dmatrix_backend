@@ -1717,7 +1717,7 @@ def calculate_xirr(cashflows, dates, guess=0.1):
     years = days / 365.0
     amounts = np.array(cashflows, dtype=float)
 
-    # Define NPV and its derivative
+    # Define NPV and derivative
     def npv(rate):
         return np.sum(amounts / (1 + rate) ** years)
 
@@ -1730,45 +1730,49 @@ def calculate_xirr(cashflows, dates, guess=0.1):
         f_value = npv(rate)
         f_derivative = d_npv(rate)
 
-        if abs(f_value) < 1e-6:  # Converged
-            return round(rate * 100, 2)  # return % directly
+        if abs(f_value) < 1e-6:  # converged
+            return round(rate * 100, 2)
 
         if f_derivative == 0:
-            break  # Avoid divide by zero
+            break
 
         rate -= f_value / f_derivative
 
-    # If Newton-Raphson didn’t converge, fall back to numpy.irr
+    # Fallback: numpy.irr (may be deprecated in new numpy versions)
     try:
         irr = np.irr(amounts)
         if irr is not None:
-            return round(irr * 100, 2)  # return % directly
+            return round(irr * 100, 2)
     except Exception:
         pass
 
     return None
 
 
-def format_irr_response(cashflows, dates, code="1023200", entityid=None):
+def format_irr_response(cashflows, dates):
     if not cashflows or not dates:
         return {
-            "code": code,
             "annualized_irr_percent": 0.0,
+            "simple_return_percent": 0.0,
             "total_invested": 0,
-            "total_redemption": 0,
-            "entityid": entityid,
-            "successmsgs": "No cashflows found"
+            "total_redemption": 0
         }
 
     irr = calculate_xirr(cashflows, dates)
 
+    total_invested = -sum(cf for cf in cashflows if cf < 0)  # outflows
+    total_redemption = sum(cf for cf in cashflows if cf > 0)  # inflows
+
+    # Simple return = (total inflow - total outflow) / total outflow
+    simple_return = None
+    if total_invested > 0:
+        simple_return = ((total_redemption - total_invested) / total_invested) * 100
+
     return {
-        "code": code,
-        "annualized_irr_percent": irr if irr is not None else 0.0,  # already %
-        "total_invested": round(-sum(cf for cf in cashflows if cf < 0), 2),
-        "total_redemption": round(sum(cf for cf in cashflows if cf > 0), 2),
-        "entityid": entityid,
-        "successmsgs": "Fetching Successfully"
+        "annualized_irr_percent": irr if irr is not None else 0.0,
+        "simple_return_percent": round(simple_return, 2) if simple_return is not None else 0.0,
+        "total_invested": round(total_invested, 2),
+        "total_redemption": round(total_redemption, 2)
     }
 
 # -------------------- Endpoints --------------------

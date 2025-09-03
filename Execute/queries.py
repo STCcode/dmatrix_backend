@@ -858,29 +858,31 @@ def get_cashflows_action(entityid):
 #     return cashflows, dates
 
 def get_cashflows_direct_equity(entityid):
-    sql = "SELECT trade_date::date, order_type, net_total, net_amount_receivable FROM tbl_direct_equity WHERE TRIM(entityid) ILIKE %s ORDER BY trade_date;"
+    sql = """
+        SELECT trade_date::date, order_type, net_total, net_amount_receivable
+        FROM tbl_direct_equity
+        WHERE TRIM(entityid) ILIKE %s
+        ORDER BY trade_date;
+    """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid.strip(),))
-
     cashflows, dates = [], []
 
     for r in rows:
         order_type = (r.get("order_type") or "").strip().lower()
 
-        if order_type in ("purchase", "buy"):
-            # net_total is already negative in DB
+        if order_type == "buy":
             amt = float(r.get("net_total") or 0)
-            if amt != 0:
-                cashflows.append(amt)   # use as-is
+            if amt > 0:
+                cashflows.append(-amt)       # Outflow
                 dates.append(r["trade_date"])
 
-        elif order_type in ("sell", "redeem", "redemption"):
+        elif order_type == "sell":
             amt = float(r.get("net_amount_receivable") or 0)
-            if amt != 0:
-                cashflows.append(amt)   # positive inflow
+            if amt > 0:
+                cashflows.append(amt)        # Inflow
                 dates.append(r["trade_date"])
 
     return cashflows, dates
-
 
 
 

@@ -4,6 +4,7 @@ from datetime import  date, datetime, time
 from werkzeug.utils import secure_filename
 import wheel
 import pandas
+import numpy as np
 import os
 import json 
 from scipy.optimize import newton 
@@ -1700,17 +1701,57 @@ def getAllActionInstrument():
 
 # Calculate XIRR
 # -------------------- Core IRR Calculation --------------------
-def calculate_xirr(cashflows, dates, guess=0.1):
+# def calculate_xirr(cashflows, dates, guess=0.1):
+#     if not cashflows or not dates or len(cashflows) != len(dates):
+#         return None
+#     d0 = dates[0]
+
+#     def xnpv(rate):
+#         return sum(cf / (1 + rate) ** ((d - d0).days / 365) for cf, d in zip(cashflows, dates))
+
+#     try:
+#         return newton(lambda r: xnpv(r), guess)
+#     except Exception:
+#         return None
+
+import numpy as np
+from datetime import date
+
+# --- Robust XIRR Calculation ---
+def calculate_irr(cashflows, dates):
     if not cashflows or not dates or len(cashflows) != len(dates):
         return None
-    d0 = dates[0]
 
-    def xnpv(rate):
-        return sum(cf / (1 + rate) ** ((d - d0).days / 365) for cf, d in zip(cashflows, dates))
-
+    # Convert to numpy datetime64
     try:
-        return newton(lambda r: xnpv(r), guess)
-    except Exception:
+        amounts = np.array(cashflows, dtype=float)
+        d0 = dates[0]
+        days = np.array([(d - d0).days for d in dates], dtype=float)
+
+        # Define XNPV
+        def xnpv(rate):
+            return np.sum(amounts / (1 + rate) ** (days / 365.0))
+
+        # Define XIRR
+        def xirr():
+            try:
+                from scipy.optimize import newton
+                return newton(lambda r: xnpv(r), 0.1)
+            except Exception:
+                # fallback: brute force search
+                rates = np.linspace(-0.9999, 5, 10000)  # from -100% to 500%
+                values = [xnpv(r) for r in rates]
+                # find sign change
+                for i in range(len(values) - 1):
+                    if values[i] * values[i+1] < 0:
+                        return rates[i]
+                return None
+
+        irr = xirr()
+        return round(irr * 100, 2) if irr is not None else None
+
+    except Exception as e:
+        print("Error in calculate_irr:", e)
         return None
 
 

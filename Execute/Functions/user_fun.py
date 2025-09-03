@@ -1718,7 +1718,7 @@ import numpy as np
 from datetime import date
 
 # --- Robust XIRR Calculation ---
-def calculate_irr(cashflows, dates):
+def calculate_xirr(cashflows, dates):
     if not cashflows or not dates or len(cashflows) != len(dates):
         return None
 

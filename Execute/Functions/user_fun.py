@@ -1701,7 +1701,7 @@ def getAllActionInstrument():
 
 # Calculate XIRR
 # -------------------- Core IRR Calculation --------------------
-
+# import numpy as np
 
 def calculate_xirr(cashflows, dates, guess=0.1):
     """
@@ -1748,6 +1748,7 @@ def calculate_xirr(cashflows, dates, guess=0.1):
 
     return None
 
+
 # --- Robust XIRR Calculation ---
 # def calculate_irr(cashflows, dates):
 #     if not cashflows or not dates or len(cashflows) != len(dates):
@@ -1786,20 +1787,20 @@ def calculate_xirr(cashflows, dates, guess=0.1):
 #         return None
 
 
-def format_irr_response(cashflows, dates):
-    if not cashflows or not dates:
-        return {
-            "annualized_irr_percent": None,
-            "total_invested": 0,
-            "total_redemption": 0
-        }
+# def format_irr_response(cashflows, dates):
+#     if not cashflows or not dates:
+#         return {
+#             "annualized_irr_percent": None,
+#             "total_invested": 0,
+#             "total_redemption": 0
+#         }
 
-    irr = calculate_irr(cashflows, dates)
-    return {
-        "annualized_irr_percent": round(irr * 100, 2) if irr is not None else None,
-        "total_invested": round(-sum(cf for cf in cashflows if cf < 0), 2),
-        "total_redemption": round(sum(cf for cf in cashflows if cf > 0), 2)
-    }
+#     irr = calculate_irr(cashflows, dates)
+#     return {
+#         "annualized_irr_percent": round(irr * 100, 2) if irr is not None else None,
+#         "total_invested": round(-sum(cf for cf in cashflows if cf < 0), 2),
+#         "total_redemption": round(sum(cf for cf in cashflows if cf > 0), 2)
+#     }
 
 # -------------------- Endpoints --------------------
 def getActionIRR():

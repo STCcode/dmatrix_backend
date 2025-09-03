@@ -1715,7 +1715,7 @@ def getAllActionInstrument():
 #         return None
 
 # --- Robust XIRR Calculation ---
-def calculate_xirr(cashflows, dates):
+def calculate_irr(cashflows, dates):
     if not cashflows or not dates or len(cashflows) != len(dates):
         return None
 

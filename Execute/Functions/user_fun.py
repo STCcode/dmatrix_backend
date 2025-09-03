@@ -1714,9 +1714,6 @@ def getAllActionInstrument():
 #     except Exception:
 #         return None
 
-import numpy as np
-from datetime import date
-
 # --- Robust XIRR Calculation ---
 def calculate_xirr(cashflows, dates):
     if not cashflows or not dates or len(cashflows) != len(dates):

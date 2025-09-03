@@ -1701,55 +1701,89 @@ def getAllActionInstrument():
 
 # Calculate XIRR
 # -------------------- Core IRR Calculation --------------------
-# def calculate_xirr(cashflows, dates, guess=0.1):
-#     if not cashflows or not dates or len(cashflows) != len(dates):
-#         return None
-#     d0 = dates[0]
 
-#     def xnpv(rate):
-#         return sum(cf / (1 + rate) ** ((d - d0).days / 365) for cf, d in zip(cashflows, dates))
 
-#     try:
-#         return newton(lambda r: xnpv(r), guess)
-#     except Exception:
-#         return None
-
-# --- Robust XIRR Calculation ---
-def calculate_irr(cashflows, dates):
+def calculate_xirr(cashflows, dates, guess=0.1):
+    """
+    Calculate XIRR (annualized IRR) that can be positive or negative.
+    cashflows: list of amounts (negative for investments, positive for redemptions)
+    dates: list of datetime objects corresponding to cashflows
+    """
     if not cashflows or not dates or len(cashflows) != len(dates):
         return None
 
-    # Convert to numpy datetime64
+    # Convert dates to year fractions relative to first date
+    days = np.array([(d - dates[0]).days for d in dates], dtype=float)
+    years = days / 365.0
+    amounts = np.array(cashflows, dtype=float)
+
+    # Define NPV and its derivative
+    def npv(rate):
+        return np.sum(amounts / (1 + rate) ** years)
+
+    def d_npv(rate):
+        return np.sum(-years * amounts / (1 + rate) ** (years + 1))
+
+    # Newton-Raphson iteration
+    rate = guess
+    for _ in range(100):
+        f_value = npv(rate)
+        f_derivative = d_npv(rate)
+
+        if abs(f_value) < 1e-6:  # Converged
+            return round(rate * 100, 2)
+
+        if f_derivative == 0:
+            break  # Avoid divide by zero
+
+        rate -= f_value / f_derivative
+
+    # If Newton-Raphson didn’t converge, fall back to numpy.irr
     try:
-        amounts = np.array(cashflows, dtype=float)
-        d0 = dates[0]
-        days = np.array([(d - d0).days for d in dates], dtype=float)
+        irr = np.irr(amounts)
+        if irr is not None:
+            return round(irr * 100, 2)
+    except Exception:
+        pass
 
-        # Define XNPV
-        def xnpv(rate):
-            return np.sum(amounts / (1 + rate) ** (days / 365.0))
+    return None
 
-        # Define XIRR
-        def xirr():
-            try:
-                from scipy.optimize import newton
-                return newton(lambda r: xnpv(r), 0.1)
-            except Exception:
-                # fallback: brute force search
-                rates = np.linspace(-0.9999, 5, 10000)  # from -100% to 500%
-                values = [xnpv(r) for r in rates]
-                # find sign change
-                for i in range(len(values) - 1):
-                    if values[i] * values[i+1] < 0:
-                        return rates[i]
-                return None
+# --- Robust XIRR Calculation ---
+# def calculate_irr(cashflows, dates):
+#     if not cashflows or not dates or len(cashflows) != len(dates):
+#         return None
 
-        irr = xirr()
-        return round(irr * 100, 2) if irr is not None else None
+#     # Convert to numpy datetime64
+#     try:
+#         amounts = np.array(cashflows, dtype=float)
+#         d0 = dates[0]
+#         days = np.array([(d - d0).days for d in dates], dtype=float)
 
-    except Exception as e:
-        print("Error in calculate_irr:", e)
-        return None
+#         # Define XNPV
+#         def xnpv(rate):
+#             return np.sum(amounts / (1 + rate) ** (days / 365.0))
+
+#         # Define XIRR
+#         def xirr():
+#             try:
+#                 from scipy.optimize import newton
+#                 return newton(lambda r: xnpv(r), 0.1)
+#             except Exception:
+#                 # fallback: brute force search
+#                 rates = np.linspace(-0.9999, 5, 10000)  # from -100% to 500%
+#                 values = [xnpv(r) for r in rates]
+#                 # find sign change
+#                 for i in range(len(values) - 1):
+#                     if values[i] * values[i+1] < 0:
+#                         return rates[i]
+#                 return None
+
+#         irr = xirr()
+#         return round(irr * 100, 2) if irr is not None else None
+
+#     except Exception as e:
+#         print("Error in calculate_irr:", e)
+#         return None
 
 
 def format_irr_response(cashflows, dates):

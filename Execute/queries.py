@@ -600,7 +600,7 @@ def getallDirectdata():
 
 def getdirectByentId(entity_id):
     try:
-        sql = "SELECT * FROM get_direct_equity_fifo() WHERE entityid = %s ORDER BY trade_date, trade_id;"
+        sql = "SELECT * FROM tbl_direct_equity WHERE entityid = %s;"
         data = (entity_id,)  # tuple, not set
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs
@@ -631,7 +631,7 @@ def getDirectEquityByid(entity_id):
 
 def getDEDetailActionTable(entity_id):
     try:
-        sql = "SELECT * FROM tbl_direct_equity  WHERE entityid = %s;"
+        sql = "SELECT * FROM get_direct_equity_fifo() WHERE entityid = %s ORDER BY trade_date, trade_id;"
         data = (entity_id,)  # tuple, not set
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs

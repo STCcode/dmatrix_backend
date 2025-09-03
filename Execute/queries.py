@@ -621,7 +621,7 @@ def getAllActionTableOfDirectEquity():
      
 def getDirectEquityByid(entity_id):
     try:
-        sql = "SELECT * FROM tbl_direct_equity  WHERE entityid = %s;"
+        sql = "SELECT * FROM tbl_entity WHERE entityid = %s;"
         data = (entity_id,)  # tuple, not set
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs

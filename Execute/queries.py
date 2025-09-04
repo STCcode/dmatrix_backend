@@ -540,13 +540,12 @@ def getAifActionTablebyId (entity_id):
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
 
 
-def getAifEntity(entity_id):
+def getAifEntity():
      try:
-        sql="SELECT * FROM tbl_entity WHERE entityid = %s;"
+        sql=" SELECT * FROM tbl_entity WHERE category ILIKE 'Equity' AND subcategory ILIKE 'Alternative Investment Funds';"
         #   sql="SELECT e.*, a.* FROM tbl_entity e LEFT JOIN tbl_aif a ON e.entityid = a.entityid  WHERE e.category ILIKE 'Equity' AND e.subcategory ILIKE 'Alternative Investment Funds';"
 
-        #   data=''
-        data = (entity_id,)  # tuple, not set
+        data=''
         msgs=executeSql.ExecuteAllNew(sql,data)
         return msgs
      except Exception as e:

@@ -536,18 +536,19 @@ def getAifActionTablebyId (entity_id):
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs
     except Exception as e:
-        print("Error in getting underlying by id query:", e)
+        print("Error in getting underlying by id query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
 
 
-def getAifEntity():
+def getAifEntity(entity_id):
      try:
-          sql="SELECT * FROM tbl_entity WHERE entityid = %s;"
+        sql="SELECT * FROM tbl_entity WHERE entityid = %s;"
         #   sql="SELECT e.*, a.* FROM tbl_entity e LEFT JOIN tbl_aif a ON e.entityid = a.entityid  WHERE e.category ILIKE 'Equity' AND e.subcategory ILIKE 'Alternative Investment Funds';"
 
-          data=''
-          msgs=executeSql.ExecuteAllNew(sql,data)
-          return msgs
+        #   data=''
+        data = (entity_id,)  # tuple, not set
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')      

@@ -12,7 +12,16 @@ def query_msgs(msg):
                 return msg
 
 def exs_msgs(data,msg,code):
-        return jsonify({"data":data,"successmsgs":msg,"code":code})   
+        return jsonify({"data":data,"successmsgs":msg,"code":code}) 
+
+
+def exs_msgs(success_msg, response, code):
+    return {
+        "success": True,
+        "message": success_msg,
+        "response": response,
+        "code": code
+    }
 
 ''' def insert_msgs(msg):
     return jsonify({"successmsgs":responses.insert_200})

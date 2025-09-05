@@ -468,17 +468,6 @@ def ClearUnderlyingdata(entity_id):
 
 # ==============================bigsheet Table Start =======================================   
     
-# def getCamByid():
-#      try:
-#           sql="SELECT * FROM tbl_underlying"
-#           data=''
-#           msgs=executeSql.ExecuteAllNew(sql,data)
-#           return msgs
-#      except Exception as e:
-#           print("Error in getingroleRecord query==========================",e)
-#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
-   
-
 
 def getCamByid(company_name=None):
     try:
@@ -490,7 +479,9 @@ def getCamByid(company_name=None):
           return msgs
     except Exception as e:
         print("Error in getCamByid query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310')   
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310') 
+
+
 # ==============================bigsheet Table End =======================================
 
 
@@ -561,7 +552,7 @@ def getAifEntity():
 # ==================================== ETF Table Start==================================
 def InsertEtfData(data):
     try:
-        sql = " INSERT INTO tbl_etf_action (entityid, order_number, order_time, trade_number, trade_time, security_description, order_type, quantity, gross_rate, trade_price_per_unit, brokerage_per_unit, net_rate_per_unit, closing_rate, gst, stt, net_total_before_levies, remarks, created_at) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        sql = " INSERT INTO tbl_etf_action (entityid, order_number, order_time, trade_number, trade_time, security_description, order_type, quantity, gross_rate, trade_price_per_unit, brokerage_per_unit, net_rate_per_unit, closing_rate, gst, stt, net_total_before_levies, remarks, created_at) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s, %s, %s)"
         msg = executeSql.ExecuteOne(sql, data)
         return msg
     except Exception as e:

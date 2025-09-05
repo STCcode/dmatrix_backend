@@ -558,6 +558,72 @@ def getAifEntity():
 
 
 
+# ==================================== ETF Table Start==================================
+def InsertEtfData(data):
+    try:
+        sql = " INSERT INTO tbl_etf_action (entityid, order_number, order_time, trade_number, trade_time, security_description, order_type, quantity, gross_rate, trade_price_per_unit, brokerage_per_unit, net_rate_per_unit, closing_rate, gst, stt, net_total_before_levies, remarks, created_at) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        msg = executeSql.ExecuteOne(sql, data)
+        return msg
+    except Exception as e:
+        print("Error in save_user query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
+    
+
+
+
+# def insertNavData(data):
+#     try:
+#         sql = " INSERT INTO tbl_aif_nav (entityid, pre_tax_nav, post_tax_nav, nav_date, created_at) VALUES (%s, %s, %s, %s, %s)"
+#         msg = executeSql.ExecuteOne(sql, data)
+#         return msg
+#     except Exception as e:
+#         print("Error in save_user query==========================", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')    
+    
+
+# def getAllAif():
+#      try:
+#           # sql="SELECT * FROM tbl_entity WHERE category ILIKE 'Equity' AND subcategory ILIKE 'AIF';"
+#           sql="SELECT * FROM tbl_aif;"
+
+#           data=''
+#           msgs=executeSql.ExecuteAllNew(sql,data)
+#           return msgs
+#      except Exception as e:
+#           print("Error in getingroleRecord query==========================",e)
+#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+     
+# def getAifActionTablebyId (entity_id):
+#     try:
+#         sql = "SELECT * FROM tbl_aif WHERE entityid = %s;"
+#         data = (entity_id,)  # tuple, not set
+#         msgs = executeSql.ExecuteAllNew(sql, data)
+#         return msgs
+#     except Exception as e:
+#         print("Error in getting underlying by id query==========================", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
+
+
+# def getAifEntity():
+#      try:
+#         sql=" SELECT * FROM tbl_entity WHERE category ILIKE 'Equity' AND subcategory ILIKE 'Alternative Investment Funds';"
+#         #   sql="SELECT e.*, a.* FROM tbl_entity e LEFT JOIN tbl_aif a ON e.entityid = a.entityid  WHERE e.category ILIKE 'Equity' AND e.subcategory ILIKE 'Alternative Investment Funds';"
+
+#         data=''
+#         msgs=executeSql.ExecuteAllNew(sql,data)
+#         return msgs
+#      except Exception as e:
+#           print("Error in getingroleRecord query==========================",e)
+#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')      
+
+
+
+# ==================================== ETF Table End====================================
+
+
+
+
+
 # ====================================Direct table start============================
 # def Insert_directData(data):
 #     try:

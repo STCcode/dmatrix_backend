@@ -155,6 +155,19 @@ def ExecuteReturn(query, data):
 
 
 # INSERT/UPDATE/DELETE one record (no return)
+# def ExecuteOne(query, data):
+#     try:
+#         conn = get_db_connection()
+#         cur = conn.cursor()
+#         cur.execute(query, data)
+#         conn.commit()
+#         cur.close()
+#         conn.close()
+#         return responses.execution_200
+#     except Exception as e:
+#         print("Error in ExecuteOne==============================", e)
+#         return middleware.exe_msgs(responses.execution_501, str(e.args), '1020300')
+
 def ExecuteOne(query, data):
     try:
         conn = get_db_connection()
@@ -163,10 +176,12 @@ def ExecuteOne(query, data):
         conn.commit()
         cur.close()
         conn.close()
-        return responses.execution_200
+        return {"status": responses.execution_200}   # plain dict
     except Exception as e:
         print("Error in ExecuteOne==============================", e)
-        return middleware.exe_msgs(responses.execution_501, str(e.args), '1020300')
+        # return dict, not Response
+        return {"status": responses.execution_501, "error": str(e)}
+
     
 def FetchOne(query, data=None):
     try:

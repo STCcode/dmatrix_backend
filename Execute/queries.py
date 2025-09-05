@@ -560,42 +560,29 @@ def InsertEtfData(data):
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
     
 
+def getAllEtf():
+     try:
+          sql="SELECT * FROM tbl_etf_action;"
 
-
-# def insertNavData(data):
-#     try:
-#         sql = " INSERT INTO tbl_aif_nav (entityid, pre_tax_nav, post_tax_nav, nav_date, created_at) VALUES (%s, %s, %s, %s, %s)"
-#         msg = executeSql.ExecuteOne(sql, data)
-#         return msg
-#     except Exception as e:
-#         print("Error in save_user query==========================", e)
-#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')    
-    
-
-# def getAllAif():
-#      try:
-#           # sql="SELECT * FROM tbl_entity WHERE category ILIKE 'Equity' AND subcategory ILIKE 'AIF';"
-#           sql="SELECT * FROM tbl_aif;"
-
-#           data=''
-#           msgs=executeSql.ExecuteAllNew(sql,data)
-#           return msgs
-#      except Exception as e:
-#           print("Error in getingroleRecord query==========================",e)
-#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+          data=''
+          msgs=executeSql.ExecuteAllNew(sql,data)
+          return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
      
-# def getAifActionTablebyId (entity_id):
-#     try:
-#         sql = "SELECT * FROM tbl_aif WHERE entityid = %s;"
-#         data = (entity_id,)  # tuple, not set
-#         msgs = executeSql.ExecuteAllNew(sql, data)
-#         return msgs
-#     except Exception as e:
-#         print("Error in getting underlying by id query==========================", e)
-#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
+def getEtfActionTablebyId (entity_id):
+    try:
+        sql = "SELECT * FROM tbl_etf_action WHERE entityid = %s;"
+        data = (entity_id,)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
 
 
-# def getAifEntity():
+# def getEtfEntity():
 #      try:
 #         sql=" SELECT * FROM tbl_entity WHERE category ILIKE 'Equity' AND subcategory ILIKE 'Alternative Investment Funds';"
 #         #   sql="SELECT e.*, a.* FROM tbl_entity e LEFT JOIN tbl_aif a ON e.entityid = a.entityid  WHERE e.category ILIKE 'Equity' AND e.subcategory ILIKE 'Alternative Investment Funds';"

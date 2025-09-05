@@ -166,12 +166,10 @@ app.add_url_rule('/delete_entity_data',view_func=user_fun.delete_entity_data,met
 #=======================================ETF Table Start====================================
 
 app.add_url_rule('/insertEtfActionTable',view_func=user_fun.InsertEtfData,methods=['GET','POST'])
-# app.add_url_rule('/getAllAif',view_func=user_fun.getAllAif,methods=['GET','POST'])
-# app.add_url_rule('/getAifActionTablebyId',view_func=user_fun.getAifActionTablebyId,methods=['GET','POST'])
+app.add_url_rule('/getAllEtf',view_func=user_fun.getAllEtf,methods=['GET','POST'])
+app.add_url_rule('/getEtfActionTablebyId',view_func=user_fun.getEtfActionTablebyId,methods=['GET','POST'])
 
 # app.add_url_rule('/getAifEntity',view_func=user_fun.getAifEntity,methods=['GET','POST'])
-
-# app.add_url_rule('/insertNavData' ,view_func=user_fun.insertNavData,methods=['GET','POST'])
 
 # ======================================ETF Table End======================================
 

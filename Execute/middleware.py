@@ -15,13 +15,20 @@ def exs_msgs(data,msg,code):
         return jsonify({"data":data,"successmsgs":msg,"code":code}) 
 
 
-def exs_msgs(success_msg, response, code):
-    return {
-        "success": True,
-        "message": success_msg,
-        "response": response,
-        "code": code
-    }
+# def exs_msgs(result, success_msg, code):
+#     if isinstance(result, dict) and "error" in result:
+#         return {
+#             "success": False,
+#             "message": result,
+#             "code": "1020500"
+#         }
+#     return {
+#         "success": True,
+#         "message": success_msg,
+#         "response": result,
+#         "code": code
+#     }
+
 
 ''' def insert_msgs(msg):
     return jsonify({"successmsgs":responses.insert_200})

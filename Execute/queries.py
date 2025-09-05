@@ -582,17 +582,17 @@ def getEtfActionTablebyId (entity_id):
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
 
 
-# def getEtfEntity():
-#      try:
-#         sql=" SELECT * FROM tbl_entity WHERE category ILIKE 'Equity' AND subcategory ILIKE 'Alternative Investment Funds';"
-#         #   sql="SELECT e.*, a.* FROM tbl_entity e LEFT JOIN tbl_aif a ON e.entityid = a.entityid  WHERE e.category ILIKE 'Equity' AND e.subcategory ILIKE 'Alternative Investment Funds';"
+def getEtfEntity():
+     try:
+        sql=" SELECT * FROM tbl_entity WHERE category ILIKE 'Commodities' AND subcategory ILIKE 'ETF';"
+        #   sql="SELECT e.*, a.* FROM tbl_entity e LEFT JOIN tbl_aif a ON e.entityid = a.entityid  WHERE e.category ILIKE 'Equity' AND e.subcategory ILIKE 'Alternative Investment Funds';"
 
-#         data=''
-#         msgs=executeSql.ExecuteAllNew(sql,data)
-#         return msgs
-#      except Exception as e:
-#           print("Error in getingroleRecord query==========================",e)
-#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')      
+        data=''
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')      
 
 
 

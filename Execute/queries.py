@@ -382,13 +382,7 @@ def ClearUnderlyingdata(entity_id):
         if underlying_exists:
             # Case A: entityid exists in tbl_underlying → delete it
             delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
-            conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute(delete_sql, (entity_id,))
-            rows_deleted = cur.rowcount   # <-- actual number of rows deleted
-            conn.commit()
-            cur.close()
-            conn.close()
+            rows_deleted = executeSql.ExecuteAll(delete_sql, (entity_id,))   # use your existing DML executor
 
             result_summary["action"] = "deleted"
             result_summary["rows_affected"] = rows_deleted
@@ -413,14 +407,7 @@ def ClearUnderlyingdata(entity_id):
                     FROM tbl_entity
                     WHERE entityid = %s
                 """
-                conn = get_db_connection()
-                cur = conn.cursor()
-                cur.execute(insert_sql, (entity_id,))
-                rows_inserted = cur.rowcount
-                conn.commit()
-                cur.close()
-                conn.close()
-
+                rows_inserted = executeSql.ExecuteQuery(insert_sql, (entity_id,))
                 result_summary["action"] = "inserted"
                 result_summary["rows_affected"] = rows_inserted
             else:

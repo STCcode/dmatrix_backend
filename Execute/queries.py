@@ -327,41 +327,6 @@ def getUnderlyingByMf():
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')  
 
-
-# def ClearUnderlyingdata(entity_id):
-#     try:
-#         sql = "DELETE FROM tbl_underlying WHERE id = %s"
-#         data = (entity_id,) 
-#         deleted_count = executeSql.ExecuteReturnId(sql, data) 
-#         return deleted_count
-#     except Exception as e:
-#         print("Error in DeleteUnderlyingByid query:", e)
-#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')  
-# 
-# 
-# def ClearUnderlyingdata(entity_id):
-#     try:
-#         deleted_summary = {}
-
-#         # Child tables list (table_name : delete_sql)
-#         delete_queries = {
-#             "tbl_underlying": "DELETE FROM tbl_underlying WHERE entityid = %s",
-#         }
-
-#         for table, sql in delete_queries.items():
-#             deleted_count = executeSql.ExecuteReturnId(sql, (entity_id,))
-#             if isinstance(deleted_count, int):
-#                 deleted_summary[table] = deleted_count
-#             else:
-#                 deleted_summary[table] = 0  # fallback if not integer
-
-#         return deleted_summary
-
-#     except Exception as e:
-#         print("Error in DeleteEntityByid query:", e)
-#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')     
-
-
 # def ClearUnderlyingdata(entity_id):
 #     try:
 #         result_summary = {}
@@ -411,19 +376,20 @@ def ClearUnderlyingdata(entity_id):
         result_summary = {}
 
         # 1. Check if entityid exists in tbl_underlying
-        check_underlying_sql = "SELECT id FROM tbl_underlying WHERE entityid = %s"
+        check_underlying_sql = "SELECT id FROM tbl_underlying WHERE entityid = %s LIMIT 1"
         underlying_exists = executeSql.ExecuteReturn(check_underlying_sql, (entity_id,))
 
         if underlying_exists:
             # Case A: entityid exists in tbl_underlying → delete it
             delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s RETURNING id"
             deleted_rows = executeSql.ExecuteAll(delete_sql, (entity_id,))
+            
             result_summary["action"] = "deleted"
-            result_summary["rows_affected"] =  len(deleted_rows) if deleted_rows else 0
+            result_summary["rows_affected"] = len(deleted_rows) if deleted_rows else 0
 
         else:
             # Case B: entityid not in tbl_underlying → check if it exists in tbl_entity
-            check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s"
+            check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s LIMIT 1"
             entity_exists = executeSql.ExecuteReturn(check_entity_sql, (entity_id,))
 
             if entity_exists:
@@ -442,9 +408,9 @@ def ClearUnderlyingdata(entity_id):
                     FROM tbl_entity
                     WHERE entityid = %s
                 """
-                executeSql.ExecuteOne(insert_sql, (entity_id,))
+                inserted = executeSql.ExecuteOne(insert_sql, (entity_id,))
                 result_summary["action"] = "inserted"
-                result_summary["rows_affected"] = 1
+                result_summary["rows_affected"] = 1 if inserted else 0
             else:
                 # Case C: entityid not in tbl_entity either → nothing to do
                 result_summary["action"] = "not_found"
@@ -454,7 +420,7 @@ def ClearUnderlyingdata(entity_id):
 
     except Exception as e:
         print("Error in ClearUnderlyingdata query:", e)
-        return {"action": "error","error": str(e),"rows_affected": 0}
+        return {"action": "error", "error": str(e), "rows_affected": 0}
 
 # ####
 

@@ -142,14 +142,16 @@ def ExecuteAll(query, data=None):
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute(query, data or ())
+        # fetch all rows for SELECT or DELETE/UPDATE RETURNING
         result = cur.fetchall()
-        conn.commit()
+        conn.commit()  # important for DELETE/UPDATE to take effect
         cur.close()
         conn.close()
-        return result  # list of tuples (can be empty)
+        return result  # always a list, empty if no rows
     except Exception as e:
         print("Error in ExecuteAll:", e)
-        return []   # always return empty list on error
+        return []  # never return a Response object
+
 
 
 

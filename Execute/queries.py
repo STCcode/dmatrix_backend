@@ -416,10 +416,10 @@ def ClearUnderlyingdata(entity_id):
 
         if underlying_exists:
             # Case A: entityid exists in tbl_underlying → delete it
-            delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
-            deleted_rows = executeSql.ExecuteOne(delete_sql, (entity_id,))
+            delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s RETURNING id"
+            deleted_rows = executeSql.ExecuteReturn(delete_sql, (entity_id,))
             result_summary["action"] = "deleted"
-            result_summary["rows_affected"] =  len(deleted_rows)
+            result_summary["rows_affected"] =  len(deleted_rows)if deleted_rows else 0
 
         else:
             # Case B: entityid not in tbl_underlying → check if it exists in tbl_entity

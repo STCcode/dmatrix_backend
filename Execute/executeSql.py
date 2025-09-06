@@ -123,19 +123,34 @@ from psycopg2.extras import RealDictCursor
 # #         return middleware.exe_msgs(responses.execution_501,str(e.args),'1023300')
 
 # SELECT ALL
-def ExecuteAll(query, data):
+# def ExecuteAll(query, data):
+#     try:
+#         conn = get_db_connection()
+#         cur = conn.cursor()
+#         cur.execute(query, data)
+#         result = cur.fetchall()
+#         conn.commit()
+#         cur.close()
+#         conn.close()
+#         return result
+#     except Exception as e:
+#         print("Error in ExecuteAll=============================", e)
+#         return middleware.exe_msgs(responses.execution_501, str(e.args), '1023300')
+
+def ExecuteAll(query, data=None):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute(query, data)
+        cur.execute(query, data or ())
         result = cur.fetchall()
         conn.commit()
         cur.close()
         conn.close()
         return result
     except Exception as e:
-        print("Error in ExecuteAll=============================", e)
-        return middleware.exe_msgs(responses.execution_501, str(e.args), '1023300')
+        print("Error in ExecuteAll==============================", e)
+        return middleware.exe_msgs(responses.execution_501, str(e.args), '1022302')
+
 
 
 # SELECT ONE

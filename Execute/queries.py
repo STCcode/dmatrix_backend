@@ -375,22 +375,25 @@ def ClearUnderlyingdata(entity_id):
     try:
         result_summary = {}
 
+        # Normalize input (remove spaces, uppercase)
+        clean_id = entity_id.strip().upper()
+
         # 1. Check if entityid exists in tbl_underlying
-        check_underlying_sql = "SELECT id FROM tbl_underlying WHERE entityid = %s LIMIT 1"
-        underlying_exists = executeSql.ExecuteReturn(check_underlying_sql, (entity_id,))
+        check_underlying_sql = "SELECT id FROM tbl_underlying WHERE TRIM(UPPER(entityid)) = %s LIMIT 1"
+        underlying_exists = executeSql.ExecuteReturn(check_underlying_sql, (clean_id,))
 
         if underlying_exists:
             # Case A: entityid exists in tbl_underlying → delete it
-            delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s RETURNING id"
-            deleted_rows = executeSql.ExecuteAll(delete_sql, (entity_id,))
-            
+            delete_sql = "DELETE FROM tbl_underlying WHERE TRIM(UPPER(entityid)) = %s RETURNING id"
+            deleted_rows = executeSql.ExecuteAll(delete_sql, (clean_id,))
+
             result_summary["action"] = "deleted"
             result_summary["rows_affected"] = len(deleted_rows) if deleted_rows else 0
 
         else:
             # Case B: entityid not in tbl_underlying → check if it exists in tbl_entity
-            check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s LIMIT 1"
-            entity_exists = executeSql.ExecuteReturn(check_entity_sql, (entity_id,))
+            check_entity_sql = "SELECT 1 FROM tbl_entity WHERE TRIM(UPPER(entityid)) = %s LIMIT 1"
+            entity_exists = executeSql.ExecuteReturn(check_entity_sql, (clean_id,))
 
             if entity_exists:
                 # Copy matching fields from tbl_entity → tbl_underlying
@@ -398,17 +401,17 @@ def ClearUnderlyingdata(entity_id):
                     INSERT INTO tbl_underlying 
                         (company_name, scripcode, weightage, sector, isin_code, created_at, entityid)
                     SELECT 
-                        scripname,       -- maps to company_name
-                        scripcode,       -- maps to scripcode
-                        weightage,       -- maps to weightage
-                        sector,          -- maps to sector
-                        isin,            -- maps to isin_code
-                        NOW(),           -- maps to created_at
-                        entityid         -- maps to entityid
+                        scripname,
+                        scripcode,
+                        weightage,
+                        sector,
+                        isin,
+                        NOW(),
+                        entityid
                     FROM tbl_entity
-                    WHERE entityid = %s
+                    WHERE TRIM(UPPER(entityid)) = %s
                 """
-                inserted = executeSql.ExecuteOne(insert_sql, (entity_id,))
+                inserted = executeSql.ExecuteOne(insert_sql, (clean_id,))
                 result_summary["action"] = "inserted"
                 result_summary["rows_affected"] = 1 if inserted else 0
             else:

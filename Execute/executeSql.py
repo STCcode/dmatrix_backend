@@ -146,27 +146,29 @@ def ExecuteAll(query, data=None):
         conn.commit()
         cur.close()
         conn.close()
-        return result
+        return result  # list of tuples (can be empty)
     except Exception as e:
-        print("Error in ExecuteAll==============================", e)
-        return middleware.exe_msgs(responses.execution_501, str(e.args), '1022302')
+        print("Error in ExecuteAll:", e)
+        return []   # always return empty list on error
+
 
 
 
 # SELECT ONE
-def ExecuteReturn(query, data):
+def ExecuteReturn(query, data=None):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute(query, data or () )
+        cur.execute(query, data or ())
         result = cur.fetchone()
         conn.commit()
         cur.close()
         conn.close()
-        return result
+        return result  # tuple or None
     except Exception as e:
-        print("Error in ExecuteReturn============================", e)
-        return middleware.exe_msgs(responses.execution_501, str(e.args), '1022300')
+        print("Error in ExecuteReturn:", e)
+        return None   # always return None on error
+
 
 
 # INSERT/UPDATE/DELETE one record (no return)
@@ -183,19 +185,20 @@ def ExecuteReturn(query, data):
 #         print("Error in ExecuteOne==============================", e)
 #         return middleware.exe_msgs(responses.execution_501, str(e.args), '1020300')
 
-def ExecuteOne(query, data):
+def ExecuteOne(query, data=None):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute(query, data)
+        cur.execute(query, data or ())
+        result = cur.fetchone()
         conn.commit()
         cur.close()
         conn.close()
-        return {"status": responses.execution_200}   # plain dict
+        return result  # tuple or None
     except Exception as e:
-        print("Error in ExecuteOne==============================", e)
-        # return dict, not Response
-        return {"status": responses.execution_501, "error": str(e)}
+        print("Error in ExecuteOne:", e)
+        return None
+
 
     
 def FetchOne(query, data=None):

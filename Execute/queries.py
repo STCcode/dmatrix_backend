@@ -562,11 +562,12 @@ def InsertEtfData(data):
 
 def getAllEtf():
      try:
-          sql="SELECT * FROM tbl_etf_action;"
+        #   sql="SELECT * FROM tbl_etf_action;"
+        sql="SELECT e.scripname, b.* FROM tbl_entity e join tbl_etf_action b ON e.entityid = b.entityid;"
 
-          data=''
-          msgs=executeSql.ExecuteAllNew(sql,data)
-          return msgs
+        data=''
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
@@ -693,7 +694,9 @@ def delete_entity_data(entity_id):
         # Child tables list (table_name : delete_sql)
         delete_queries = {
             "tbl_underlying": "DELETE FROM tbl_underlying WHERE entityid = %s",
-            "tbl_action_table": "DELETE FROM tbl_action_table WHERE entityid = %s"
+            "tbl_action_table": "DELETE FROM tbl_action_table WHERE entityid = %s",
+            "tbl_direct_equity": "DELETE FROM tbl_direct_equity WHERE entityid = %s",
+            "tbl_etf_action": "DELETE FROM tbl_etf_action WHERE entityid = %s"
             #Add more tables here if needed
         }
 

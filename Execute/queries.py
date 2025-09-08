@@ -425,23 +425,24 @@ def ClearUnderlyingdata(entity_id):
     try:
         result_summary = {}
 
-        # 1️⃣ Delete all rows for this entityid
+        # 1. Delete all rows for this entityid
         delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
-        rows_deleted = executeSql.ExecuteOne(delete_sql, (entity_id,), return_rowcount=True)
+        deleted_rows = executeSql.ExecuteOne(delete_sql, (entity_id,), return_rowcount=True)
+        rows_deleted = deleted_rows if deleted_rows is not None else 0
 
         if rows_deleted > 0:
             result_summary["action"] = "deleted"
             result_summary["rows_affected"] = rows_deleted
             return result_summary
 
-        # 2️⃣ If no rows deleted, check if entity exists in tbl_entity
+        # 2. If no rows deleted, check if entity exists in tbl_entity
         check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s"
         entity_exists = executeSql.ExecuteReturn(check_entity_sql, (entity_id,))
 
         if entity_exists:
-            # Insert entityid into tbl_underlying
             insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
-            rows_inserted = executeSql.ExecuteOne(insert_sql, (entity_id,), return_rowcount=True)
+            inserted_rows = executeSql.ExecuteOne(insert_sql, (entity_id,), return_rowcount=True)
+            rows_inserted = inserted_rows if inserted_rows is not None else 0
             result_summary["action"] = "inserted"
             result_summary["rows_affected"] = rows_inserted
         else:

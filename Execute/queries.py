@@ -371,6 +371,55 @@ def getUnderlyingByMf():
 
 # #####
 
+# def ClearUnderlyingdata(entity_id):
+#     try:
+#         result_summary = {}
+
+#         # 1. Check if entityid exists in tbl_underlying
+#         check_underlying_sql = "SELECT 1 FROM tbl_underlying WHERE entityid = %s LIMIT 1"
+#         underlying_exists = executeSql.ExecuteReturn(check_underlying_sql, (entity_id,))
+
+#         if underlying_exists:
+#             # Case A: delete all rows from tbl_underlying
+#             delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
+#             rows_deleted = executeSql.ExecuteRowCount(delete_sql, (entity_id,))
+#             result_summary["action"] = "deleted"
+#             result_summary["rows_affected"] = rows_deleted
+
+#         else:
+#             # Case B: check tbl_entity
+#             check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s LIMIT 1"
+#             entity_exists = executeSql.ExecuteReturn(check_entity_sql, (entity_id,))
+
+#             if entity_exists:
+#                 insert_sql = """
+#                     INSERT INTO tbl_underlying 
+#                         (company_name, scripcode, weightage, sector, isin_code, created_at, entityid)
+#                     SELECT 
+#                         scripname,       
+#                         scripcode,       
+#                         weightage,       
+#                         sector,          
+#                         isin,            
+#                         NOW(),           
+#                         entityid         
+#                     FROM tbl_entity
+#                     WHERE entityid = %s
+#                 """
+#                 rows_inserted = executeSql.ExecuteRowCount(insert_sql, (entity_id,))
+#                 result_summary["action"] = "inserted"
+#                 result_summary["rows_affected"] = rows_inserted
+#             else:
+#                 result_summary["action"] = "not_found"
+#                 result_summary["rows_affected"] = 0
+
+#         return result_summary
+
+#     except Exception as e:
+#         print("Error in ClearUnderlyingdata query:", e)
+#         return {"action": "error", "error": str(e), "rows_affected": 0}
+
+
 def ClearUnderlyingdata(entity_id):
     try:
         result_summary = {}
@@ -380,14 +429,15 @@ def ClearUnderlyingdata(entity_id):
         underlying_exists = executeSql.ExecuteReturn(check_underlying_sql, (entity_id,))
 
         if underlying_exists:
-            # Case A: delete all rows from tbl_underlying
+            # Case A: entityid exists in tbl_underlying → delete all rows
             delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
-            rows_deleted = executeSql.ExecuteRowCount(delete_sql, (entity_id,))
+            executeSql.ExecuteOne(delete_sql, (entity_id,))
+
             result_summary["action"] = "deleted"
-            result_summary["rows_affected"] = rows_deleted
+            result_summary["rows_affected"] = None   # don’t return count
 
         else:
-            # Case B: check tbl_entity
+            # Case B: entityid not in tbl_underlying → check if it exists in tbl_entity
             check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s LIMIT 1"
             entity_exists = executeSql.ExecuteReturn(check_entity_sql, (entity_id,))
 
@@ -406,18 +456,18 @@ def ClearUnderlyingdata(entity_id):
                     FROM tbl_entity
                     WHERE entityid = %s
                 """
-                rows_inserted = executeSql.ExecuteRowCount(insert_sql, (entity_id,))
+                executeSql.ExecuteOne(insert_sql, (entity_id,))
                 result_summary["action"] = "inserted"
-                result_summary["rows_affected"] = rows_inserted
+                result_summary["rows_affected"] = None
             else:
                 result_summary["action"] = "not_found"
-                result_summary["rows_affected"] = 0
+                result_summary["rows_affected"] = None
 
         return result_summary
 
     except Exception as e:
         print("Error in ClearUnderlyingdata query:", e)
-        return {"action": "error", "error": str(e), "rows_affected": 0}
+        return {"action": "error", "error": str(e), "rows_affected": None}
 
 # ####
 

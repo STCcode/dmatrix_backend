@@ -426,21 +426,13 @@ def ClearUnderlyingdata(entity_id):
     try:
         entity_id = entity_id.strip()
 
-        from db import get_db_connection
-        conn = get_db_connection()
-        cur = conn.cursor()
-
+        # 1. Try delete first
         delete_sql = "DELETE FROM tbl_underlying WHERE TRIM(entityid) = TRIM(%s)"
-        cur.execute(delete_sql, (entity_id,))
-        rows_deleted = cur.rowcount
-        conn.commit()
+        rows_deleted = executeSql.ExecuteOne(delete_sql, (entity_id,), return_rowcount=True)
 
         print(f"[DEBUG] Direct delete for {entity_id}, rows_deleted={rows_deleted}")
 
-        cur.close()
-        conn.close()
-
-        if rows_deleted > 0:
+        if rows_deleted and rows_deleted > 0:
             return {
                 "data": {
                     "message": f"Entity {entity_id} deleted from tbl_underlying",
@@ -450,27 +442,18 @@ def ClearUnderlyingdata(entity_id):
                 "code": "1024200"
             }
 
-        # If no rows deleted, check if entity exists in tbl_entity
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT 1 FROM tbl_entity WHERE entityid = %s", (entity_id,))
-        exists = cur.fetchone()
-        cur.close()
-        conn.close()
+        # 2. If no rows deleted, check if entity exists in tbl_entity
+        check_sql = "SELECT 1 FROM tbl_entity WHERE TRIM(entityid) = TRIM(%s)"
+        exists = executeSql.ExecuteReturn(check_sql, (entity_id,))
 
         if exists:
-            conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute("INSERT INTO tbl_underlying (entityid) VALUES (%s)", (entity_id,))
-            conn.commit()
-            inserted = cur.rowcount
-            cur.close()
-            conn.close()
+            insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
+            inserted_count = executeSql.ExecuteOne(insert_sql, (entity_id,), return_rowcount=True)
 
             return {
                 "data": {
                     "message": f"Entity {entity_id} inserted into tbl_underlying",
-                    "rows_affected": inserted
+                    "rows_affected": inserted_count
                 },
                 "successmsgs": "Inserted Successfully",
                 "code": "1024201"
@@ -492,7 +475,7 @@ def ClearUnderlyingdata(entity_id):
 
         return {
             "errmsgs": f"Query error: {str(e)}",
-            "error": error_details,   # return full traceback in JSON for now
+            "error": error_details,
             "code": "1024503"
         }
 

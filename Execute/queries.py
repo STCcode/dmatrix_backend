@@ -426,11 +426,10 @@ def ClearUnderlyingdata(entity_id):
     try:
         entity_id = entity_id.strip()
 
-        from db import get_db_connection  # adjust import if needed
+        from db import get_db_connection
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Force delete
         delete_sql = "DELETE FROM tbl_underlying WHERE TRIM(entityid) = TRIM(%s)"
         cur.execute(delete_sql, (entity_id,))
         rows_deleted = cur.rowcount
@@ -487,10 +486,13 @@ def ClearUnderlyingdata(entity_id):
             }
 
     except Exception as e:
-        print("Error in ClearUnderlyingdata:", e)
+        import traceback
+        error_details = traceback.format_exc()
+        print("🔥 ClearUnderlyingdata failed:", error_details)
+
         return {
             "errmsgs": f"Query error: {str(e)}",
-            "error": "Internal Server Error while Deleting Data",
+            "error": error_details,   # return full traceback in JSON for now
             "code": "1024503"
         }
 

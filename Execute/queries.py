@@ -424,66 +424,41 @@ def ClearUnderlyingdata(entity_id):
     try:
         result_summary = {}
 
-        # 1. Check if entityid exists in tbl_underlying
-        check_underlying_sql = "SELECT 1 FROM tbl_underlying WHERE entityid = %s LIMIT 1"
-        underlying_exists = executeSql.ExecuteReturn(check_underlying_sql, (entity_id,))
+        # Check if entityid exists
+        check_sql = "SELECT 1 FROM tbl_underlying WHERE entityid = %s LIMIT 1"
+        exists = executeSql.ExecuteReturn(check_sql, (entity_id,))
 
-        if underlying_exists:
-            # Case A: entityid exists in tbl_underlying → delete all rows
-            delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
-            rows_deleted = executeSql.ExecuteOne(delete_sql, (entity_id,))
+        if exists:
+            # DELETE and return deleted IDs
+            delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s RETURNING id"
+            deleted_rows = executeSql.ExecuteOne(delete_sql, (entity_id,)) or []
 
-            # ✅ force None → 0
-            rows_deleted = rows_deleted if isinstance(rows_deleted, int) else 0  
+            rows_deleted = len(deleted_rows)
+            deleted_ids = [row[0] for row in deleted_rows]  # extract id column
 
             result_summary["action"] = "deleted"
             result_summary["rows_affected"] = rows_deleted
-            if rows_deleted > 0:
-                result_summary["message"] = f"Entity {entity_id} deleted from tbl_underlying"
-            else:
-                result_summary["message"] = f"No records deleted for Entity {entity_id}"
-
+            result_summary["deleted_ids"] = deleted_ids
+            result_summary["message"] = (
+                f"Entity {entity_id} deleted from tbl_underlying"
+                if rows_deleted > 0 else f"No records deleted for Entity {entity_id}"
+            )
         else:
-            # Case B: entityid not in tbl_underlying → check if it exists in tbl_entity
-            check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s LIMIT 1"
-            entity_exists = executeSql.ExecuteReturn(check_entity_sql, (entity_id,))
-
-            if entity_exists:
-                insert_sql = """
-                    INSERT INTO tbl_underlying 
-                        (company_name, scripcode, weightage, sector, isin_code, created_at, entityid)
-                    SELECT 
-                        scripname,       
-                        scripcode,       
-                        weightage,       
-                        sector,          
-                        isin,            
-                        NOW(),           
-                        entityid         
-                    FROM tbl_entity
-                    WHERE entityid = %s
-                """
-                rows_inserted = executeSql.ExecuteOne(insert_sql, (entity_id,))
-
-                # ✅ force None → 0
-                rows_inserted = rows_inserted if isinstance(rows_inserted, int) else 0  
-
-                result_summary["action"] = "inserted"
-                result_summary["rows_affected"] = rows_inserted
-                if rows_inserted > 0:
-                    result_summary["message"] = f"Entity {entity_id} inserted into tbl_underlying"
-                else:
-                    result_summary["message"] = f"No records inserted for Entity {entity_id}"
-            else:
-                result_summary["action"] = "not_found"
-                result_summary["rows_affected"] = 0
-                result_summary["message"] = f"Entity {entity_id} not found in tbl_entity"
+            result_summary["action"] = "not_found"
+            result_summary["rows_affected"] = 0
+            result_summary["deleted_ids"] = []
+            result_summary["message"] = f"Entity {entity_id} not found in tbl_underlying"
 
         return result_summary
 
     except Exception as e:
         print("Error in ClearUnderlyingdata query:", e)
-        return {"action": "error", "error": str(e), "rows_affected": 0}
+        return {
+            "action": "error",
+            "error": str(e),
+            "rows_affected": 0,
+            "deleted_ids": []
+        }
 
 # ####
 

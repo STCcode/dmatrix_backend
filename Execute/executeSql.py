@@ -205,14 +205,18 @@ def ExecuteOne(query, data=None):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
+
         cur.execute(query, data or ())
 
-        result = None
-        # ✅ if SELECT/RETURNING → fetch
-        if cur.description is not None:
+        query_lower = query.strip().lower()
+        if query_lower.startswith("select"):
+            # SELECT → single row
             result = cur.fetchone()
+        elif "returning" in query_lower:
+            # INSERT/UPDATE/DELETE with RETURNING → all returned rows
+            result = cur.fetchall()
         else:
-            # ✅ for DELETE/UPDATE/INSERT → return affected row count
+            # Normal INSERT/UPDATE/DELETE without RETURNING → rowcount
             result = cur.rowcount
 
         conn.commit()

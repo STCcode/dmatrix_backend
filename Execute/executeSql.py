@@ -137,20 +137,20 @@ from psycopg2.extras import RealDictCursor
 #         print("Error in ExecuteAll=============================", e)
 #         return middleware.exe_msgs(responses.execution_501, str(e.args), '1023300')
 
+# SELECT / DELETE / INSERT MANY
 def ExecuteAll(query, data=None):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute(query, data or ())
-        # fetch all rows for SELECT or DELETE/UPDATE RETURNING
-        result = cur.fetchall()
-        conn.commit()  # important for DELETE/UPDATE to take effect
+        results = cur.fetchall()
+        conn.commit()
         cur.close()
         conn.close()
-        return result  # always a list, empty if no rows
+        return results
     except Exception as e:
         print("Error in ExecuteAll:", e)
-        return []  # never return a Response object
+        return None
 
 
 
@@ -202,19 +202,27 @@ def ExecuteReturn(query, data=None):
 #         return None
 
 # Execute an INSERT, UPDATE, DELETE or any query
+
 def ExecuteOne(query, data=None, return_rowcount=False):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute(query, data or ())
-        conn.commit()
         rowcount = cur.rowcount
+        result = None
+        if not return_rowcount:
+            try:
+                result = cur.fetchone()
+            except Exception:
+                result = None
+        conn.commit()
         cur.close()
         conn.close()
-        return rowcount if return_rowcount else cur.fetchone()
+        return rowcount if return_rowcount else result
     except Exception as e:
         print("ExecuteOne error:", e)
         return None
+
 
 
     
@@ -278,29 +286,19 @@ def ExecuteMany(query, data):
 
 
 # RETURN INSERTED ID
-def ExecuteReturnId(query, data):
+def ExecuteReturn(query, data=None):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        
-        # Execute the insert query and return the inserted id
-        cur.execute(query + " RETURNING id", data)
-        inserted_id = cur.fetchone()[0]
-        
+        cur.execute(query, data or ())
+        result = cur.fetchone()
         conn.commit()
         cur.close()
         conn.close()
-        
-        return inserted_id
-
+        return result  # tuple or None
     except Exception as e:
-        if cur:
-            cur.close()
-        if conn:
-            conn.rollback()
-            conn.close()
-        print("Error in ExecuteReturnId=============================", e)
-        return middleware.exe_msgs(responses.execution_501, str(e.args), '1022300')
+        print("Error in ExecuteReturn:", e)
+        return None
     
     
 def ExecuteRowCount(query, params=None):

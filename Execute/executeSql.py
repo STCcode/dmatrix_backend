@@ -203,37 +203,34 @@ def ExecuteReturn(query, data=None):
 
 # Execute an INSERT, UPDATE, DELETE or any query
 
-def ExecuteOne(query, data=None, return_rowcount=False):
-    """
-    Executes a single query (INSERT/UPDATE/DELETE/SELECT).
-    - return_rowcount=True: returns number of affected rows (for DML)
-    - return_rowcount=False: returns first row (for SELECT)
-    """
+def ExecuteOne(sql, params=None, return_rowcount=False):
+    conn = None
+    cur = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute(query, data or ())
-        
-        # Determine what to return
-        if return_rowcount:
-            result = cur.rowcount
-        else:
-            result = cur.fetchone()  # for SELECT
+        cur.execute(sql, params or ())
 
+        if return_rowcount:
+            affected = cur.rowcount
+            conn.commit()
+            return affected
+
+        # for SELECT queries
+        row = cur.fetchone()
         conn.commit()
-        cur.close()
-        conn.close()
-        return result
+        return row
 
     except Exception as e:
-        import traceback
-        error_details = traceback.format_exc()
-        print("🔥 ExecuteOne failed:", error_details)
-        # Return -1 on error for DML, or None for SELECT
-        return -1 if return_rowcount else None
+        if conn:
+            conn.rollback()
+        raise e
 
-
-    
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 def FetchOne(query, data=None):
     try:
         conn = get_db_connection()

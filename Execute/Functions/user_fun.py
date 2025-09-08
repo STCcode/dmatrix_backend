@@ -909,7 +909,6 @@ def ClearUnderlyingdata():
     try:
         entity_id = None
 
-        # Get entityid from DELETE query params or POST JSON/form
         if request.method == 'DELETE':
             entity_id = request.args.get('entityid')
         elif request.method == 'POST':
@@ -918,53 +917,53 @@ def ClearUnderlyingdata():
             else:
                 entity_id = request.form.get('entityid')
 
-        # ❌ Validate input
         if not entity_id:
-            result = middleware.exe_msgs(responses.delete_501, "Missing entityid parameter", '1024501')
-            return make_response(jsonify(result), 400)
+            # middleware already returns a response-like object
+            return make_response(middleware.exe_msgs(
+                responses.delete_501,
+                "Missing entityid parameter",
+                '1024501'
+            ), 400)
 
-        # ✅ Call query
         action_result = queries.ClearUnderlyingdata(entity_id)
         action = action_result.get("action")
         rows_affected = action_result.get("rows_affected", 0)
 
-        # Handle response
         if action == "deleted":
-            result = middleware.exs_msgs(
+            return make_response(middleware.exs_msgs(
                 {"message": f"Entity {entity_id} deleted from tbl_underlying", "rows_affected": rows_affected},
                 responses.delete_200,
                 '1024200'
-            )
-            return make_response(jsonify(result), 200)
+            ), 200)
 
         elif action == "inserted":
-            result = middleware.exs_msgs(
+            return make_response(middleware.exs_msgs(
                 {"message": f"Entity {entity_id} inserted into tbl_underlying", "rows_affected": rows_affected},
                 responses.insert_200 if hasattr(responses, 'insert_200') else responses.delete_200,
                 '1024201'
-            )
-            return make_response(jsonify(result), 200)
+            ), 200)
 
         elif action == "not_found":
-            result = middleware.exe_msgs(
+            return make_response(middleware.exe_msgs(
                 responses.delete_404,
                 f"Entity {entity_id} not found in tbl_entity or tbl_underlying",
                 '1024504'
-            )
-            return make_response(jsonify(result), 404)
+            ), 404)
 
-        else:  # error
-            result = middleware.exe_msgs(
+        else:
+            return make_response(middleware.exe_msgs(
                 responses.delete_501,
                 f"Query error: {action_result.get('error')}",
                 '1024503'
-            )
-            return make_response(jsonify(result), 500)
+            ), 500)
 
     except Exception as e:
         print("Error in ClearUnderlyingdata API:", e)
-        result = middleware.exe_msgs(responses.delete_501, str(e), '1024500')
-        return make_response(jsonify(result), 500)
+        return make_response(middleware.exe_msgs(
+            responses.delete_501,
+            str(e),
+            '1024500'
+        ), 500)
 
 
 #========================================Underlying Table End ======================================================

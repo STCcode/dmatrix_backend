@@ -426,17 +426,17 @@ def ClearUnderlyingdata(entity_id):
         result_summary = {}
 
         # 1. Check if entityid exists in tbl_underlying
-        check_underlying_sql = "SELECT 1 FROM tbl_underlying WHERE entityid = %s LIMIT 1"
+        check_underlying_sql = "SELECT 1 FROM tbl_underlying WHERE entityid = %s"
         underlying_exists = executeSql.ExecuteReturn(check_underlying_sql, (entity_id,))
 
         if underlying_exists:
-            # Delete all rows and get affected IDs
+            # Delete all rows for this entityid and get affected IDs
             delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s RETURNING id"
             deleted_rows = executeSql.ExecuteAll(delete_sql, (entity_id,))
             rows_count = len(deleted_rows) if deleted_rows else 0
 
             result_summary["action"] = "deleted"
-            result_summary["rows_affected"] = rows_count  # <-- actual count
+            result_summary["rows_affected"] = rows_count
 
         else:
             # Check if entity exists in tbl_entity
@@ -444,10 +444,10 @@ def ClearUnderlyingdata(entity_id):
             entity_exists = executeSql.ExecuteReturn(check_entity_sql, (entity_id,))
 
             if entity_exists:
-                # Insert entityid into tbl_underlying
+                # Insert entityid into tbl_underlying and get inserted ID
                 insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s) RETURNING id"
-                inserted_row = executeSql.ExecuteReturn(insert_sql, (entity_id,))
-                rows_count = 1 if inserted_row else 0
+                inserted_row = executeSql.ExecuteAll(insert_sql, (entity_id,))
+                rows_count = len(inserted_row) if inserted_row else 0
 
                 result_summary["action"] = "inserted"
                 result_summary["rows_affected"] = rows_count

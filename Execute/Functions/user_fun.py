@@ -906,13 +906,6 @@ def getUnderlyingByMf():
 
 
 
-
-
-
-
-
-
-
 def ClearUnderlyingdata():
     try:
         entity_id = None
@@ -932,12 +925,12 @@ def ClearUnderlyingdata():
 
         # Call query
         action_result = queries.ClearUnderlyingdata(entity_id)
-
         action = action_result.get("action")
+        rows = action_result.get("rows_affected", 0)
 
         if action == "deleted":
             result = middleware.exs_msgs(
-                {"message": f"Entity {entity_id} deleted from tbl_underlying", "rows_affected": None},
+                {"message": f"Entity {entity_id} deleted from tbl_underlying", "rows_affected": rows},
                 responses.delete_200,
                 '1024200'
             )
@@ -945,7 +938,7 @@ def ClearUnderlyingdata():
 
         elif action == "inserted":
             result = middleware.exs_msgs(
-                {"message": f"Entity {entity_id} inserted into tbl_underlying", "rows_affected": None},
+                {"message": f"Entity {entity_id} inserted into tbl_underlying", "rows_affected": rows},
                 responses.insert_200 if hasattr(responses, 'insert_200') else responses.delete_200,
                 '1024201'
             )
@@ -971,7 +964,6 @@ def ClearUnderlyingdata():
         print("Error in ClearUnderlyingdata API:", e)
         result = middleware.exe_msgs(responses.delete_501, str(e), '1024500')
         return make_response(result, 500)
-
 
 
 #========================================Underlying Table End ======================================================

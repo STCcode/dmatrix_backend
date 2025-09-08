@@ -422,12 +422,18 @@ def getUnderlyingByMf():
 
 def ClearUnderlyingdata(entity_id):
     try:
-        # delete and return deleted IDs
         delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s RETURNING id"
         deleted_rows = executeSql.ExecuteOne(delete_sql, (entity_id,)) or []
 
-        rows_deleted = len(deleted_rows) if isinstance(deleted_rows, list) else 0
-        deleted_ids = [row[0] for row in deleted_rows] if rows_deleted > 0 else []
+        # Handle both fetchall() list and plain rowcount int
+        if isinstance(deleted_rows, list):
+            rows_deleted = len(deleted_rows)
+            deleted_ids = [row[0] for row in deleted_rows]
+        elif isinstance(deleted_rows, int):
+            rows_deleted = deleted_rows
+            deleted_ids = []
+        else:
+            rows_deleted, deleted_ids = 0, []
 
         if rows_deleted > 0:
             return {
@@ -457,6 +463,7 @@ def ClearUnderlyingdata(entity_id):
             "error": "Internal Server Error while Deleting Data",
             "code": "1024503"
         }
+
 
 # ####
 

@@ -209,14 +209,13 @@ def ExecuteOne(query, data=None):
         cur.execute(query, data or ())
 
         query_lower = query.strip().lower()
+
         if query_lower.startswith("select"):
             result = cur.fetchone()
         elif "returning" in query_lower:
-            # fetch all deleted/updated rows
-            result = cur.fetchall()
+            result = cur.fetchall()  # ✅ for DELETE/UPDATE/INSERT ... RETURNING
         else:
-            # normal insert/update/delete without returning
-            result = cur.rowcount
+            result = cur.rowcount  # ✅ safe for normal insert/update/delete
 
         conn.commit()
         cur.close()
@@ -225,7 +224,6 @@ def ExecuteOne(query, data=None):
     except Exception as e:
         print("Error in ExecuteOne:", e)
         return None
-
 
     
 def FetchOne(query, data=None):

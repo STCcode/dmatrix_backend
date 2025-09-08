@@ -420,48 +420,45 @@ def getUnderlyingByMf():
 #         return {"action": "error", "error": str(e), "rows_affected": 0}
 
 
+# queri.py
 def ClearUnderlyingdata(entity_id):
     try:
-        delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s RETURNING id"
-        deleted_rows = executeSql.ExecuteOne(delete_sql, (entity_id,)) or []
+        result_summary = {}
 
-        # Handle both fetchall() list and plain rowcount int
-        if isinstance(deleted_rows, list):
-            rows_deleted = len(deleted_rows)
-            deleted_ids = [row[0] for row in deleted_rows]
-        elif isinstance(deleted_rows, int):
-            rows_deleted = deleted_rows
-            deleted_ids = []
-        else:
-            rows_deleted, deleted_ids = 0, []
+        # 1. Check if entityid exists in tbl_underlying
+        check_underlying_sql = "SELECT 1 FROM tbl_underlying WHERE entityid = %s"
+        underlying_exists = executeSql.ExecuteReturn(check_underlying_sql, (entity_id,))
 
-        if rows_deleted > 0:
-            return {
-                "data": {
-                    "message": f"Entity {entity_id} deleted from tbl_underlying",
-                    "rows_affected": rows_deleted,
-                    "deleted_ids": deleted_ids
-                },
-                "successmsgs": "Record(s) deleted successfully",
-                "code": "1024200"
-            }
+        if underlying_exists:
+            # Delete all rows for this entityid
+            delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
+            executeSql.ExecuteOne(delete_sql, (entity_id,))  # no fetch, just execute
+            result_summary["action"] = "deleted"
+            result_summary["rows_affected"] = None  # <-- do not return count
+
         else:
-            return {
-                "data": {
-                    "message": f"No records deleted for Entity {entity_id}",
-                    "rows_affected": 0,
-                    "deleted_ids": []
-                },
-                "successmsgs": "No records deleted",
-                "code": "1024201"
-            }
+            # Check if entity exists in tbl_entity
+            check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s"
+            entity_exists = executeSql.ExecuteReturn(check_entity_sql, (entity_id,))
+
+            if entity_exists:
+                # Insert entityid into tbl_underlying
+                insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
+                executeSql.ExecuteOne(insert_sql, (entity_id,))
+                result_summary["action"] = "inserted"
+                result_summary["rows_affected"] = None
+            else:
+                result_summary["action"] = "not_found"
+                result_summary["rows_affected"] = None
+
+        return result_summary
 
     except Exception as e:
-        print("Error in ClearUnderlyingdata:", e)
+        print("Error in ClearUnderlyingdata query:", e)
         return {
-            "errmsgs": str(e),
-            "error": "Internal Server Error while Deleting Data",
-            "code": "1024503"
+            "action": "error",
+            "error": str(e),
+            "rows_affected": None
         }
 
 

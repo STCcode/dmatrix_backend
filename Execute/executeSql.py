@@ -174,18 +174,18 @@ def ExecuteReturn(query, data=None):
 
 
 # INSERT/UPDATE/DELETE one record (no return)
-# def ExecuteOne(query, data):
-#     try:
-#         conn = get_db_connection()
-#         cur = conn.cursor()
-#         cur.execute(query, data)
-#         conn.commit()
-#         cur.close()
-#         conn.close()
-#         return responses.execution_200
-#     except Exception as e:
-#         print("Error in ExecuteOne==============================", e)
-#         return middleware.exe_msgs(responses.execution_501, str(e.args), '1020300')
+def ExecuteOne(query, data):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(query, data)
+        conn.commit()
+        cur.close()
+        conn.close()
+        return responses.execution_200
+    except Exception as e:
+        print("Error in ExecuteOne==============================", e)
+        return middleware.exe_msgs(responses.execution_501, str(e.args), '1020300')
 
 # def ExecuteOne(query, data=None):
 #     try:
@@ -202,35 +202,40 @@ def ExecuteReturn(query, data=None):
 #         return None
 
 # Execute an INSERT, UPDATE, DELETE or any query
+# new running
 
-def ExecuteOne(sql, params=None, return_rowcount=False):
-    conn = None
-    cur = None
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute(sql, params or ())
+# def ExecuteOne(sql, params=None, return_rowcount=False):
+#     conn = None
+#     cur = None
+#     try:
+#         conn = get_db_connection()
+#         cur = conn.cursor()
+#         cur.execute(sql, params or ())
 
-        if return_rowcount:
-            affected = cur.rowcount
-            conn.commit()
-            return affected
+#         if return_rowcount:
+#             affected = cur.rowcount
+#             conn.commit()
+#             return affected
 
-        # for SELECT queries
-        row = cur.fetchone()
-        conn.commit()
-        return row
+#         # for SELECT queries
+#         row = cur.fetchone()
+#         conn.commit()
+#         return row
 
-    except Exception as e:
-        if conn:
-            conn.rollback()
-        raise e
+#     except Exception as e:
+#         if conn:
+#             conn.rollback()
+#         raise e
 
-    finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
+#     finally:
+#         if cur:
+#             cur.close()
+#         if conn:
+#             conn.close()
+# new running
+
+
+
 def FetchOne(query, data=None):
     try:
         conn = get_db_connection()

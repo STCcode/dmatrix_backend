@@ -327,46 +327,46 @@ def getUnderlyingByMf():
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')  
 
-# def ClearUnderlyingdata(entity_id):
-#     try:
-#         result_summary = {}
+def ClearUnderlyingdata(entity_id):
+    try:
+        result_summary = {}
 
-#         # 1. Check if entityid exists in tbl_underlying
-#         check_underlying_sql = "SELECT 1 FROM tbl_underlying WHERE entityid = %s"
-#         underlying_exists = executeSql.ExecuteReturn(check_underlying_sql, (entity_id,))
+        # 1. Check if entityid exists in tbl_underlying
+        check_underlying_sql = "SELECT 1 FROM tbl_underlying WHERE entityid = %s"
+        underlying_exists = executeSql.ExecuteReturn(check_underlying_sql, (entity_id,))
 
-#         if underlying_exists:
-#             # Case A: entityid exists in tbl_underlying → delete it
-#             delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
-#             executeSql.ExecuteOne(delete_sql, (entity_id,))
-#             result_summary["action"] = "deleted"
-#             result_summary["rows_affected"] = 1
+        if underlying_exists:
+            # Case A: entityid exists in tbl_underlying → delete it
+            delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
+            executeSql.ExecuteOne(delete_sql, (entity_id,))
+            result_summary["action"] = "deleted"
+            result_summary["rows_affected"] = 1
 
-#         else:
-#             # Case B: entityid not in tbl_underlying → check if it exists in tbl_entity
-#             check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s"
-#             entity_exists = executeSql.ExecuteReturn(check_entity_sql, (entity_id,))
+        else:
+            # Case B: entityid not in tbl_underlying → check if it exists in tbl_entity
+            check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s"
+            entity_exists = executeSql.ExecuteReturn(check_entity_sql, (entity_id,))
 
-#             if entity_exists:
-#                 # Insert entityid into tbl_underlying
-#                 insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
-#                 executeSql.ExecuteOne(insert_sql, (entity_id,))
-#                 result_summary["action"] = "inserted"
-#                 result_summary["rows_affected"] = 1
-#             else:
-#                 # Case C: entityid not in tbl_entity either → nothing to do
-#                 result_summary["action"] = "not_found"
-#                 result_summary["rows_affected"] = 0
+            if entity_exists:
+                # Insert entityid into tbl_underlying
+                insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
+                executeSql.ExecuteOne(insert_sql, (entity_id,))
+                result_summary["action"] = "inserted"
+                result_summary["rows_affected"] = 1
+            else:
+                # Case C: entityid not in tbl_entity either → nothing to do
+                result_summary["action"] = "not_found"
+                result_summary["rows_affected"] = 0
 
-#         return result_summary
+        return result_summary
 
-#     except Exception as e:
-#         print("Error in ClearUnderlyingdata query:", e)
-#         return {
-#             "action": "error",
-#             "error": str(e),
-#             "rows_affected": 0
-#         }
+    except Exception as e:
+        print("Error in ClearUnderlyingdata query:", e)
+        return {
+            "action": "error",
+            "error": str(e),
+            "rows_affected": 0
+        }
 
 
 # #####
@@ -422,49 +422,49 @@ def getUnderlyingByMf():
 
 # queri.py
 # queries.py
+# old
+# def ClearUnderlyingdata(entity_id: str):
+#     try:
+#         entity_id = entity_id.strip()  # remove hidden spaces
 
-def ClearUnderlyingdata(entity_id: str):
-    try:
-        entity_id = entity_id.strip()  # remove hidden spaces
+#         # 1️⃣ Delete rows in tbl_underlying
+#         delete_sql = "DELETE FROM tbl_underlying WHERE TRIM(entityid) = TRIM(%s)"
+#         rows_deleted = executeSql.ExecuteOne(delete_sql, (entity_id,), return_rowcount=True)
 
-        # 1️⃣ Delete rows in tbl_underlying
-        delete_sql = "DELETE FROM tbl_underlying WHERE TRIM(entityid) = TRIM(%s)"
-        rows_deleted = executeSql.ExecuteOne(delete_sql, (entity_id,), return_rowcount=True)
+#         if rows_deleted > 0:
+#             return {
+#                 "action": "deleted",
+#                 "rows_affected": rows_deleted
+#             }
 
-        if rows_deleted > 0:
-            return {
-                "action": "deleted",
-                "rows_affected": rows_deleted
-            }
+#         # 2️⃣ Check if entity exists in tbl_entity
+#         check_sql = "SELECT 1 FROM tbl_entity WHERE TRIM(entityid) = TRIM(%s)"
+#         exists = executeSql.ExecuteOne(check_sql, (entity_id,), return_rowcount=False)
 
-        # 2️⃣ Check if entity exists in tbl_entity
-        check_sql = "SELECT 1 FROM tbl_entity WHERE TRIM(entityid) = TRIM(%s)"
-        exists = executeSql.ExecuteOne(check_sql, (entity_id,), return_rowcount=False)
+#         if exists:
+#             # 3️⃣ Insert entityid if not deleted
+#             insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
+#             rows_inserted = executeSql.ExecuteOne(insert_sql, (entity_id,), return_rowcount=True)
+#             return {
+#                 "action": "inserted",
+#                 "rows_affected": rows_inserted
+#             }
+#         else:
+#             return {
+#                 "action": "not_found",
+#                 "rows_affected": 0
+#             }
 
-        if exists:
-            # 3️⃣ Insert entityid if not deleted
-            insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
-            rows_inserted = executeSql.ExecuteOne(insert_sql, (entity_id,), return_rowcount=True)
-            return {
-                "action": "inserted",
-                "rows_affected": rows_inserted
-            }
-        else:
-            return {
-                "action": "not_found",
-                "rows_affected": 0
-            }
-
-    except Exception as e:
-        import traceback
-        error_details = traceback.format_exc()
-        print("🔥 ClearUnderlyingdata failed:", error_details)
-        return {
-            "action": "error",
-            "error": str(e),
-            "rows_affected": 0
-        }
-
+#     except Exception as e:
+#         import traceback
+#         error_details = traceback.format_exc()
+#         print("🔥 ClearUnderlyingdata failed:", error_details)
+#         return {
+#             "action": "error",
+#             "error": str(e),
+#             "rows_affected": 0
+#         }
+# old
 # ####
 
 # ==============================Underlying Table End =======================================

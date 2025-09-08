@@ -856,126 +856,129 @@ def getUnderlyingByMf():
 
 
     
-# def ClearUnderlyingdata():
-#     try:
-#         entity_id = None
-
-#         # If DELETE → get from query parameters
-#         if request.method == 'DELETE':
-#             entity_id = request.args.get('id')
-
-#         # If POST → get from form-data or JSON
-#         elif request.method == 'POST':
-#             if request.is_json:
-#                 entity_id = request.json.get('id')
-#             else:
-#                 entity_id = request.form.get('id')
-
-#         # Validate input
-#         if not entity_id:
-#             return make_response(
-#                 middleware.exe_msgs(responses.delete_501, "Missing id parameter", '1024501'),
-#                 400
-#             )
-
-#         # Perform deletion
-#         deleted_rows = queries.ClearUnderlyingdata(entity_id)
-
-#         if isinstance(deleted_rows, int):
-#             if deleted_rows > 0:
-#                 result = middleware.exs_msgs(deleted_rows, responses.delete_200, '1024200')
-#                 status = 200
-#             else:
-#                 result = middleware.exe_msgs(responses.delete_404, "No record found to delete", '1024504')
-#                 status = 404
-#         else:
-#             # Query returned error message object
-#             result = deleted_rows
-#             status = 500
-
-#         return make_response(result, status)
-
-#     except Exception as e:
-#         print("Error in delete_entity:", e)
-#         return make_response(
-#             middleware.exe_msgs(responses.delete_501, str(e.args), '1024500'),
-#             500
- 
-#       )
-
-
-
 def ClearUnderlyingdata():
     try:
-        # Get entity_id from DELETE query param or POST JSON/form
         entity_id = None
+
+        # If DELETE → get from query parameters
         if request.method == 'DELETE':
-            entity_id = request.args.get('entityid')
+            entity_id = request.args.get('id')
+
+        # If POST → get from form-data or JSON
         elif request.method == 'POST':
             if request.is_json:
-                entity_id = request.json.get('entityid')
+                entity_id = request.json.get('id')
             else:
-                entity_id = request.form.get('entityid')
+                entity_id = request.form.get('id')
 
+        # Validate input
         if not entity_id:
-            return make_response({
-                "data": {"message": "Missing entityid parameter", "rows_affected": 0},
-                "successmsgs": "Failed",
-                "code": "1024501"
-            }, 400)
+            return make_response(
+                middleware.exe_msgs(responses.delete_501, "Missing id parameter", '1024501'),
+                400
+            )
 
-        # Call queries.py function
-        result = queries.ClearUnderlyingdata(entity_id)
+        # Perform deletion
+        deleted_rows = queries.ClearUnderlyingdata(entity_id)
 
-        action = result.get("action")
-        rows_affected = result.get("rows_affected", 0)
-
-        if action == "deleted":
-            return make_response({
-                "data": {
-                    "message": f"Entity {entity_id} deleted from tbl_underlying",
-                    "rows_affected": rows_affected
-                },
-                "successmsgs": "Record(s) deleted successfully",
-                "code": "1024200"
-            }, 200)
-
-        elif action == "inserted":
-            return make_response({
-                "data": {
-                    "message": f"Entity {entity_id} inserted into tbl_underlying",
-                    "rows_affected": rows_affected
-                },
-                "successmsgs": "Inserted Successfully",
-                "code": "1024201"
-            }, 200)
-
-        elif action == "not_found":
-            return make_response({
-                "data": {
-                    "message": f"Entity {entity_id} not found in tbl_entity",
-                    "rows_affected": 0
-                },
-                "successmsgs": "No matching entity found",
-                "code": "1024204"
-            }, 404)
-
+        if isinstance(deleted_rows, int):
+            if deleted_rows > 0:
+                result = middleware.exs_msgs(deleted_rows, responses.delete_200, '1024200')
+                status = 200
+            else:
+                result = middleware.exe_msgs(responses.delete_404, "No record found to delete", '1024504')
+                status = 404
         else:
-            return make_response({
-                "errmsgs": f"Query error: {result.get('error')}",
-                "error": result.get('error'),
-                "code": "1024503"
-            }, 500)
+            # Query returned error message object
+            result = deleted_rows
+            status = 500
+
+        return make_response(result, status)
 
     except Exception as e:
-        import traceback
-        error_details = traceback.format_exc()
-        print("🔥 ClearUnderlyingdata API failed:", error_details)
-        return make_response({
-            "errmsgs": f"Internal Server Error: {str(e)}",
-            "error": error_details,
-            "code": "1024503"
-        }, 500)
+        print("Error in delete_entity:", e)
+        return make_response(
+            middleware.exe_msgs(responses.delete_501, str(e.args), '1024500'),
+            500
+ 
+      )
+
+
+# new running
+# def ClearUnderlyingdata():
+#     try:
+#         # Get entity_id from DELETE query param or POST JSON/form
+#         entity_id = None
+#         if request.method == 'DELETE':
+#             entity_id = request.args.get('entityid')
+#         elif request.method == 'POST':
+#             if request.is_json:
+#                 entity_id = request.json.get('entityid')
+#             else:
+#                 entity_id = request.form.get('entityid')
+
+#         if not entity_id:
+#             return make_response({
+#                 "data": {"message": "Missing entityid parameter", "rows_affected": 0},
+#                 "successmsgs": "Failed",
+#                 "code": "1024501"
+#             }, 400)
+
+#         # Call queries.py function
+#         result = queries.ClearUnderlyingdata(entity_id)
+
+#         action = result.get("action")
+#         rows_affected = result.get("rows_affected", 0)
+
+#         if action == "deleted":
+#             return make_response({
+#                 "data": {
+#                     "message": f"Entity {entity_id} deleted from tbl_underlying",
+#                     "rows_affected": rows_affected
+#                 },
+#                 "successmsgs": "Record(s) deleted successfully",
+#                 "code": "1024200"
+#             }, 200)
+
+#         elif action == "inserted":
+#             return make_response({
+#                 "data": {
+#                     "message": f"Entity {entity_id} inserted into tbl_underlying",
+#                     "rows_affected": rows_affected
+#                 },
+#                 "successmsgs": "Inserted Successfully",
+#                 "code": "1024201"
+#             }, 200)
+
+#         elif action == "not_found":
+#             return make_response({
+#                 "data": {
+#                     "message": f"Entity {entity_id} not found in tbl_entity",
+#                     "rows_affected": 0
+#                 },
+#                 "successmsgs": "No matching entity found",
+#                 "code": "1024204"
+#             }, 404)
+
+#         else:
+#             return make_response({
+#                 "errmsgs": f"Query error: {result.get('error')}",
+#                 "error": result.get('error'),
+#                 "code": "1024503"
+#             }, 500)
+
+#     except Exception as e:
+#         import traceback
+#         error_details = traceback.format_exc()
+#         print("🔥 ClearUnderlyingdata API failed:", error_details)
+#         return make_response({
+#             "errmsgs": f"Internal Server Error: {str(e)}",
+#             "error": error_details,
+#             "code": "1024503"
+#         }, 500)
+
+# new
+
 #========================================Underlying Table End ======================================================
 
             

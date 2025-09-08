@@ -425,7 +425,7 @@ def ClearUnderlyingdata(entity_id):
     try:
         result_summary = {}
 
-        # 1. Delete all rows for this entityid, return affected IDs
+        # 1. Delete all rows for this entityid
         delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s RETURNING id"
         deleted_rows = executeSql.ExecuteAll(delete_sql, (entity_id,))
         rows_count = len(deleted_rows) if deleted_rows else 0
@@ -443,7 +443,7 @@ def ClearUnderlyingdata(entity_id):
             # Insert entityid into tbl_underlying
             insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s) RETURNING id"
             inserted_rows = executeSql.ExecuteAll(insert_sql, (entity_id,))
-            rows_count = len(inserted_rows) if inserted_rows else 0
+            rows_count = len(inserted_rows) if inserted_rows else 1  # fallback to 1 if ExecuteAll returns None
             result_summary["action"] = "inserted"
             result_summary["rows_affected"] = rows_count
         else:

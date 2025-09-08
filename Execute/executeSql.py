@@ -208,22 +208,14 @@ def ExecuteOne(query, data=None, return_rowcount=False):
         cur = conn.cursor()
         cur.execute(query, data or ())
         conn.commit()
-        rowcount = cur.rowcount  # number of rows affected
+        rowcount = cur.rowcount
         cur.close()
         conn.close()
-        # return number of affected rows if requested, else None
-        if return_rowcount:
-            return rowcount
-        return None
+        return rowcount if return_rowcount else cur.fetchone()
     except Exception as e:
         print("ExecuteOne error:", e)
-        if conn:
-            conn.rollback()
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
         return None
+
 
     
 def FetchOne(query, data=None):

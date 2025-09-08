@@ -426,13 +426,22 @@ def ClearUnderlyingdata(entity_id):
     try:
         entity_id = entity_id.strip()
 
-        # 1. Delete all rows for this entityid
-        delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
-        rows_deleted = executeSql.ExecuteOne(delete_sql, (entity_id,), return_rowcount=True)
+        from db import get_db_connection  # adjust import if needed
+        conn = get_db_connection()
+        cur = conn.cursor()
 
-        print(f"[DEBUG] Delete tried for entityid={entity_id}, rows_deleted={rows_deleted}")
+        # Force delete
+        delete_sql = "DELETE FROM tbl_underlying WHERE TRIM(entityid) = TRIM(%s)"
+        cur.execute(delete_sql, (entity_id,))
+        rows_deleted = cur.rowcount
+        conn.commit()
 
-        if rows_deleted and rows_deleted > 0:
+        print(f"[DEBUG] Direct delete for {entity_id}, rows_deleted={rows_deleted}")
+
+        cur.close()
+        conn.close()
+
+        if rows_deleted > 0:
             return {
                 "data": {
                     "message": f"Entity {entity_id} deleted from tbl_underlying",
@@ -442,19 +451,27 @@ def ClearUnderlyingdata(entity_id):
                 "code": "1024200"
             }
 
-        # 2. If no rows deleted, check in tbl_entity
-        check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s"
-        entity_exists = executeSql.ExecuteReturn(check_entity_sql, (entity_id,))
+        # If no rows deleted, check if entity exists in tbl_entity
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT 1 FROM tbl_entity WHERE entityid = %s", (entity_id,))
+        exists = cur.fetchone()
+        cur.close()
+        conn.close()
 
-        print(f"[DEBUG] Entity exists check for {entity_id}: {entity_exists}")
+        if exists:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("INSERT INTO tbl_underlying (entityid) VALUES (%s)", (entity_id,))
+            conn.commit()
+            inserted = cur.rowcount
+            cur.close()
+            conn.close()
 
-        if entity_exists:
-            insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
-            rows_inserted = executeSql.ExecuteOne(insert_sql, (entity_id,), return_rowcount=True)
             return {
                 "data": {
                     "message": f"Entity {entity_id} inserted into tbl_underlying",
-                    "rows_affected": rows_inserted
+                    "rows_affected": inserted
                 },
                 "successmsgs": "Inserted Successfully",
                 "code": "1024201"
@@ -476,7 +493,6 @@ def ClearUnderlyingdata(entity_id):
             "error": "Internal Server Error while Deleting Data",
             "code": "1024503"
         }
-
 
 # ####
 

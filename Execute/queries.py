@@ -424,11 +424,10 @@ def getUnderlyingByMf():
 def ClearUnderlyingdata(entity_id):
     try:
         result_summary = {}
-        # Always clean up Python-side
-        entity_id = entity_id.strip()
+        entity_id = entity_id.strip()  # just in case
 
-        # 1. Delete all rows for this entityid (with TRIM in SQL too)
-        delete_sql = "DELETE FROM tbl_underlying WHERE TRIM(entityid) = %s"
+        # 1. Delete all rows for this entityid
+        delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
         rows_deleted = executeSql.ExecuteOne(delete_sql, (entity_id,), return_rowcount=True)
 
         if rows_deleted and rows_deleted > 0:
@@ -437,15 +436,14 @@ def ClearUnderlyingdata(entity_id):
             return result_summary
 
         # 2. If no rows deleted, check if entity exists in tbl_entity
-        check_entity_sql = "SELECT 1 FROM tbl_entity WHERE TRIM(entityid) = %s"
+        check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s"
         entity_exists = executeSql.ExecuteReturn(check_entity_sql, (entity_id,))
 
         if entity_exists:
-            # Insert entityid into tbl_underlying
             insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
-            inserted_rows = executeSql.ExecuteOne(insert_sql, (entity_id,), return_rowcount=True)
+            inserted = executeSql.ExecuteOne(insert_sql, (entity_id,), return_rowcount=True)
             result_summary["action"] = "inserted"
-            result_summary["rows_affected"] = inserted_rows or 1
+            result_summary["rows_affected"] = inserted or 1
         else:
             result_summary["action"] = "not_found"
             result_summary["rows_affected"] = 0
@@ -459,6 +457,7 @@ def ClearUnderlyingdata(entity_id):
             "error": str(e),
             "rows_affected": 0
         }
+
 
 # ####
 

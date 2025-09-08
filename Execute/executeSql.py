@@ -201,28 +201,18 @@ def ExecuteReturn(query, data=None):
 #         print("Error in ExecuteOne:", e)
 #         return None
 
-def ExecuteOne(query, data=None):
+def ExecuteOne(query, data=None, return_rowcount=False):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-
         cur.execute(query, data or ())
-
-        query_lower = query.strip().lower()
-
-        if query_lower.startswith("select"):
-            result = cur.fetchone()
-        elif "returning" in query_lower:
-            result = cur.fetchall()  # ✅ for DELETE/UPDATE/INSERT ... RETURNING
-        else:
-            result = cur.rowcount  # ✅ safe for normal insert/update/delete
-
         conn.commit()
+        rowcount = cur.rowcount
         cur.close()
         conn.close()
-        return result
+        return rowcount if return_rowcount else cur.fetchone()
     except Exception as e:
-        print("Error in ExecuteOne:", e)
+        print("ExecuteOne error:", e)
         return None
 
     

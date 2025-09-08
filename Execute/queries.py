@@ -426,9 +426,8 @@ def ClearUnderlyingdata(entity_id):
         result_summary = {}
 
         # 1. Delete all rows for this entityid
-        delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s RETURNING id"
-        deleted_rows = executeSql.ExecuteAll(delete_sql, (entity_id,))
-        rows_deleted = len(deleted_rows) if deleted_rows else 0
+        delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
+        rows_deleted = executeSql.ExecuteOne(delete_sql, (entity_id,), return_rowcount=True)
 
         if rows_deleted > 0:
             result_summary["action"] = "deleted"
@@ -441,11 +440,10 @@ def ClearUnderlyingdata(entity_id):
 
         if entity_exists:
             # Insert entityid into tbl_underlying
-            insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s) RETURNING id"
-            inserted_rows = executeSql.ExecuteAll(insert_sql, (entity_id,))
-            rows_inserted = len(inserted_rows) if inserted_rows else 1  # fallback to 1 if ExecuteAll returns None
+            insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
+            rows_inserted = executeSql.ExecuteOne(insert_sql, (entity_id,), return_rowcount=True)
             result_summary["action"] = "inserted"
-            result_summary["rows_affected"] = rows_inserted
+            result_summary["rows_affected"] = rows_inserted if rows_inserted else 1
         else:
             result_summary["action"] = "not_found"
             result_summary["rows_affected"] = 0

@@ -286,6 +286,22 @@ def ExecuteReturnId(query, data):
             conn.close()
         print("Error in ExecuteReturnId=============================", e)
         return middleware.exe_msgs(responses.execution_501, str(e.args), '1022300')
+    
+    
+def ExecuteRowCount(query, params=None):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(query, params or ())
+        rowcount = cur.rowcount  # <-- number of rows affected
+        conn.commit()
+        cur.close()
+        conn.close()
+        return rowcount
+    except Exception as e:
+        print("Error in ExecuteRowCount:", e)
+        return 0
+
 
 
 
@@ -362,3 +378,8 @@ def ExecuteAllWithHeaders(query, params=None):
             cur.close()
         if conn:
             conn.close()
+
+
+
+
+            

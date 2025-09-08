@@ -428,7 +428,8 @@ def ClearUnderlyingdata(entity_id):
         # 1. Delete all rows for this entityid
         delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s RETURNING id"
         deleted_rows = executeSql.ExecuteAll(delete_sql, (entity_id,))
-        rows_count = len(deleted_rows) if deleted_rows else 0
+        rows_deleted = len(deleted_rows) if deleted_rows else 0
+
 
         if rows_count > 0:
             result_summary["action"] = "deleted"

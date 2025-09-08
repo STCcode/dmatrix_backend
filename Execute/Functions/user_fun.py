@@ -907,8 +907,8 @@ def getUnderlyingByMf():
 
 def ClearUnderlyingdata():
     try:
+        # Get entity_id from DELETE query param or POST JSON/form
         entity_id = None
-
         if request.method == 'DELETE':
             entity_id = request.args.get('entityid')
         elif request.method == 'POST':
@@ -918,54 +918,64 @@ def ClearUnderlyingdata():
                 entity_id = request.form.get('entityid')
 
         if not entity_id:
-            # middleware already returns a response-like object
-            return make_response(middleware.exe_msgs(
-                responses.delete_501,
-                "Missing entityid parameter",
-                '1024501'
-            ), 400)
+            return make_response({
+                "data": {"message": "Missing entityid parameter", "rows_affected": 0},
+                "successmsgs": "Failed",
+                "code": "1024501"
+            }, 400)
 
-        action_result = queries.ClearUnderlyingdata(entity_id)
-        action = action_result.get("action")
-        rows_affected = action_result.get("rows_affected", 0)
+        # Call queries.py function
+        result = queries.ClearUnderlyingdata(entity_id)
+
+        action = result.get("action")
+        rows_affected = result.get("rows_affected", 0)
 
         if action == "deleted":
-            return make_response(middleware.exs_msgs(
-                {"message": f"Entity {entity_id} deleted from tbl_underlying", "rows_affected": rows_affected},
-                responses.delete_200,
-                '1024200'
-            ), 200)
+            return make_response({
+                "data": {
+                    "message": f"Entity {entity_id} deleted from tbl_underlying",
+                    "rows_affected": rows_affected
+                },
+                "successmsgs": "Record(s) deleted successfully",
+                "code": "1024200"
+            }, 200)
 
         elif action == "inserted":
-            return make_response(middleware.exs_msgs(
-                {"message": f"Entity {entity_id} inserted into tbl_underlying", "rows_affected": rows_affected},
-                responses.insert_200 if hasattr(responses, 'insert_200') else responses.delete_200,
-                '1024201'
-            ), 200)
+            return make_response({
+                "data": {
+                    "message": f"Entity {entity_id} inserted into tbl_underlying",
+                    "rows_affected": rows_affected
+                },
+                "successmsgs": "Inserted Successfully",
+                "code": "1024201"
+            }, 200)
 
         elif action == "not_found":
-            return make_response(middleware.exe_msgs(
-                responses.delete_404,
-                f"Entity {entity_id} not found in tbl_entity or tbl_underlying",
-                '1024504'
-            ), 404)
+            return make_response({
+                "data": {
+                    "message": f"Entity {entity_id} not found in tbl_entity",
+                    "rows_affected": 0
+                },
+                "successmsgs": "No matching entity found",
+                "code": "1024204"
+            }, 404)
 
         else:
-            return make_response(middleware.exe_msgs(
-                responses.delete_501,
-                f"Query error: {action_result.get('error')}",
-                '1024503'
-            ), 500)
+            return make_response({
+                "errmsgs": f"Query error: {result.get('error')}",
+                "error": result.get('error'),
+                "code": "1024503"
+            }, 500)
 
     except Exception as e:
-        print("Error in ClearUnderlyingdata API:", e)
-        return make_response(middleware.exe_msgs(
-            responses.delete_501,
-            str(e),
-            '1024500'
-        ), 500)
-
-
+        import traceback
+        error_details = traceback.format_exc()
+        print("🔥 ClearUnderlyingdata API failed:", error_details)
+        return make_response({
+            "errmsgs": f"Internal Server Error: {str(e)}",
+            "error": error_details,
+            "code": "1024503"
+        }, 500)
 #========================================Underlying Table End ======================================================
 
             

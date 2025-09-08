@@ -421,62 +421,48 @@ def getUnderlyingByMf():
 
 
 # queri.py
+# queries.py
 
-def ClearUnderlyingdata(entity_id):
+def ClearUnderlyingdata(entity_id: str):
     try:
-        entity_id = entity_id.strip()
+        entity_id = entity_id.strip()  # remove hidden spaces
 
-        # 1. Try delete first
+        # 1️⃣ Delete rows in tbl_underlying
         delete_sql = "DELETE FROM tbl_underlying WHERE TRIM(entityid) = TRIM(%s)"
         rows_deleted = executeSql.ExecuteOne(delete_sql, (entity_id,), return_rowcount=True)
 
-        print(f"[DEBUG] Direct delete for {entity_id}, rows_deleted={rows_deleted}")
-
-        if rows_deleted and rows_deleted > 0:
+        if rows_deleted > 0:
             return {
-                "data": {
-                    "message": f"Entity {entity_id} deleted from tbl_underlying",
-                    "rows_affected": rows_deleted
-                },
-                "successmsgs": "Record(s) deleted successfully",
-                "code": "1024200"
+                "action": "deleted",
+                "rows_affected": rows_deleted
             }
 
-        # 2. If no rows deleted, check if entity exists in tbl_entity
+        # 2️⃣ Check if entity exists in tbl_entity
         check_sql = "SELECT 1 FROM tbl_entity WHERE TRIM(entityid) = TRIM(%s)"
-        exists = executeSql.ExecuteReturn(check_sql, (entity_id,))
+        exists = executeSql.ExecuteOne(check_sql, (entity_id,), return_rowcount=False)
 
         if exists:
+            # 3️⃣ Insert entityid if not deleted
             insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
-            inserted_count = executeSql.ExecuteOne(insert_sql, (entity_id,), return_rowcount=True)
-
+            rows_inserted = executeSql.ExecuteOne(insert_sql, (entity_id,), return_rowcount=True)
             return {
-                "data": {
-                    "message": f"Entity {entity_id} inserted into tbl_underlying",
-                    "rows_affected": inserted_count
-                },
-                "successmsgs": "Inserted Successfully",
-                "code": "1024201"
+                "action": "inserted",
+                "rows_affected": rows_inserted
             }
         else:
             return {
-                "data": {
-                    "message": f"Entity {entity_id} not found in tbl_entity",
-                    "rows_affected": 0
-                },
-                "successmsgs": "No matching entity found",
-                "code": "1024204"
+                "action": "not_found",
+                "rows_affected": 0
             }
 
     except Exception as e:
         import traceback
         error_details = traceback.format_exc()
         print("🔥 ClearUnderlyingdata failed:", error_details)
-
         return {
-            "errmsgs": f"Query error: {str(e)}",
-            "error": error_details,
-            "code": "1024503"
+            "action": "error",
+            "error": str(e),
+            "rows_affected": 0
         }
 
 # ####

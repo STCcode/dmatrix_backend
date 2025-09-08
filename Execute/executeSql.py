@@ -156,20 +156,20 @@ def ExecuteAll(query, data=None):
 
 
 
-# SELECT ONE
+# Execute a SELECT query that returns a single row
 def ExecuteReturn(query, data=None):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute(query, data or ())
-        result = cur.fetchone()
+        result = cur.fetchone()  # single row or None
         conn.commit()
         cur.close()
         conn.close()
-        return result  # tuple or None
+        return result
     except Exception as e:
         print("Error in ExecuteReturn:", e)
-        return None   # always return None on error
+        return None
 
 
 
@@ -201,18 +201,28 @@ def ExecuteReturn(query, data=None):
 #         print("Error in ExecuteOne:", e)
 #         return None
 
+# Execute an INSERT, UPDATE, DELETE or any query
 def ExecuteOne(query, data=None, return_rowcount=False):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute(query, data or ())
         conn.commit()
-        rowcount = cur.rowcount
+        rowcount = cur.rowcount  # number of rows affected
         cur.close()
         conn.close()
-        return rowcount if return_rowcount else cur.fetchone()
+        # return number of affected rows if requested, else None
+        if return_rowcount:
+            return rowcount
+        return None
     except Exception as e:
         print("ExecuteOne error:", e)
+        if conn:
+            conn.rollback()
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
         return None
 
     

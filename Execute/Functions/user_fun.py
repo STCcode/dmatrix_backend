@@ -862,7 +862,7 @@ def ClearUnderlyingdata():
 
         # If DELETE → get from query parameters
         if request.method == 'DELETE':
-            entity_id = request.args.get('id')
+            entity_id = request.args.get('entityid')
 
         # If POST → get from form-data or JSON
         elif request.method == 'POST':

@@ -326,6 +326,7 @@ def getUnderlyingByMf():
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')  
+     
 
 def ClearUnderlyingdata(entity_id):
     try:
@@ -338,9 +339,9 @@ def ClearUnderlyingdata(entity_id):
         if underlying_exists:
             # Case A: entityid exists in tbl_underlying → delete it
             delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
-            executeSql.ExecuteOne(delete_sql, (entity_id,))
+            rows_deleted = executeSql.ExecuteOne(delete_sql, (entity_id,))
             result_summary["action"] = "deleted"
-            result_summary["rows_affected"] = 1
+            result_summary["rows_affected"] = rows_deleted
 
         else:
             # Case B: entityid not in tbl_underlying → check if it exists in tbl_entity

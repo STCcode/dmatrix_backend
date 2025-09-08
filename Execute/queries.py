@@ -385,7 +385,7 @@ def ClearUnderlyingdata(entity_id):
             deleted_rows = executeSql.ExecuteAll(delete_sql, (entity_id,))
             
             result_summary["action"] = "deleted"
-            result_summary["rows_affected"] = len(deleted_rows)  # <-- count instead of list
+            result_summary["rows_affected"] = len(deleted_rows)  # number of deleted rows
 
         else:
             # Case B: entityid not in tbl_underlying → check if it exists in tbl_entity
@@ -406,10 +406,11 @@ def ClearUnderlyingdata(entity_id):
                         entityid         
                     FROM tbl_entity
                     WHERE entityid = %s
+                    RETURNING id
                 """
-                rows_inserted = executeSql.ExecuteQuery(insert_sql, (entity_id,))
+                inserted_rows = executeSql.ExecuteAll(insert_sql, (entity_id,))
                 result_summary["action"] = "inserted"
-                result_summary["rows_affected"] = rows_inserted
+                result_summary["rows_affected"] = len(inserted_rows)
             else:
                 result_summary["action"] = "not_found"
                 result_summary["rows_affected"] = 0

@@ -900,8 +900,17 @@ def getUnderlyingByMf():
 #         return make_response(
 #             middleware.exe_msgs(responses.delete_501, str(e.args), '1024500'),
 #             500
-#  
+ 
 #       )
+
+
+
+
+
+
+
+
+
 
 
 def ClearUnderlyingdata():
@@ -909,7 +918,7 @@ def ClearUnderlyingdata():
         entity_id = None
         data = {}
 
-        # ✅ Get entity_id depending on method
+        # ✅ Extract entity_id from request
         if request.method == 'DELETE':
             if request.is_json:
                 data = request.get_json(silent=True) or {}
@@ -922,22 +931,22 @@ def ClearUnderlyingdata():
                 data = request.get_json(silent=True) or {}
                 entity_id = data.get("entityid")
             else:
-                entity_id = request.form.get('entityid')
+                entity_id = request.form.get("entityid")
 
         # ✅ Validate input
         if not entity_id:
             result = middleware.exe_msgs(
                 responses.delete_501,
                 "Missing entityid parameter",
-                '1024501'
+                "1024501"
             )
-            return result if isinstance(result, Response) else make_response(jsonify(result), 400)
+            return make_response(jsonify(result), 400)
 
         # ✅ Call query layer
         action_result = queries.ClearUnderlyingdata(entity_id)
 
-        result = None
-        status = 500
+        # ✅ Default fallback
+        result, status = None, 500
 
         if isinstance(action_result, dict):
             action = action_result.get("action")
@@ -945,17 +954,13 @@ def ClearUnderlyingdata():
 
             if action == "deleted":
                 result = middleware.exs_msgs(
-                    {"message": f"Entity {entity_id} deleted from tbl_underlying", "rows_affected": rows},
+                    {
+                        "message": f"Entity {entity_id} deleted from tbl_underlying",
+                        "rows_affected": rows,
+                        "deleted_ids": action_result.get("deleted_ids", [])
+                    },
                     responses.delete_200,
-                    '1024200'
-                )
-                status = 200
-
-            elif action == "inserted":
-                result = middleware.exs_msgs(
-                    {"message": f"Entity {entity_id} was not in tbl_underlying, inserted successfully", "rows_affected": rows},
-                    getattr(responses, 'insert_200', responses.delete_200),
-                    '1024201'
+                    "1024200"
                 )
                 status = 200
 
@@ -963,7 +968,7 @@ def ClearUnderlyingdata():
                 result = middleware.exe_msgs(
                     responses.delete_404,
                     f"Entity {entity_id} not found in tbl_entity or tbl_underlying",
-                    '1024504'
+                    "1024504"
                 )
                 status = 404
 
@@ -971,37 +976,26 @@ def ClearUnderlyingdata():
                 result = middleware.exe_msgs(
                     responses.delete_501,
                     f"Query error: {action_result.get('error')}",
-                    '1024503'
+                    "1024503"
                 )
                 status = 500
 
         else:
+            # unexpected return type
             result = middleware.exe_msgs(
                 responses.delete_501,
                 "Unexpected return type from query",
-                '1024502'
+                "1024502"
             )
             status = 500
 
         # ✅ Always safe return
-        if isinstance(result, Response):
-            return result
-        elif isinstance(result, dict):
-            return make_response(jsonify(result), status)
-        else:
-            return make_response(result, status)
+        return make_response(jsonify(result), status)
 
     except Exception as e:
         print("Error in ClearUnderlyingdata API:", e)
-        result = middleware.exe_msgs(responses.delete_501, str(e), '1024500')
-        if isinstance(result, Response):
-            return result
-        elif isinstance(result, dict):
-            return make_response(jsonify(result), 500)
-        else:
-            return make_response(result, 500)
-
-
+        result = middleware.exe_msgs(responses.delete_501, str(e), "1024500")
+        return make_response(jsonify(result), 500)
 
 
 #========================================Underlying Table End ======================================================

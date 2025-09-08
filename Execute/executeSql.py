@@ -207,11 +207,13 @@ def ExecuteOne(query, data=None):
         cur = conn.cursor()
         cur.execute(query, data or ())
 
-        # ✅ Only fetch if query has RETURNING
+        result = None
+        # ✅ if SELECT/RETURNING → fetch
         if cur.description is not None:
             result = cur.fetchone()
         else:
-            result = None
+            # ✅ for DELETE/UPDATE/INSERT → return affected row count
+            result = cur.rowcount
 
         conn.commit()
         cur.close()

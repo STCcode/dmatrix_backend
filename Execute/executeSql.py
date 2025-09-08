@@ -210,13 +210,12 @@ def ExecuteOne(query, data=None):
 
         query_lower = query.strip().lower()
         if query_lower.startswith("select"):
-            # SELECT → single row
             result = cur.fetchone()
         elif "returning" in query_lower:
-            # INSERT/UPDATE/DELETE with RETURNING → all returned rows
+            # fetch all deleted/updated rows
             result = cur.fetchall()
         else:
-            # Normal INSERT/UPDATE/DELETE without RETURNING → rowcount
+            # normal insert/update/delete without returning
             result = cur.rowcount
 
         conn.commit()

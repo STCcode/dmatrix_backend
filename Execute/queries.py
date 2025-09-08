@@ -422,42 +422,40 @@ def getUnderlyingByMf():
 
 def ClearUnderlyingdata(entity_id):
     try:
-        result_summary = {}
+        # delete and return deleted IDs
+        delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s RETURNING id"
+        deleted_rows = executeSql.ExecuteOne(delete_sql, (entity_id,)) or []
 
-        # Check if entityid exists
-        check_sql = "SELECT 1 FROM tbl_underlying WHERE entityid = %s LIMIT 1"
-        exists = executeSql.ExecuteReturn(check_sql, (entity_id,))
+        rows_deleted = len(deleted_rows) if isinstance(deleted_rows, list) else 0
+        deleted_ids = [row[0] for row in deleted_rows] if rows_deleted > 0 else []
 
-        if exists:
-            # DELETE and return deleted IDs
-            delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s RETURNING id"
-            deleted_rows = executeSql.ExecuteOne(delete_sql, (entity_id,)) or []
-
-            rows_deleted = len(deleted_rows)
-            deleted_ids = [row[0] for row in deleted_rows]  # extract id column
-
-            result_summary["action"] = "deleted"
-            result_summary["rows_affected"] = rows_deleted
-            result_summary["deleted_ids"] = deleted_ids
-            result_summary["message"] = (
-                f"Entity {entity_id} deleted from tbl_underlying"
-                if rows_deleted > 0 else f"No records deleted for Entity {entity_id}"
-            )
+        if rows_deleted > 0:
+            return {
+                "data": {
+                    "message": f"Entity {entity_id} deleted from tbl_underlying",
+                    "rows_affected": rows_deleted,
+                    "deleted_ids": deleted_ids
+                },
+                "successmsgs": "Record(s) deleted successfully",
+                "code": "1024200"
+            }
         else:
-            result_summary["action"] = "not_found"
-            result_summary["rows_affected"] = 0
-            result_summary["deleted_ids"] = []
-            result_summary["message"] = f"Entity {entity_id} not found in tbl_underlying"
-
-        return result_summary
+            return {
+                "data": {
+                    "message": f"No records deleted for Entity {entity_id}",
+                    "rows_affected": 0,
+                    "deleted_ids": []
+                },
+                "successmsgs": "No records deleted",
+                "code": "1024201"
+            }
 
     except Exception as e:
-        print("Error in ClearUnderlyingdata query:", e)
+        print("Error in ClearUnderlyingdata:", e)
         return {
-            "action": "error",
-            "error": str(e),
-            "rows_affected": 0,
-            "deleted_ids": []
+            "errmsgs": str(e),
+            "error": "Internal Server Error while Deleting Data",
+            "code": "1024503"
         }
 
 # ####

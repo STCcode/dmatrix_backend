@@ -187,16 +187,36 @@ def ExecuteReturn(query, data=None):
 #         print("Error in ExecuteOne==============================", e)
 #         return middleware.exe_msgs(responses.execution_501, str(e.args), '1020300')
 
+# def ExecuteOne(query, data=None):
+#     try:
+#         conn = get_db_connection()
+#         cur = conn.cursor()
+#         cur.execute(query, data or ())
+#         result = cur.fetchone()
+#         conn.commit()
+#         cur.close()
+#         conn.close()
+#         return result  # tuple or None
+#     except Exception as e:
+#         print("Error in ExecuteOne:", e)
+#         return None
+
 def ExecuteOne(query, data=None):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute(query, data or ())
-        result = cur.fetchone()
+
+        # ✅ Only fetch if query has RETURNING
+        if cur.description is not None:
+            result = cur.fetchone()
+        else:
+            result = None
+
         conn.commit()
         cur.close()
         conn.close()
-        return result  # tuple or None
+        return result
     except Exception as e:
         print("Error in ExecuteOne:", e)
         return None

@@ -433,7 +433,7 @@ def ClearUnderlyingdata(entity_id):
 
         if rows_count > 0:
             result_summary["action"] = "deleted"
-            result_summary["rows_affected"] = rows_count
+            result_summary["rows_affected"] = rows_deleted
             return result_summary
 
         # 2. If no rows deleted, check if entity exists in tbl_entity

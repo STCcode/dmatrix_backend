@@ -421,20 +421,18 @@ def getUnderlyingByMf():
 
 
 # queri.py
+
 def ClearUnderlyingdata(entity_id):
     try:
-        result_summary = {}
-
-        # Strip spaces just in case
         entity_id = entity_id.strip()
 
         # 1. Delete all rows for this entityid
         delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
         rows_deleted = executeSql.ExecuteOne(delete_sql, (entity_id,), return_rowcount=True)
 
+        print(f"[DEBUG] Delete tried for entityid={entity_id}, rows_deleted={rows_deleted}")
+
         if rows_deleted and rows_deleted > 0:
-            result_summary["action"] = "deleted"
-            result_summary["rows_affected"] = rows_deleted
             return {
                 "data": {
                     "message": f"Entity {entity_id} deleted from tbl_underlying",
@@ -444,17 +442,15 @@ def ClearUnderlyingdata(entity_id):
                 "code": "1024200"
             }
 
-        # 2. If no rows deleted, check if entity exists in tbl_entity
+        # 2. If no rows deleted, check in tbl_entity
         check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s"
         entity_exists = executeSql.ExecuteReturn(check_entity_sql, (entity_id,))
 
+        print(f"[DEBUG] Entity exists check for {entity_id}: {entity_exists}")
+
         if entity_exists:
-            # Insert entityid into tbl_underlying
             insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
             rows_inserted = executeSql.ExecuteOne(insert_sql, (entity_id,), return_rowcount=True)
-
-            result_summary["action"] = "inserted"
-            result_summary["rows_affected"] = rows_inserted
             return {
                 "data": {
                     "message": f"Entity {entity_id} inserted into tbl_underlying",
@@ -463,10 +459,7 @@ def ClearUnderlyingdata(entity_id):
                 "successmsgs": "Inserted Successfully",
                 "code": "1024201"
             }
-
         else:
-            result_summary["action"] = "not_found"
-            result_summary["rows_affected"] = 0
             return {
                 "data": {
                     "message": f"Entity {entity_id} not found in tbl_entity",
@@ -483,6 +476,8 @@ def ClearUnderlyingdata(entity_id):
             "error": "Internal Server Error while Deleting Data",
             "code": "1024503"
         }
+
+
 # ####
 
 # ==============================Underlying Table End =======================================

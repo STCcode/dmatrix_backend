@@ -209,16 +209,21 @@ def ExecuteOne(query, data=None, return_rowcount=False):
         cur = conn.cursor()
         cur.execute(query, data or ())
         rowcount = cur.rowcount
+
         result = None
         if not return_rowcount:
             try:
                 result = cur.fetchone()
             except Exception:
                 result = None
+
         conn.commit()
         cur.close()
         conn.close()
+
+        # ✅ Always return integer if return_rowcount=True
         return rowcount if return_rowcount else result
+
     except Exception as e:
         print("ExecuteOne error:", e)
         return None

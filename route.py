@@ -171,6 +171,8 @@ app.add_url_rule('/getETFActionTablebyId',view_func=user_fun.getEtfActionTableby
 
 app.add_url_rule('/getETFEntity',view_func=user_fun.getEtfEntity,methods=['GET','POST'])
 
+app.add_url_rule('/getCountOfAllCommodities',view_func=user_fun.getCountOfAllCommodities,methods=['GET','POST'])
+
 # ======================================ETF Table End======================================
 
 

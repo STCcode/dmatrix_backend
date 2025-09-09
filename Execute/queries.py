@@ -641,7 +641,20 @@ def getEtfEntity():
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')      
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')   
+
+
+
+
+def getCountOfAllCommodities():
+     try:
+          sql=" SELECT MIN(subcategory) AS subcategory,MIN(category) AS category,COUNT(*) AS total FROM tbl_entity WHERE (subcategory ILIKE 'ETF' OR subcategory ILIKE 'PMS' OR subcategory ILIKE 'ATF' OR subcategory ILIKE 'Direct') AND category ILIKE 'Commodities' GROUP BY subcategory ORDER BY subcategory;"
+          data=''
+          msgs=executeSql.ExecuteAllNew(sql,data)
+          return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')        
 
 
 

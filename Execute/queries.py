@@ -328,6 +328,48 @@ def getUnderlyingByMf():
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')  
      
 
+# def ClearUnderlyingdata(entity_id):
+#     try:
+#         result_summary = {}
+
+#         # 1. Check if entityid exists in tbl_underlying
+#         check_underlying_sql = "SELECT 1 FROM tbl_underlying WHERE entityid = %s"
+#         underlying_exists = executeSql.ExecuteReturn(check_underlying_sql, (entity_id,))
+
+#         if underlying_exists:
+#             # Case A: entityid exists in tbl_underlying → delete it
+#             delete_sql = "DELETE FROM tbl_underlying WHERE entityid = %s"
+#             rows_deleted = executeSql.ExecuteOne(delete_sql, (entity_id,))
+#             result_summary["action"] = "deleted"
+#             result_summary["rows_affected"] = rows_deleted
+
+#         else:
+#             # Case B: entityid not in tbl_underlying → check if it exists in tbl_entity
+#             check_entity_sql = "SELECT 1 FROM tbl_entity WHERE entityid = %s"
+#             entity_exists = executeSql.ExecuteReturn(check_entity_sql, (entity_id,))
+
+#             if entity_exists:
+#                 # Insert entityid into tbl_underlying
+#                 insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
+#                 executeSql.ExecuteReturnId(insert_sql, (entity_id,))
+#                 result_summary["action"] = "inserted"
+#                 result_summary["rows_affected"] = 1
+#             else:
+#                 # Case C: entityid not in tbl_entity either → nothing to do
+#                 result_summary["action"] = "not_found"
+#                 result_summary["rows_affected"] = 0
+
+#         return result_summary
+
+#     except Exception as e:
+#         print("Error in ClearUnderlyingdata query:", e)
+#         return {
+#             "action": "error",
+#             "error": str(e),
+#             "rows_affected": 0
+#         }
+
+
 def ClearUnderlyingdata(entity_id):
     try:
         result_summary = {}
@@ -351,9 +393,9 @@ def ClearUnderlyingdata(entity_id):
             if entity_exists:
                 # Insert entityid into tbl_underlying
                 insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
-                executeSql.ExecuteReturnId(insert_sql, (entity_id,))
+                rows_inserted = executeSql.ExecuteReturnId(insert_sql, (entity_id,))
                 result_summary["action"] = "inserted"
-                result_summary["rows_affected"] = 1
+                result_summary["rows_affected"] = rows_inserted
             else:
                 # Case C: entityid not in tbl_entity either → nothing to do
                 result_summary["action"] = "not_found"

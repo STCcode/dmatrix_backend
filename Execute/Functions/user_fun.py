@@ -856,6 +856,53 @@ def getUnderlyingByMf():
 
 
     
+# def ClearUnderlyingdata():
+#     try:
+#         entity_id = None
+
+#         # If DELETE → get from query parameters
+#         if request.method == 'DELETE':
+#             entity_id = request.args.get('entityid')
+
+#         # If POST → get from form-data or JSON
+#         elif request.method == 'POST':
+#             if request.is_json:
+#                 entity_id = request.json.get('id')
+#             else:
+#                 entity_id = request.form.get('id')
+
+#         # Validate input
+#         if not entity_id:
+#             return make_response(
+#                 middleware.exe_msgs(responses.delete_501, "Missing id parameter", '1024501'),
+#                 400
+#             )
+
+#         # Perform deletion
+#         deleted_rows = queries.ClearUnderlyingdata(entity_id)
+
+#         if isinstance(deleted_rows, int):
+#             if deleted_rows > 0:
+#                 result = middleware.exs_msgs(deleted_rows, responses.delete_200, '1024200')
+#                 status = 200
+#             else:
+#                 result = middleware.exe_msgs(responses.delete_404, "No record found to delete", '1024504')
+#                 status = 404
+#         else:
+#             # Query returned error message object
+#             result = deleted_rows
+#             status = 500
+
+#         return make_response(result, status)
+
+#     except Exception as e:
+#         print("Error in delete_entity:", e)
+#         return make_response(
+#             middleware.exe_msgs(responses.delete_501, str(e.args), '1024500'),
+#             500
+ 
+#       )
+
 def ClearUnderlyingdata():
     try:
         entity_id = None
@@ -867,42 +914,44 @@ def ClearUnderlyingdata():
         # If POST → get from form-data or JSON
         elif request.method == 'POST':
             if request.is_json:
-                entity_id = request.json.get('id')
+                entity_id = request.json.get('entityid')
             else:
-                entity_id = request.form.get('id')
+                entity_id = request.form.get('entityid')
 
         # Validate input
         if not entity_id:
             return make_response(
-                middleware.exe_msgs(responses.delete_501, "Missing id parameter", '1024501'),
+                middleware.exe_msgs(responses.delete_501, "Missing entityid parameter", '1024501'),
                 400
             )
 
-        # Perform deletion
-        deleted_rows = queries.ClearUnderlyingdata(entity_id)
+        # Perform deletion or insertion
+        result_summary = queries.ClearUnderlyingdata(entity_id)
 
-        if isinstance(deleted_rows, int):
-            if deleted_rows > 0:
-                result = middleware.exs_msgs(deleted_rows, responses.delete_200, '1024200')
-                status = 200
-            else:
-                result = middleware.exe_msgs(responses.delete_404, "No record found to delete", '1024504')
-                status = 404
-        else:
-            # Query returned error message object
-            result = deleted_rows
+        if result_summary["action"] == "deleted":
+            result = middleware.exs_msgs(result_summary, responses.delete_200, '1024200')
+            status = 200
+
+        elif result_summary["action"] == "inserted":
+            result = middleware.exs_msgs(result_summary, responses.insert_200, '1024201')
+            status = 200
+
+        elif result_summary["action"] == "not_found":
+            result = middleware.exe_msgs(responses.delete_404, "No matching entity found", '1024204')
+            status = 404
+
+        else:  # error case
+            result = middleware.exe_msgs(responses.delete_501, result_summary.get("error", "Unknown error"), '1024500')
             status = 500
 
         return make_response(result, status)
 
     except Exception as e:
-        print("Error in delete_entity:", e)
+        print("Error in ClearUnderlyingdata function:", e)
         return make_response(
             middleware.exe_msgs(responses.delete_501, str(e.args), '1024500'),
             500
- 
-      )
-
+        )
 
 # new running
 # def ClearUnderlyingdata():

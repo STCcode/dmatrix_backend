@@ -102,21 +102,20 @@ from psycopg2.extras import RealDictCursor
 
 
 def ExecuteReturnId(query, data):
+    """For INSERT (returns affected rows count, not id)."""
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute(query, data)
-
-        # Fetch the ID from "RETURNING id"
-        inserted_id = cur.fetchone()[0]
-
+        affected = cur.rowcount
         conn.commit()
         cur.close()
         conn.close()
-        return inserted_id
+        return affected
     except Exception as e:
         print("Error in ExecuteReturnId=============================", e)
-        return middleware.exe_msgs(responses.execution_501, str(e.args), '1022300')
+        return 0
+
 
 
 
@@ -193,18 +192,33 @@ def ExecuteReturn(query, data=None):
 
 
 # INSERT/UPDATE/DELETE one record (no return)
+# def ExecuteOne(query, data):
+#     try:
+#         conn = get_db_connection()
+#         cur = conn.cursor()
+#         cur.execute(query, data)
+#         conn.commit()
+#         cur.close()
+#         conn.close()
+#         return responses.execution_200
+#     except Exception as e:
+#         print("Error in ExecuteOne==============================", e)
+#         return middleware.exe_msgs(responses.execution_501, str(e.args), '1020300')
 def ExecuteOne(query, data):
+    """For DELETE/UPDATE (returns affected rows count)."""
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute(query, data)
+        affected = cur.rowcount
         conn.commit()
         cur.close()
         conn.close()
-        return responses.execution_200
+        return affected
     except Exception as e:
         print("Error in ExecuteOne==============================", e)
-        return middleware.exe_msgs(responses.execution_501, str(e.args), '1020300')
+        return 0  # return 0 on error
+
 
 # def ExecuteOne(query, data=None):
 #     try:

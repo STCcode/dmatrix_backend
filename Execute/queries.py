@@ -654,7 +654,30 @@ def getCountOfAllCommodities():
           return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')        
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')  
+
+
+
+def getAllCommoditiesInstrument():
+    try:
+        action_data = executeSql.FetchAll("SELECT order_type,trade_price_per_unit  FROM tbl_etf_action;")
+        print("DEBUG action_data:", action_data)
+
+        aif_data = executeSql.FetchAll("SELECT amc_name, contribution_amount FROM tbl_aif")
+        print("DEBUG aif_data:", aif_data)
+
+        direct_equity_data = executeSql.FetchAll("SELECT order_type, trade_price FROM tbl_direct_equity")
+        print("DEBUG direct_equity_data:", direct_equity_data)
+
+        return {
+            "action_data": action_data,
+            "aif_data": aif_data,
+            "direct_equity_data": direct_equity_data
+        }
+
+    except Exception as e:
+        print("Error in getAllCommoditiesInstrument==============================", e)
+        return {"action_data": [], "aif_data": [], "direct_equity_data": []}           
 
 
 
@@ -804,7 +827,7 @@ def getEquityActionTable():
 # ======================================Get All EquityActionTable======================================
 
 
-# ======================================Get All Home Data of Equity======================================
+# ======================================Get All Home instrument_counts of Equity======================================
 def getAllHomeData():
      try:
           sql="WITH instrument_counts AS (SELECT 'Equity' AS instrument, (SELECT COUNT(*) FROM tbl_action_table) + (SELECT COUNT(*) FROM tbl_aif) + (SELECT COUNT(*) FROM tbl_direct_equity) AS instrument_total_count UNION ALL SELECT 'Fixed Income', 0 UNION ALL SELECT 'Commodities', 0)SELECT * FROM instrument_counts;"
@@ -814,7 +837,7 @@ def getAllHomeData():
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
-# ======================================Get All Home Data of Equity======================================
+# ======================================Get All Home instrument_counts of Equity======================================
 
 
 

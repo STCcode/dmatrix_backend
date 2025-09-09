@@ -1415,7 +1415,29 @@ def getCountOfAllCommodities():
             return make_response(result,status)
         except Exception as e:
             print("Error in getting role data=============================", e)
-            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)                  
+            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500) 
+
+
+
+
+def getAllCommoditiesInstrument():
+    if request.method == 'GET':
+        try:
+            data = queries.getAllCommoditiesInstrument()
+
+            result = {
+                "code": "1023200",
+                "successmsgs": responses.getAll_200,
+                "data": data
+            }
+            return make_response(result, 200)
+
+        except Exception as e:
+            print("Error in getAllActionInstrument =============================", e)
+            return make_response(
+                middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
+                500
+            )                         
 
 
 

@@ -648,7 +648,7 @@ def getEtfEntity():
 
 def getCountOfAllCommodities():
      try:
-          sql=" SELECT MIN(subcategory) AS subcategory,MIN(category) AS category,COUNT(*) AS total FROM tbl_entity WHERE (subcategory ILIKE 'ETF' OR subcategory ILIKE 'PMS' OR subcategory ILIKE 'ATF' OR subcategory ILIKE 'Direct') AND category ILIKE 'Commodities' GROUP BY subcategory ORDER BY subcategory;"
+          sql=" SELECT subcategory, MIN(category) AS category,COUNT(*) AS total FROM tbl_entity WHERE (subcategory ILIKE 'ETF' OR subcategory ILIKE 'PMS' OR subcategory ILIKE 'Alternative Investment Funds' OR subcategory ILIKE 'Direct Equity') AND category ILIKE 'Commodities' GROUP BY subcategory ORDER BY subcategory;"
           data=''
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs
@@ -663,14 +663,14 @@ def getAllCommoditiesInstrument():
         action_data = executeSql.FetchAll("SELECT order_type,trade_price_per_unit  FROM tbl_etf_action;")
         print("DEBUG action_data:", action_data)
 
-        aif_data = executeSql.FetchAll("SELECT amc_name, contribution_amount FROM tbl_aif")
+        aif_data = executeSql.FetchAll("SELECT amc_name, contribution_amount FROM tbl_aif where ")
         print("DEBUG aif_data:", aif_data)
 
         direct_equity_data = executeSql.FetchAll("SELECT order_type, trade_price FROM tbl_direct_equity")
         print("DEBUG direct_equity_data:", direct_equity_data)
 
         return {
-            "action_data": action_data,
+            "ETC_Action": action_data,
             "aif_data": aif_data,
             "direct_equity_data": direct_equity_data
         }

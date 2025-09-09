@@ -162,16 +162,29 @@ def update_entity_table(data):
         print("Error in update_entity_table query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020311')
     
+# def DeleteEntityByid(entity_id):
+#     try:
+#         entity_id = int(entity_id)
+#         sql = "DELETE FROM tbl_entity WHERE id = %s"
+#         data = (entity_id,) 
+#         deleted_count = executeSql.ExecuteReturnId(sql, data) 
+#         return deleted_count
+#     except Exception as e:
+#         print("Error in DeleteEntityByid query:", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')
+
+
 def DeleteEntityByid(entity_id):
     try:
         entity_id = int(entity_id)
-        sql = "DELETE FROM tbl_entity WHERE id = %s"
+        sql = "DELETE FROM tbl_entity WHERE id = %s RETURNING id"
         data = (entity_id,) 
         deleted_count = executeSql.ExecuteReturnId(sql, data) 
         return deleted_count
     except Exception as e:
         print("Error in DeleteEntityByid query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')
+
   
 
 def getCountOfAllEntity():

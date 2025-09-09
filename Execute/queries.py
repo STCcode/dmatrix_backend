@@ -175,7 +175,7 @@ def DeleteEntityByid(entity_id):
 
 def getCountOfAllEntity():
      try:
-          sql=" SELECT MIN(subcategory) AS subcategory,MIN(category) AS category,COUNT(*) AS total FROM tbl_entity WHERE LOWER(subcategory) IN ('mutual fund', 'alternative investment funds', 'direct equity') AND LOWER(category) IN ('equity') GROUP BY LOWER(subcategory) ORDER BY subcategory;"
+          sql=" SELECT subcategory,category,COUNT(*) AS total FROM tbl_entity WHERE category ILIKE 'Equity' GROUP BY subcategory, category ORDER BY subcategory;"
           data=''
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs
@@ -648,7 +648,8 @@ def getEtfEntity():
 
 def getCountOfAllCommodities():
      try:
-          sql=" SELECT subcategory, MIN(category) AS category,COUNT(*) AS total FROM tbl_entity WHERE (subcategory ILIKE 'ETF' OR subcategory ILIKE 'PMS' OR subcategory ILIKE 'Alternative Investment Funds' OR subcategory ILIKE 'Direct Equity') AND category ILIKE 'Commodities' GROUP BY subcategory ORDER BY subcategory;"
+        #   sql=" SELECT subcategory, MIN(category) AS category,COUNT(*) AS total FROM tbl_entity WHERE (subcategory ILIKE 'ETF' OR subcategory ILIKE 'PMS' OR subcategory ILIKE 'Alternative Investment Funds' OR subcategory ILIKE 'Direct Equity') AND category ILIKE 'Commodities' GROUP BY subcategory ORDER BY subcategory;"
+          sql="SELECT subcategory,category,COUNT(*) AS total FROM tbl_entity WHERE category ILIKE 'Commodities' GROUP BY subcategory, category ORDER BY subcategory;"
           data=''
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs

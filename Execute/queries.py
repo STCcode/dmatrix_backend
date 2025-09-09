@@ -644,6 +644,45 @@ def getEtfEntity():
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')   
 
 
+# ==================================== ETF Table End====================================
+
+
+# ==================================== commodities Table Start==================================
+    
+# def getAllDirectEquityCommodities():
+#      try:
+#         #   sql="SELECT * FROM tbl_etf_action;"
+#         sql="SELECT e.scripname, b.* FROM tbl_entity e join tbl_direct_equity b ON e.entityid = b.entityid;"
+
+#         data=''
+#         msgs=executeSql.ExecuteAllNew(sql,data)
+#         return msgs
+#      except Exception as e:
+#           print("Error in getingroleRecord query==========================",e)
+#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+     
+def getCommoditiesActionTablebyId (entity_id):
+    try:
+        sql = "SELECT * FROM tbl_direct_equity WHERE entityid = %s;"
+        data = (entity_id,)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
+
+
+def getCommoditiesEntity():
+     try:
+        sql="SELECT * FROM tbl_entity WHERE category ILIKE 'Commodities' ORDER BY subcategory;"
+        data=''
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')   
+
+
 
 
 def getCountOfAllCommodities():
@@ -682,7 +721,7 @@ def getAllCommoditiesInstrument():
 
 
 
-# ==================================== ETF Table End====================================
+# ==================================== Commodities Table End====================================
 
 
 

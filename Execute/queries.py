@@ -164,6 +164,7 @@ def update_entity_table(data):
     
 def DeleteEntityByid(entity_id):
     try:
+        entity_id = int(entity_id)
         sql = "DELETE FROM tbl_entity WHERE id = %s"
         data = (entity_id,) 
         deleted_count = executeSql.ExecuteReturnId(sql, data) 

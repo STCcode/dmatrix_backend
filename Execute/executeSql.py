@@ -111,6 +111,8 @@ def ExecuteReturnId(query, data):
         conn.commit()
         cur.close()
         conn.close()
+        print("Delete debug: rowcount =", cur.rowcount)
+
         return affected
     except Exception as e:
         print("Error in ExecuteReturnId=============================", e)

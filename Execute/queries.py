@@ -351,7 +351,7 @@ def ClearUnderlyingdata(entity_id):
             if entity_exists:
                 # Insert entityid into tbl_underlying
                 insert_sql = "INSERT INTO tbl_underlying (entityid) VALUES (%s)"
-                executeSql.ExecuteOne(insert_sql, (entity_id,))
+                executeSql.ExecuteReturnId(insert_sql, (entity_id,))
                 result_summary["action"] = "inserted"
                 result_summary["rows_affected"] = 1
             else:

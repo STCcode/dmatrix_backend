@@ -86,19 +86,38 @@ from psycopg2.extras import RealDictCursor
 # #                 print("Error in ExecuteMany==============================",e)
 # #                 return middleware.exe_msgs(responses.execution_501,str(e.args),'1020300')
 
-# #for returning Inserted Id
-# # def ExecuteReturnId(query,data):
-# #     try:
-# #         cur = psycopg2.connection.cursor()
-# #         cur.execute(query,data)
-# #         id=psycopg2.connection.insert_id()
-# #         result = id
-# #         psycopg2.connection.commit()
-# #         cur.close()
-# #         return result
-# #     except Exception as e:
-# #                 print("Error in ExecuteReturnId=============================",e)
-# #                 return middleware.exe_msgs(responses.execution_501,str(e.args),'1022300')
+# for returning Inserted Id
+# def ExecuteReturnId(query,data):
+#     try:
+#         cur = psycopg2.connection.cursor()
+#         cur.execute(query,data)
+#         id=psycopg2.connection.insert_id()
+#         result = id
+#         psycopg2.connection.commit()
+#         cur.close()
+#         return result
+#     except Exception as e:
+#                 print("Error in ExecuteReturnId=============================",e)
+#                 return middleware.exe_msgs(responses.execution_501,str(e.args),'1022300')
+
+
+def ExecuteReturnId(query, data):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(query, data)
+
+        # Fetch the ID from "RETURNING id"
+        inserted_id = cur.fetchone()[0]
+
+        conn.commit()
+        cur.close()
+        conn.close()
+        return inserted_id
+    except Exception as e:
+        print("Error in ExecuteReturnId=============================", e)
+        return middleware.exe_msgs(responses.execution_501, str(e.args), '1022300')
+
 
 
 

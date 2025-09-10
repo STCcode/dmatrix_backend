@@ -100,23 +100,25 @@ from psycopg2.extras import RealDictCursor
 #                 print("Error in ExecuteReturnId=============================",e)
 #                 return middleware.exe_msgs(responses.execution_501,str(e.args),'1022300')
 
-
 def ExecuteReturnId(query, data):
-    """For INSERT (returns affected rows count, not id)."""
+    """For INSERT/DELETE with RETURNING (returns affected rows count)."""
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute(query, data)
-        affected = cur.rowcount
+
+        # If query has RETURNING, fetch result
+        returned = cur.fetchall()
+        affected = len(returned)
+
         conn.commit()
         cur.close()
         conn.close()
-        print("Delete debug: rowcount =", cur.rowcount)
-
         return affected
     except Exception as e:
         print("Error in ExecuteReturnId=============================", e)
         return 0
+
 
 
 

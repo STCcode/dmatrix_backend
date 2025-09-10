@@ -173,7 +173,6 @@ def update_entity_table(data):
 #         print("Error in DeleteEntityByid query:", e)
 #         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')
 
-
 def DeleteEntityByid(entity_id):
     try:
         entity_id = int(entity_id)

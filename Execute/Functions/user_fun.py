@@ -1404,36 +1404,36 @@ def getEtfEntity():
 
 
 #========================================Commodities Table Start ====================================================
-# def InsertEtfData():
-#     try:
-#         if request.method == 'POST':
-#             formData = request.get_json()
+def Insert_CommoditiesDirect():
+    try:
+        if request.method == 'POST':
+            formData = request.get_json()
 
-#             # required_fields = ['entityid', 'order_number', 'order_time', 'trade_number', 'trade_time', 'security_description', 'order_type', 'quantity', 'gross_rate', 'trade_price_per_unit', 'brokerage_per_unit', 'created_at']
-#             # missing = [f for f in required_fields if f not in formData]
+            # Prepare tuple in same order as SQL
+            formlist = (formData.get('entityid'),formData.get('contract_note_number'),formData.get('trade_date'),formData.get('client_code'),formData.get('client_name'),formData.get('order_number'),formData.get('order_time'),formData.get('trade_number'),formData.get('description'),formData.get('order_type'),formData.get('qty'),formData.get('trade_price'),formData.get('brokerage_per_unit', 0),formData.get('net_rate_per_unit'),formData.get('gst', 0),formData.get('stt', 0),formData.get('security_transaction_tax', 0),formData.get('exchange_transaction_charges', 0),formData.get('sebi_turnover_fees', 0),formData.get('stamp_duty', 0),formData.get('ipft', 0),formData.get('net_total'),formData.get('net_amount_receivable'),datetime.now())
 
-#             # if missing:
-#             #     return make_response(
-#             #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
-#             #         400
-#             #     )
+            insert_id = queries.Insert_CommoditiesDirect(formlist)
 
-#             formlist = (formData['entityid'],formData['order_number'],formData['order_time'],formData['trade_number'],formData['trade_time'],formData['security_description'],formData['order_type'],formData['quantity'],formData['gross_rate'],formData['trade_price_per_unit'],formData['brokerage_per_unit'],formData['net_rate_per_unit'],formData['closing_rate'],formData['gst'],formData['stt'],formData['net_total_before_levies'],formData['remarks'], datetime.now(), formData['trade_date'])
+            # If insert_id is None, treat as success
+            if insert_id is None:
+                insert_id = 0
 
-#             insert_msg = queries.InsertEtfData(formlist)
+            try:
+                result = middleware.exs_msgs(insert_id, responses.insert_200, '1020200')
+            except Exception as e:
+                print("Error in middleware.exs_msgs:", e)
+                # Return minimal success response
+                result = {"status": "success", "insert_id": insert_id}
 
-#             # Always return 200 if insert succeeds
-#             return make_response(
-#                 middleware.exs_msgs(insert_msg, responses.insert_200, '1020200'),
-#                 200
-#             )
+            return make_response(result, 200)
 
-#     except Exception as e:
-#         print("Error in insertNavData:", e)
-#         return make_response(
-#             middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
-#             500
-#         )
+    except Exception as e:
+        print("Error in Insert_directData:", e)
+        return make_response(
+            middleware.exe_msgs(responses.insert_501, str(e), '1020500'),
+            500
+        )
+
    
 
 # def getAllEtf():

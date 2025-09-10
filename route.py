@@ -177,7 +177,7 @@ app.add_url_rule('/getETFEntity',view_func=user_fun.getEtfEntity,methods=['GET',
 
 #=======================================Commodities  etc Table Start====================================
 
-# app.add_url_rule('/insertETFActionTable',view_func=user_fun.InsertEtfData,methods=['GET','POST'])
+app.add_url_rule('/InsertCommoditiesDirect' ,view_func=user_fun.Insert_CommoditiesDirect,methods=['GET','POST'])
 app.add_url_rule('/getAllDirectEquityCommodities',view_func=user_fun.getAllEtf,methods=['GET','POST'])
 # app.add_url_rule('/getCommoditiesActionTablebyId',view_func=user_fun.getCommoditiesActionTablebyId,methods=['GET','POST'])
 

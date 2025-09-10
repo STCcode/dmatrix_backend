@@ -2212,6 +2212,20 @@ def getAifIRR():
     response["entityid"] = entityid
     return make_response({"code": "1023200", **response, "successmsgs": "Fetching Successfully"}, 200)
 
+
+def getDirectEquityCommodityIRR():
+    entityid = request.args.get("entityid", "").strip()
+    if not entityid:
+        return make_response({"error": "entityid is required"}, 400)
+
+    cashflows, dates = queries.getDirectEquityCommodityIRR(entityid)
+    if not cashflows:
+        return make_response({"error": f"No rows found for entityid={entityid} in tbl_direct_equity"}, 404)
+
+    response = format_irr_response(cashflows, dates)
+    response["entityid"] = entityid
+    return make_response({"code": "1023200", **response, "successmsgs": "Fetching Successfully"}, 200)
+
 # ======================================calculate Xirr (IRR)======================================
 
 

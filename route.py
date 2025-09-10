@@ -181,7 +181,7 @@ app.add_url_rule('/InsertCommoditiesDirect' ,view_func=user_fun.Insert_Commoditi
 app.add_url_rule('/getAllDirectEquityCommodities',view_func=user_fun.getAllDirectEquityCommodities,methods=['GET','POST'])
 app.add_url_rule('/getCommoditiesActionTablebyId',view_func=user_fun.getCommoditiesActionTablebyId,methods=['GET','POST'])
 
-app.add_url_rule('/getDirectEquityCommodities',view_func=user_fun.getCommoditiesEntity,methods=['GET','POST'])
+app.add_url_rule('/getAllActionOfDirectEquityCommodity',view_func=user_fun.getCommoditiesEntity,methods=['GET','POST'])
 
 app.add_url_rule('/getCountOfAllCommodities',view_func=user_fun.getCountOfAllCommodities,methods=['GET','POST'])
 app.add_url_rule('/getAllCommoditiesInstrument',view_func=user_fun.getAllCommoditiesInstrument,methods=['GET','POST'])

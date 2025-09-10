@@ -179,7 +179,7 @@ app.add_url_rule('/getETFEntity',view_func=user_fun.getEtfEntity,methods=['GET',
 
 app.add_url_rule('/InsertCommoditiesDirect' ,view_func=user_fun.Insert_CommoditiesDirect,methods=['GET','POST'])
 app.add_url_rule('/getAllDirectEquityCommodities',view_func=user_fun.getAllDirectEquityCommodities,methods=['GET','POST'])
-app.add_url_rule('/getDEDetailCommoditiesActionTablebyId',view_func=user_fun.getCommoditiesActionTablebyId,methods=['GET','POST'])
+app.add_url_rule('/getDEDetailCommoditiesActionTable',view_func=user_fun.getCommoditiesActionTablebyId,methods=['GET','POST'])
 app.add_url_rule('/getDEDetailCommoditiesEntityById',view_func=user_fun.getDEDetailCommoditiesEntityById,methods=['GET','POST'])
 
 app.add_url_rule('/getAllActionOfDirectEquityCommodity',view_func=user_fun.getCommoditiesEntity,methods=['GET','POST'])

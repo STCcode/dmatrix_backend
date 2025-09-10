@@ -1499,7 +1499,7 @@ def  getCommoditiesActionTablebyId ():
 def getCommoditiesEntity():
      if request.method == 'GET':
         try:
-            data=queries.getAllEtf()
+            data=queries.getCommoditiesEntity()
             if type(data).__name__  != "list":
                 if data.json:
                     result=data

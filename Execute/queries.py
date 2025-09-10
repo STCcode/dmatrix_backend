@@ -693,6 +693,17 @@ def getCommoditiesActionTablebyId (entity_id):
     except Exception as e:
         print("Error in getting underlying by id query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310') 
+    
+
+def getDEDetailCommoditiesEntityById(entity_id):
+    try:
+        sql = "SELECT * FROM tbl_entity WHERE entityid = %s;"
+        data = (entity_id,)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
             
 
 

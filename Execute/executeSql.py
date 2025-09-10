@@ -107,9 +107,12 @@ def ExecuteReturnId(query, data):
         cur = conn.cursor()
         cur.execute(query, data)
 
-        # If query has RETURNING, fetch result
-        returned = cur.fetchall()
-        affected = len(returned)
+        # If RETURNING is present, fetch results
+        if cur.description is not None:
+            returned = cur.fetchall()
+            affected = len(returned)
+        else:
+            affected = cur.rowcount
 
         conn.commit()
         cur.close()
@@ -118,6 +121,7 @@ def ExecuteReturnId(query, data):
     except Exception as e:
         print("Error in ExecuteReturnId=============================", e)
         return 0
+
 
 
 

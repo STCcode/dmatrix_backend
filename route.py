@@ -72,7 +72,7 @@ app.add_url_rule('/main', view_func=functions.home)
 app.add_url_rule('/logout', view_func=functions.logout)
 
 #User Master 
-app.add_url_rule('/wcare/getallrole',view_func=user_fun.getallrole,methods=['GET','POST'])
+# app.add_url_rule('/wcare/getallrole',view_func=user_fun.getallrole,methods=['GET','POST'])
 # app.add_url_rule('/wcare/saveuser',view_func=user_fun.saveuser,methods=['GET','POST'])
 app.add_url_rule('/register',view_func=user_fun.save_user,methods=['GET','POST'])
 app.add_url_rule('/wcare/checkusername',view_func=user_fun.checkusername,methods=['GET','POST'])

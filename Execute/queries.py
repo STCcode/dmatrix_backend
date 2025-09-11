@@ -256,7 +256,7 @@ def getMfByentId():
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')      
      
-def insertMFNavData(data):
+def insert_MF_NavData(data):
     try:
         sql = " INSERT INTO tbl_mutual_fund_nav (entityid, nav, nav_date, created_at) VALUES (%s, %s, %s, %s)"
         msg = executeSql.ExecuteOne(sql, data)
@@ -767,6 +767,55 @@ def getAllCommoditiesInstrument():
 
 
 # ==================================== Commodities Ditrect Table End====================================
+
+
+
+# ====================================PMS & AMC Table Start==================================
+def insertClientAction(data):
+    try:
+        sql = " INSERT INTO tbl_pms_Client_action (entityid, order_number, order_time, trade_number, trade_time, security_description, order_type, quantity, gross_rate, trade_price_per_unit, brokerage_per_unit, net_rate_per_unit, closing_rate, gst, stt, net_total_before_levies, remarks, created_at, trade_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        msg = executeSql.ExecuteOne(sql, data)
+        return msg
+    except Exception as e:
+        print("Error in save_user query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
+    
+
+def getAllPmsClientActionTable():
+     try:
+        #   sql="SELECT * FROM tbl_etf_action;"
+        sql="SELECT e.scripname, b.* FROM tbl_entity e join tbl_pms_Client_action b ON e.entityid = b.entityid;"
+
+        data=''
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+     
+def  getPmsClientActionById (entity_id):
+    try:
+        sql = "SELECT * FROM tbl_pms_Client_action WHERE entityid = %s;"
+        data = (entity_id,)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
+
+
+def getPmsClientEntity():
+     try:
+        sql=" SELECT * FROM tbl_entity WHERE category ILIKE 'PMS' AND subcategory ILIKE 'Client';"
+        data=''
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')   
+
+
+# ====================================PMS & AMC Table END====================================
 
 
 

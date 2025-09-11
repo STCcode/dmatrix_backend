@@ -595,13 +595,12 @@ def insertMFNavData():
             formlist = (formData['entityid'],formData['nav'],formData['nav_date'], datetime.now()
             )
 
-            insert_msg = queries.insertMFNavData(formlist)
+            insert_msg = queries.insert_MF_NavData(formlist)
 
             
             return make_response(
                 middleware.exs_msgs(insert_msg, responses.insert_200, '1020200'),
-                200
-            )
+                200 )
 
     except Exception as e:
         print("Error in insertNavData:", e)
@@ -1631,6 +1630,128 @@ def getAllCommoditiesInstrument():
 
 
 #========================================Commodities Table End ======================================================
+
+
+
+#======================================== PMS Cliend and AMC Table Start ====================================================
+def insertClientAction():
+    try:
+        if request.method == 'POST':
+            formData = request.get_json()
+
+            # required_fields = ['entityid', 'order_number', 'order_time', 'trade_number', 'trade_time', 'security_description', 'order_type', 'quantity', 'gross_rate', 'trade_price_per_unit', 'brokerage_per_unit', 'created_at']
+            # missing = [f for f in required_fields if f not in formData]
+
+            # if missing:
+            #     return make_response(
+            #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
+            #         400
+            #     )
+
+            formlist = (formData['entityid'],formData['order_number'],formData['order_time'],formData['trade_number'],formData['trade_time'],formData['security_description'],formData['order_type'],formData['quantity'],formData['gross_rate'],formData['trade_price_per_unit'],formData['brokerage_per_unit'],formData['net_rate_per_unit'],formData['closing_rate'],formData['gst'],formData['stt'],formData['net_total_before_levies'],formData['remarks'], datetime.now(), formData['trade_date'])
+
+            insert_msg = queries.insertClientAction(formlist)
+
+            # Always return 200 if insert succeeds
+            return make_response(
+                middleware.exs_msgs(insert_msg, responses.insert_200, '1020200'),
+                200
+            )
+
+    except Exception as e:
+        print("Error in insertNavData:", e)
+        return make_response(
+            middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
+            500
+        )
+   
+
+def getAllPmsClientActionTable():
+     if request.method == 'GET':
+        try:
+            data=queries.getAllPmsClientActionTable()
+            if type(data).__name__  != "list":
+                if data.json:
+                    result=data
+                    status=500
+            else:
+                result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
+                status=200
+                        
+            return make_response(result,status)
+        except Exception as e:
+            print("Error in getting role data=============================", e)
+            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)  
+
+
+def  getPmsClientActionById ():
+    try:
+        entity_id = None
+
+        # Handle GET → from query params
+        if request.method == 'GET':
+            entity_id = request.args.get('entityid')
+
+        # Handle POST → from JSON or form-data
+        elif request.method == 'POST':
+            if request.is_json:
+                entity_id = request.json.get('entityid')
+            else:
+                entity_id = request.form.get('entityid')
+
+        if not entity_id:
+            return make_response(
+                middleware.exe_msgs(responses.getAll_501, "Missing entityid parameter", '1023501'),
+                400
+            )
+
+        data = queries.getPmsClientActionById (entity_id)
+
+        # Return proper response
+        if isinstance(data, list):
+            result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+            status = 200
+        else:
+            result = data
+            status = 500
+
+        return make_response(result, status)
+
+    except Exception as e:
+        print("Error in getting underlying by id:", e)
+        return make_response(
+            middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
+            500
+        )
+
+
+
+def getPmsClientEntity():
+     if request.method == 'GET':
+        try:
+            data=queries.getPmsClientEntity()
+            # if type(data).__name__  != "list":
+            #     if data.json:
+            #         result=data
+            #         status=500
+            # else:
+            #     result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
+            #     status=200
+            if isinstance(data, list):
+                result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+                status = 200
+            else:
+                result = data
+                status = 500
+
+            return make_response(result, status)
+     
+        except Exception as e:
+            print("Error in getting role data=============================", e)
+            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)  
+
+
+#========================================ETF Table End ======================================================
 
 
 

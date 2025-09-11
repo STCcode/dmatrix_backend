@@ -113,7 +113,7 @@ app.add_url_rule('/getActionByentId',view_func=user_fun.getActionByentId,methods
 
 app.add_url_rule('/getMfByentId',view_func=user_fun.getMfByentId,methods=['GET','POST'])
 
-app.add_url_rule('/insertMutualFundNavData' ,view_func=user_fun.insertMFNavData,methods=['GET','POST'])
+app.add_url_rule('/insertMutualFundNavData',view_func=user_fun.insertMFNavData,methods=['GET','POST'])
 
 # ====================================== Mutual Fund Action Table End======================================
 
@@ -196,6 +196,27 @@ app.add_url_rule('/getCountOfAllCommodities',view_func=user_fun.getCountOfAllCom
 app.add_url_rule('/getAllCommoditiesInstrument',view_func=user_fun.getAllCommoditiesInstrument,methods=['GET','POST'])
 
 # ====================================== Commodities  etc Table End======================================
+
+
+
+# ====================================== PMS Start=======================================================
+
+# ==================================PMS Client Action Table Start======================================
+
+app.add_url_rule('/insertClientAction',view_func=user_fun.insertClientAction,methods=['GET','POST'])
+app.add_url_rule('/getAllPmsClientActionTable',view_func=user_fun.getAllPmsClientActionTable,methods=['GET','POST'])
+app.add_url_rule('/getPmsClientActionById',view_func=user_fun.getPmsClientActionById,methods=['GET','POST'])
+app.add_url_rule('/getPmsClientEntity',view_func=user_fun.getPmsClientEntity,methods=['GET','POST'])
+
+#======================================= PMS AMC Action Table Start====================================
+
+# app.add_url_rule('/insertETFActionTable',view_func=user_fun.InsertEtfData,methods=['GET','POST'])
+# app.add_url_rule('/getAllActionTableOfETF',view_func=user_fun.getAllEtf,methods=['GET','POST'])
+# app.add_url_rule('/getETFActionTablebyId',view_func=user_fun.getEtfActionTablebyId,methods=['GET','POST'])
+# app.add_url_rule('/getETFEntity',view_func=user_fun.getEtfEntity,methods=['GET','POST'])
+
+
+# ====================================== PMS End=======================================================
 
 
 

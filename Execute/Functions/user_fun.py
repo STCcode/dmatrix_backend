@@ -1639,15 +1639,6 @@ def insertClientAction():
         if request.method == 'POST':
             formData = request.get_json()
 
-            # required_fields = ['entityid', 'order_number', 'order_time', 'trade_number', 'trade_time', 'security_description', 'order_type', 'quantity', 'gross_rate', 'trade_price_per_unit', 'brokerage_per_unit', 'created_at']
-            # missing = [f for f in required_fields if f not in formData]
-
-            # if missing:
-            #     return make_response(
-            #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
-            #         400
-            #     )
-
             formlist = (formData['entityid'],formData['order_type'],formData['trade_price'],formData['cheque'], datetime.now())
 
             insert_msg = queries.insertClientAction(formlist)

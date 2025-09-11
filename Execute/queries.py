@@ -773,7 +773,7 @@ def getAllCommoditiesInstrument():
 # ====================================PMS & AMC Table Start==================================
 def insertClientAction(data):
     try:
-        sql = " INSERT INTO tbl_pms_Client_action (entityid, order_type, trade_price, cheque, created_at) VALUES (%s, %s, %s, %s, %s)"
+        sql = " INSERT INTO tbl_pms_client_action (entityid, order_type, trade_price, cheque, created_at) VALUES (%s, %s, %s, %s, %s)"
         msg = executeSql.ExecuteOne(sql, data)
         return msg
     except Exception as e:
@@ -784,7 +784,7 @@ def insertClientAction(data):
 def getAllPmsClientActionTable():
      try:
         #   sql="SELECT * FROM tbl_etf_action;"
-        sql="SELECT e.scripname, b.* FROM tbl_entity e join tbl_pms_Client_action b ON e.entityid = b.entityid;"
+        sql="SELECT e.scripname, b.* FROM tbl_entity e join tbl_pms_client_action b ON e.entityid = b.entityid;"
 
         data=''
         msgs=executeSql.ExecuteAllNew(sql,data)
@@ -795,7 +795,7 @@ def getAllPmsClientActionTable():
      
 def  getPmsClientActionById (entity_id):
     try:
-        sql = "SELECT * FROM tbl_pms_Client_action WHERE entityid = %s;"
+        sql = "SELECT * FROM tbl_pms_client_action WHERE entityid = %s;"
         data = (entity_id,)  # tuple, not set
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs

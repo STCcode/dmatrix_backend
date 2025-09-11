@@ -81,6 +81,14 @@ app.add_url_rule('/register',view_func=user_fun.save_user,methods=['GET','POST']
 # app.add_url_rule('/wcare/updateuser',view_func=user_fun.updateuser,methods=['GET','POST'])
 # app.add_url_rule('/wcare/deleteuserById',view_func=user_fun.deleteuserById,methods=['GET','POST'])
 
+#=======================================Auto Ectract and Upload ALL Actio Table Data====================================
+
+# app.add_url_rule('/upload_and_save', view_func=user_fun.upload_and_save, methods=['POST'])
+
+
+#=======================================Auto Ectract and Upload ALL Actio Table Data====================================
+
+
 #=======================================Entity Table Start====================================
 
 app.add_url_rule('/entity_table' ,view_func=user_fun.entity_table,methods=['GET','POST'])
@@ -95,11 +103,9 @@ app.add_url_rule('/getAllMutualFund',view_func=user_fun.getAllMutualFund,methods
 
 app.add_url_rule('/getCountOfAllEntity',view_func=user_fun.getCountOfAllEntity,methods=['GET','POST'])
 
-
-
 # ======================================entity Table End======================================
 
-#=======================================Action Table Start====================================
+#======================================= Mutual Fund Action Table Start====================================
 
 app.add_url_rule('/action_table' ,view_func=user_fun.action_table,methods=['GET','POST'])
 app.add_url_rule('/getAllAction',view_func=user_fun.getAllAction,methods=['GET','POST'])
@@ -107,7 +113,9 @@ app.add_url_rule('/getActionByentId',view_func=user_fun.getActionByentId,methods
 
 app.add_url_rule('/getMfByentId',view_func=user_fun.getMfByentId,methods=['GET','POST'])
 
-# ======================================Action Table End======================================
+app.add_url_rule('/insertMutualFundNavData' ,view_func=user_fun.insertMFNavData,methods=['GET','POST'])
+
+# ====================================== Mutual Fund Action Table End======================================
 
 #=======================================mcap Table Start======================================
 

@@ -255,6 +255,15 @@ def getMfByentId():
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')      
+     
+def insertMFNavData(data):
+    try:
+        sql = " INSERT INTO tbl_mutual_fund_nav (entityid, nav, nav_date, created_at) VALUES (%s, %s, %s, %s)"
+        msg = executeSql.ExecuteOne(sql, data)
+        return msg
+    except Exception as e:
+        print("Error in save_user query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')        
 
 
 

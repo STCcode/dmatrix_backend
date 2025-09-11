@@ -818,7 +818,7 @@ def getPmsClientEntity():
 ##############-> Amc Action #################3
 def insertPmsAmcAction(data):
     try:
-        sql = " INSERT INTO tbl_pms_Amc_action (entityid, order_type, trade_price, cheque, created_at) VALUES (%s, %s, %s, %s, %s)"
+        sql = " INSERT INTO tbl_pms_Amc_action (entityid, security_description, order_type, quantity, trade_price, net_amount, created_at) VALUES (%s, %s, %s, %s, %s,%s, %s)"
         msg = executeSql.ExecuteOne(sql, data)
         return msg
     except Exception as e:

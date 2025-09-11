@@ -773,7 +773,7 @@ def getAllCommoditiesInstrument():
 # ====================================PMS client & AMC actiomn Table Start==================================
 def insertClientAction(data):
     try:
-        sql = " INSERT INTO tbl_pms_client_action (entityid, order_type, trade_price, cheque, created_at) VALUES (%s, %s, %s, %s, %s)"
+        sql = " INSERT INTO tbl_pms_client_action (entityid, order_type, trade_price, cheque, created_at, trade_date) VALUES (%s, %s, %s, %s, %s, %s)"
         msg = executeSql.ExecuteOne(sql, data)
         return msg
     except Exception as e:

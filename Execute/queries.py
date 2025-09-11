@@ -770,7 +770,7 @@ def getAllCommoditiesInstrument():
 
 
 
-# ====================================PMS & AMC Table Start==================================
+# ====================================PMS client & AMC actiomn Table Start==================================
 def insertClientAction(data):
     try:
         sql = " INSERT INTO tbl_pms_client_action (entityid, order_type, trade_price, cheque, created_at) VALUES (%s, %s, %s, %s, %s)"
@@ -813,9 +813,56 @@ def getPmsClientEntity():
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')   
+     
+
+##############-> Amc Action #################3
+def insertPmsAmcAction(data):
+    try:
+        sql = " INSERT INTO tbl_pms_Amc_action (entityid, order_type, trade_price, cheque, created_at) VALUES (%s, %s, %s, %s, %s)"
+        msg = executeSql.ExecuteOne(sql, data)
+        return msg
+    except Exception as e:
+        print("Error in save_user query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
+    
+
+def getAllPmsAmcActionTable():
+     try:
+        #   sql="SELECT * FROM tbl_etf_action;"
+        sql="SELECT e.scripname, b.* FROM tbl_entity e join tbl_pms_Amc_action b ON e.entityid = b.entityid;"
+
+        data=''
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+     
+def  getPmsAmcActionById (entity_id):
+    try:
+        sql = "SELECT * FROM tbl_pms_Amc_action WHERE entityid = %s;"
+        data = (entity_id,)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
 
 
-# ====================================PMS & AMC Table END====================================
+def getPmsAmcEntity():
+     try:
+        sql=" SELECT * FROM tbl_entity WHERE category ILIKE 'PMS' AND subcategory ILIKE 'AMS';"
+        data=''
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')   
+
+
+
+
+# ====================================PMS client & AMC action Table END====================================
 
 
 

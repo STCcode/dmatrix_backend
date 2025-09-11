@@ -210,10 +210,10 @@ app.add_url_rule('/getPmsClientEntity',view_func=user_fun.getPmsClientEntity,met
 
 #======================================= PMS AMC Action Table Start====================================
 
-# app.add_url_rule('/insertETFActionTable',view_func=user_fun.InsertEtfData,methods=['GET','POST'])
-# app.add_url_rule('/getAllActionTableOfETF',view_func=user_fun.getAllEtf,methods=['GET','POST'])
-# app.add_url_rule('/getETFActionTablebyId',view_func=user_fun.getEtfActionTablebyId,methods=['GET','POST'])
-# app.add_url_rule('/getETFEntity',view_func=user_fun.getEtfEntity,methods=['GET','POST'])
+app.add_url_rule('/insertPmsAmcAction',view_func=user_fun.insertPmsAmcAction,methods=['GET','POST'])
+app.add_url_rule('/getAllPmsAmcActionTable',view_func=user_fun.getAllPmsAmcActionTable,methods=['GET','POST'])
+app.add_url_rule('/getPmsAmcActionById',view_func=user_fun.getPmsAmcActionById,methods=['GET','POST'])
+app.add_url_rule('/getPmsAmcEntity',view_func=user_fun.getPmsAmcEntity,methods=['GET','POST'])
 
 
 # ====================================== PMS End=======================================================

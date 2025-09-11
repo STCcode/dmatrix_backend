@@ -1648,7 +1648,7 @@ def insertClientAction():
             #         400
             #     )
 
-            formlist = (formData['entityid'],formData['order_number'],formData['order_time'],formData['trade_number'],formData['trade_time'],formData['security_description'],formData['order_type'],formData['quantity'],formData['gross_rate'],formData['trade_price_per_unit'],formData['brokerage_per_unit'],formData['net_rate_per_unit'],formData['closing_rate'],formData['gst'],formData['stt'],formData['net_total_before_levies'],formData['remarks'], datetime.now(), formData['trade_date'])
+            formlist = (formData['entityid'],formData['order_type'],formData['trade_price'],formData['cheque'], datetime.now())
 
             insert_msg = queries.insertClientAction(formlist)
 

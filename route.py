@@ -206,7 +206,7 @@ app.add_url_rule('/getAllCommoditiesInstrument',view_func=user_fun.getAllCommodi
 app.add_url_rule('/insertPmsClientAction',view_func=user_fun.insertClientAction,methods=['GET','POST'])
 app.add_url_rule('/getAllPmsClientActionTable',view_func=user_fun.getAllPmsClientActionTable,methods=['GET','POST'])
 app.add_url_rule('/getPmsClientActionById',view_func=user_fun.getPmsClientActionById,methods=['GET','POST'])
-app.add_url_rule('/getPmsEquityEntity',view_func=user_fun.getPmsClientEntity,methods=['GET','POST'])
+app.add_url_rule('/getAllPMSEquity',view_func=user_fun.getPmsClientEntity,methods=['GET','POST'])
 
 #======================================= PMS AMC Action Table Start====================================
 
@@ -244,6 +244,10 @@ app.add_url_rule('/getAllActionInstrument',view_func=user_fun.getAllActionInstru
 app.add_url_rule('/getActionIRR', view_func=user_fun.getActionIRR, methods=['GET'])
 app.add_url_rule('/getDirectEquityIRR', view_func=user_fun.getDirectEquityIRR, methods=['GET'])
 app.add_url_rule('/getAifIRR', view_func=user_fun.getAifIRR, methods=['GET'])
+
+
+app.add_url_rule('/getALLMutualFundActionTableIRR', view_func=user_fun.getALLMutualFundActionTableIRR, methods=['GET'])
+
 
 app.add_url_rule('/getDirectEquityCommodityIRR', view_func=user_fun.getDirectEquityCommodityIRR, methods=['GET'])
 

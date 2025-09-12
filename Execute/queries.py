@@ -135,7 +135,7 @@ def getAllentity():
 
 def getAllMutualFund():
      try:
-          sql="SELECT * FROM tbl_entity WHERE category = 'Equity' AND subcategory = 'Mutual Fund';"
+          sql=" "
           data=''
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs

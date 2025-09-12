@@ -1807,22 +1807,35 @@ def insertPmsAmcAction():
         if request.method == 'POST':
             formData = request.get_json()
 
-            formlist = (formData['entityid'],formData['security_description'],formData['order_type'],formData['quantity'],formData['trade_price'],formData['net_amount'], datetime.now())
+            formlist = (formData['entityid'],formData['security_description'],formData['order_type'],formData['quantity'],formData['trade_price'],formData['net_amount'],
+                datetime.now()
+            )
 
             insert_msg = queries.insertPmsAmcAction(formlist)
 
-            # Always return 200 if insert succeeds
+            # ✅ Check if insert actually succeeded
+            if not insert_msg or (isinstance(insert_msg, int) and insert_msg <= 0):
+                return make_response(
+                    middleware.exe_msgs(
+                        responses.insert_501,
+                        f"Insert failed: entityid {formData['entityid']} may not exist in tbl_entity",
+                        '1020502'
+                    ),
+                    400
+                )
+
             return make_response(
                 middleware.exs_msgs(insert_msg, responses.insert_200, '1020200'),
                 200
             )
 
     except Exception as e:
-        print("Error in insertNavData:", e)
+        print("Error in insertPmsAmcAction:", e)
         return make_response(
             middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
             500
         )
+
    
 
 def getAllPmsAmcActionTable():

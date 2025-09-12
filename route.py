@@ -206,7 +206,7 @@ app.add_url_rule('/getAllCommoditiesInstrument',view_func=user_fun.getAllCommodi
 app.add_url_rule('/insertPmsClientAction',view_func=user_fun.insertClientAction,methods=['GET','POST'])
 app.add_url_rule('/getAllPmsClientActionTable',view_func=user_fun.getAllPmsClientActionTable,methods=['GET','POST'])
 app.add_url_rule('/getPmsClientActionById',view_func=user_fun.getPmsClientActionById,methods=['GET','POST'])
-app.add_url_rule('/getPmsClientEntity',view_func=user_fun.getPmsClientEntity,methods=['GET','POST'])
+app.add_url_rule('/getPmsEquityEntity',view_func=user_fun.getPmsClientEntity,methods=['GET','POST'])
 
 #======================================= PMS AMC Action Table Start====================================
 

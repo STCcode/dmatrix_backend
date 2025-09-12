@@ -1245,7 +1245,7 @@ def get_cashflows_aif(entityid):
 
 
 
-def get_cashflows_All_action(entityid):
+def get_cashflows_All_action():
     sql = "SELECT order_date::date, TRIM(LOWER(order_type)) AS order_type,purchase_amount, redeem_amount FROM tbl_action_table ORDER BY order_date;"
     rows = executeSql.ExecuteAllWithHeaders(sql)
 

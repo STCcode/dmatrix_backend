@@ -806,7 +806,7 @@ def  getPmsClientActionById (entity_id):
 
 def getPmsClientEntity():
      try:
-        sql=" SELECT * FROM tbl_entity WHERE category ILIKE 'PMS' AND subcategory ILIKE 'Client';"
+        sql=" SELECT * FROM tbl_entity WHERE category ILIKE 'Equity' AND subcategory ILIKE 'PMS';"
         data=''
         msgs=executeSql.ExecuteAllNew(sql,data)
         return msgs
@@ -851,7 +851,7 @@ def  getPmsAmcActionById (entity_id):
 
 def getPmsAmcEntity():
      try:
-        sql=" SELECT * FROM tbl_entity WHERE category ILIKE 'PMS' AND subcategory ILIKE 'AMS';"
+        sql=" SELECT * FROM tbl_entity WHERE category ILIKE 'Equity' AND subcategory ILIKE 'PMS';"
         data=''
         msgs=executeSql.ExecuteAllNew(sql,data)
         return msgs

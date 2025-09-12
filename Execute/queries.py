@@ -825,7 +825,7 @@ def getPmsClientEntity():
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')   
      
-def getPmsEquityDetailbyId():
+def getPmsEquityDetailbyId(entity_id):
      try:
         sql=" SELECT * FROM tbl_entity WHERE entityid = %s;"
         data=''

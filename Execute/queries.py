@@ -135,7 +135,7 @@ def getAllentity():
 
 def getAllMutualFund():
      try:
-          sql=" "
+          sql="SELECT * FROM tbl_entity WHERE category = 'Equity' AND subcategory = 'Mutual Fund';"
           data=''
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs
@@ -263,7 +263,18 @@ def insert_MF_NavData(data):
         return msg
     except Exception as e:
         print("Error in save_user query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')        
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
+
+
+def getAll_Mutual_Fund_Nav():
+     try:
+          sql="SELECT * FROM tbl_mutual_fund_nav"
+          data=''
+          msgs=executeSql.ExecuteAllNew(sql,data)
+          return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')             
 
 
 

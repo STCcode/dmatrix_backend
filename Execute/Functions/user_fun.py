@@ -610,6 +610,23 @@ def insertMFNavData():
         )
    
 
+def getAllMutualFundNav():
+     if request.method == 'GET':
+        try:
+            data=queries.getAll_Mutual_Fund_Nav()
+            if type(data).__name__  != "list":
+                if data.json:
+                    result=data
+                    status=500
+            else:
+                result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
+                status=200
+                        
+            return make_response(result,status)
+        except Exception as e:
+            print("Error in getting role data=============================", e)
+            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)  
+
 
 #========================================Action Table End ======================================================
 
@@ -2458,6 +2475,21 @@ def getAifIRR():
     cashflows, dates = queries.get_cashflows_aif(entityid)
     if not cashflows:
         return make_response({"error": f"No rows found for entityid={entityid} in tbl_aif"}, 404)
+
+    response = format_irr_response(cashflows, dates)
+    response["entityid"] = entityid
+    return make_response({"code": "1023200", **response, "successmsgs": "Fetching Successfully"}, 200)
+
+
+
+def getActionIRR():
+    entityid = request.args.get("entityid", "").strip()
+    if not entityid:
+        return make_response({"error": "entityid is required"}, 400)
+
+    cashflows, dates = queries.get_cashflows_action(entityid)
+    if not cashflows:
+        return make_response({"error": f"No rows found for entityid={entityid} in tbl_action_table"}, 404)
 
     response = format_irr_response(cashflows, dates)
     response["entityid"] = entityid

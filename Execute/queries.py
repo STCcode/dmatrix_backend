@@ -1243,6 +1243,35 @@ def get_cashflows_aif(entityid):
     return cashflows, dates
 
 
+
+
+def get_cashflows_All_action(entityid):
+    sql = "SELECT order_date::date, TRIM(LOWER(order_type)) AS order_type,purchase_amount, redeem_amount FROM tbl_action_table ORDER BY order_date;"
+    rows = executeSql.ExecuteAllWithHeaders(sql)
+
+    cashflows, dates = [], []
+    for r in rows:
+        order_type = (r.get("order_type") or "").strip().lower()
+
+        if order_type in ("purchase", "buy"):
+            amt = float(r.get("purchase_amount") or 0)
+            if amt > 0:
+                cashflows.append(-amt)
+                dates.append(r["order_date"])
+
+        elif order_type in ("sell", "redeem", "redemption"):
+            # first try redeem_amount, but if it's 0 and purchase_amount > 0, use that
+            amt = float(r.get("redeem_amount") or 0)
+            if amt <= 0:
+                amt = float(r.get("purchase_amount") or 0)
+            if amt > 0:
+                cashflows.append(amt)
+                dates.append(r["order_date"])
+
+    return cashflows, dates
+
+
+
 def getDirectEquityCommodityIRR(entityid):
     sql = """
         SELECT trade_date::date, order_type, net_total, net_amount_receivable

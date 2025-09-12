@@ -2482,17 +2482,13 @@ def getAifIRR():
 
 
 
-def getActionIRR():
-    entityid = request.args.get("entityid", "").strip()
-    if not entityid:
-        return make_response({"error": "entityid is required"}, 400)
-
-    cashflows, dates = queries.get_cashflows_action(entityid)
+def getALLMutualFundActionTableIRR():
+    
+    cashflows, dates = queries.get_cashflows_All_action()
     if not cashflows:
-        return make_response({"error": f"No rows found for entityid={entityid} in tbl_action_table"}, 404)
+        return make_response({"error": "No rows found in tbl_action_table"}, 404)
 
     response = format_irr_response(cashflows, dates)
-    response["entityid"] = entityid
     return make_response({"code": "1023200", **response, "successmsgs": "Fetching Successfully"}, 200)
 
 

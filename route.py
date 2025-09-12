@@ -247,7 +247,7 @@ app.add_url_rule('/getDirectEquityIRR', view_func=user_fun.getDirectEquityIRR, m
 app.add_url_rule('/getAifIRR', view_func=user_fun.getAifIRR, methods=['GET'])
 
 
-# app.add_url_rule('/getALLMutualFundActionTableIRR', view_func=user_fun.getALLMutualFundActionTableIRR, methods=['GET'])
+app.add_url_rule('/getALLMutualFundActionTableIRR', view_func=user_fun.getALLMutualFundActionTableIRR, methods=['GET'])
 
 
 app.add_url_rule('/getDirectEquityCommodityIRR', view_func=user_fun.getDirectEquityCommodityIRR, methods=['GET'])

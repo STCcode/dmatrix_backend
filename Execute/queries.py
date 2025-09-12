@@ -1033,7 +1033,7 @@ def getEquityActionTable():
 
 def GetallMfEquityUnderlyingCount():
      try:
-          sql="WITH counts AS (SELECT u.tag,COUNT(*) AS tag_count,(SELECT COUNT(*) FROM tbl_underlying u2 JOIN tbl_entity e2 ON u2.entityid = e2.entityid WHERE e2.category = 'Equity' AND e2.subcategory = 'Mutual Fund') AS total_mf_count FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity'AND e.subcategory = 'Mutual Fund' GROUP BY u.tag)SELECT tag,tag_count,total_mf_count,(tag_count * 100.0 / total_mf_count)::numeric(5,2) AS tag_percentFROM counts ORDER BY tag_percent DESC;"
+          sql="WITH counts AS (SELECT u.tag,COUNT(*) AS tag_count,(SELECT COUNT(*) FROM tbl_underlying u2 JOIN tbl_entity e2 ON u2.entityid = e2.entityid WHERE e2.category = 'Equity' AND e2.subcategory = 'Mutual Fund') AS total_mf_count FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity'AND e.subcategory = 'Mutual Fund' GROUP BY u.tag) SELECT tag,tag_count,total_mf_count,(tag_count * 100.0 / total_mf_count)::numeric(5,2) AS tag_percent FROM counts ORDER BY tag_percent DESC;"
           data=''
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs

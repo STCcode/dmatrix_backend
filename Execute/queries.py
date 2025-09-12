@@ -828,7 +828,7 @@ def getPmsClientEntity():
 def getPmsEquityDetailbyId(entity_id):
      try:
         sql=" SELECT * FROM tbl_entity WHERE entityid = %s;"
-        data=''
+        data = (entity_id,) 
         msgs=executeSql.ExecuteAllNew(sql,data)
         return msgs
      except Exception as e:

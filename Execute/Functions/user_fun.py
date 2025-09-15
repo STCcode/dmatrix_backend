@@ -611,21 +611,26 @@ def insertMFNavData():
    
 
 def getAllMutualFundNav():
-     if request.method == 'GET':
+    if request.method == 'GET':
         try:
-            data=queries.getAll_Mutual_Fund_Nav()
-            if type(data).__name__  != "list":
-                if data.json:
-                    result=data
-                    status=500
+            entity_id = request.args.get("entity_id") 
+            data = queries.getAll_Mutual_Fund_Nav(entity_id)
+
+            if isinstance(data, list):
+                result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+                status = 200
             else:
-                result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
-                status=200
-                        
-            return make_response(result,status)
+                result = data  # assume middleware wrapped error
+                status = 500
+
+            return make_response(result, status)
         except Exception as e:
             print("Error in getting role data=============================", e)
-            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)  
+            return make_response(
+                middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
+                500
+            )
+
 
 
 #========================================Action Table End ======================================================
@@ -2587,7 +2592,136 @@ def getDirectEquityCommodityIRR():
 # ======================================calculate Xirr (IRR)======================================
 
 
+# ============================= Auto PDF Read and Insert Into DB =========================
 
+def upload_and_save():
+    try:
+        if request.method == 'POST':
+            formData = request.get_json()
+
+            # Data comes from parser with category + entity + action
+            entity = formData.get("entity", {})
+            action = formData.get("action", {})
+            category = action.get("category")  # mutual_fund, aif, etf, commodities, direct_equity
+
+            result = None
+
+            # ✅ Mutual Fund → tbl_action_table
+            if category == "mutual_fund":
+                data_tuple = (
+                    action.get("scrip_code"),
+                    action.get("mode"),
+                    action.get("order_type"),
+                    action.get("scrip_name"),
+                    action.get("isin"),
+                    action.get("order_number"),
+                    action.get("folio_number"),
+                    action.get("nav"),
+                    action.get("stt"),
+                    action.get("unit"),
+                    action.get("redeem_amount"),
+                    action.get("purchase_amount"),
+                    action.get("cgst"),
+                    action.get("sgst"),
+                    action.get("igst"),
+                    action.get("ugst"),
+                    action.get("stamp_duty"),
+                    action.get("cess_value"),
+                    action.get("net_amount"),
+                    datetime.now(),
+                    entity.get("entityid"),
+                    action.get("purchase_value"),
+                    action.get("order_date"),
+                    action.get("sett_no"),
+                )
+                result = queries.auto_action_table(data_tuple)
+
+            # ✅ AIF → tbl_pms_amc_action
+            elif category == "aif":
+                data_tuple = (
+                    entity.get("entityid"),
+                    action.get("security_description"),
+                    action.get("order_type"),
+                    action.get("quantity"),
+                    action.get("trade_price"),
+                    action.get("net_amount"),
+                    datetime.now(),
+                    entity.get("created_by"),
+                )
+                result = queries.auto_InsertAifData(data_tuple)
+
+            # ✅ ETF → tbl_etf_action
+            elif category == "etf":
+                data_tuple = (
+                    entity.get("entityid"),
+                    action.get("security_description"),
+                    action.get("order_type"),
+                    action.get("quantity"),
+                    action.get("trade_price"),
+                    action.get("net_amount"),
+                    datetime.now(),
+                )
+                result = queries.auto_InsertEtfDataInsert(data_tuple)
+
+            # ✅ Commodities → tbl_commodities_direct
+            elif category == "commodities":
+                data_tuple = (
+                    entity.get("entityid"),
+                    action.get("security_name"),
+                    action.get("order_type"),
+                    action.get("quantity"),
+                    action.get("trade_price"),
+                    action.get("net_amount"),
+                    datetime.now(),
+                )
+                result = queries.auto_insertcommoditiesDirect(data_tuple)
+
+            # ✅ Direct Equity → tbl_direct_equity
+            elif category == "direct_equity":
+                data_tuple = (
+                    entity.get("entityid"),
+                    action.get("security_name"),
+                    action.get("order_type"),
+                    action.get("quantity"),
+                    action.get("trade_price"),
+                    action.get("net_amount"),
+                    datetime.now(),
+                )
+                result = queries.auto_insert_directdata(data_tuple)
+
+            else:
+                return make_response(
+                    middleware.exe_msgs(
+                        responses.insert_501,
+                        f"Unknown category: {category}",
+                        '1020999'
+                    ), 400
+                )
+
+            # ✅ Insert success check
+            if not result or (isinstance(result, int) and result <= 0):
+                return make_response(
+                    middleware.exe_msgs(
+                        responses.insert_501,
+                        f"Insert failed for category {category}, entityid {entity.get('entityid')}",
+                        '1020502'
+                    ), 400
+                )
+
+            return make_response(
+                middleware.exs_msgs(result, responses.insert_200, '1020200'),
+                200
+            )
+
+    except Exception as e:
+        print("Error in upload_and_save:", e)
+        return make_response(
+            middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
+            500
+        )
+
+
+# ============================= Auto PDF Read and Insert Into DB =========================
 
 
 

@@ -1333,38 +1333,93 @@ def getDirectEquityCommodityIRR(entityid):
 
 
 # ============================= Auto PDF Read and Insert Into DB  Start queries=========================
-def log_sql(sql, data):
-    print(f"[DEBUG] SQL: {sql}")
-    print(f"[DEBUG] Parameters: {data}")
+def insert_entity_return_id(data):
+    """
+    Insert a new entity in tbl_entity and return generated entityid.
+    Data = (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at)
+    """
+    try:
+        sql = """
+            INSERT INTO tbl_entity
+            (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING entityid
+        """
+        msg = executeSql.ExecuteOne(sql, data)
+        return msg  # should return {"entityid": "..."}
+    except Exception as e:
+        print("Error in insert_entity_return_id ==================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020301')
 
-def insert_entity_return_id(fields):
-    sql = """INSERT INTO tbl_entity 
-             (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at)
-             VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING entityid"""
-    log_sql(sql, fields)
-    return executeSql.ExecuteReturnId(sql, fields)
 
+# ================= Insert Action Table =================
 def auto_action_table(data):
-    sql = """INSERT INTO tbl_action_table 
-             (scrip_code, mode, order_type, scrip_name, isin, order_number, folio_number, nav, stt, unit,
-              redeem_amount, purchase_amount, cgst, sgst, igst, ugst, stamp_duty, cess_value, net_amount, 
-              created_at, entityid, purchase_value, order_date, sett_no)
-             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
-    log_sql(sql, data)
-    return executeSql.ExecuteReturnId(sql, data)
+    """
+    Insert mutual fund action data in tbl_pms_mf_action (example).
+    Adjust table/columns based on your schema.
+    """
+    try:
+        sql = """
+            INSERT INTO tbl_pms_mf_action
+            (scrip_code, mode, order_type, scrip_name, isin, order_number, folio_number,
+             nav, stt, unit, redeem_amount, purchase_amount,
+             cgst, sgst, igst, ugst, stamp_duty, cess_value,
+             net_amount, created_at, entityid, purchase_value, order_date, sett_no)
+            VALUES
+            (%s, %s, %s, %s, %s, %s, %s,
+             %s, %s, %s, %s, %s,
+             %s, %s, %s, %s, %s, %s,
+             %s, %s, %s, %s, %s, %s)
+        """
+        msg = executeSql.ExecuteOne(sql, data)
+        return msg
+    except Exception as e:
+        print("Error in auto_action_table ==================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020302')
 
-def insert_pdf_file(entityid, pdf_name, pdf_file_bytes, uploaded_at):
-    sql = """INSERT INTO tbl_action_pdf (entityid, pdf_name, pdf_file, uploaded_at)
-             VALUES (%s, %s, %s, %s)"""
-    data = (entityid, pdf_name, psycopg2.Binary(pdf_file_bytes), uploaded_at)
-    log_sql(sql, data)
-    return executeSql.ExecuteOne(sql, data)
 
+# ================= Insert PDF File =================
+def insert_pdf_file(entityid, filename, file_bytes, created_at=None):
+    """
+    Store uploaded PDF into tbl_action_pdf.
+    """
+    try:
+        if created_at is None:
+            created_at = datetime.now()
+
+        sql = """
+            INSERT INTO tbl_action_pdf (entityid, filename, file_data, created_at)
+            VALUES (%s, %s, %s, %s)
+        """
+        data = (entityid, filename, file_bytes, created_at)
+        msg = executeSql.ExecuteOne(sql, data)
+        return msg
+    except Exception as e:
+        print("Error in insert_pdf_file ==================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020303')
+
+
+# ================= Get Entity by Category/Subcategory =================
 def get_entity_by_category_subcategory(category, subcategory):
-    sql = """SELECT * FROM tbl_entity WHERE category=%s AND subcategory=%s ORDER BY id DESC LIMIT 1"""
-    data = (category, subcategory)
-    return executeSql.ExecuteOne(sql, data)
+    """
+    Get the first entityid for given category & subcategory.
+    """
+    try:
+        sql = """
+            SELECT entityid
+            FROM tbl_entity
+            WHERE category = %s AND subcategory = %s
+            LIMIT 1
+        """
+        data = (category, subcategory)
+        msg = executeSql.ExecuteAllNew(sql, data)
 
+        if msg and isinstance(msg, list) and len(msg) > 0:
+            return msg[0]  # return first row
+        return None
+    except Exception as e:
+        print("Error in get_entity_by_category_subcategory ==================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020304')
 
 # =================== AIF ===================
 # def auto_InsertAifData(data):

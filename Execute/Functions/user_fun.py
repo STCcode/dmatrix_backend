@@ -2738,14 +2738,15 @@ def upload_and_save():
         if request.method != "POST":
             return make_response({"error": "Method not allowed"}, 405)
 
-        # --- Check files ---
+        # ✅ Check files
         if "files" not in request.files:
             return make_response({"error": "No files uploaded"}, 400)
+
         files = request.files.getlist("files")
         if not files:
             return make_response({"error": "Empty files list"}, 400)
 
-        # --- Category & subcategory from frontend ---
+        # ✅ Category & subcategory from frontend
         category = request.form.get("category")
         subcategory = request.form.get("subcategory")
         if not category or not subcategory:
@@ -2754,37 +2755,38 @@ def upload_and_save():
         inserted_records = []
         now = datetime.now()
 
-        # --- Get existing entityid by category/subcategory ---
+        # ✅ Fetch existing entity by category/subcategory
         existing_entity = queries.get_entity_by_category_subcategory(category, subcategory)
         entityid_to_use = existing_entity.get("entityid") if existing_entity else None
-        print("DEBUG: Existing entityid ->", entityid_to_use)
 
         for file in files:
             filename = secure_filename(file.filename)
             file_bytes = file.read()
 
-            # --- Save PDF in tbl_action_pdf ---
+            # ✅ Generate entityid if none exists
+            if not entityid_to_use:
+                entityid_to_use = queries.generate_new_entityid()
+                print("Generated new entityid:", entityid_to_use)
+
+            # ✅ Insert PDF
             queries.insert_pdf_file(entityid_to_use, filename, file_bytes, now)
+            file.seek(0)  # Reset file pointer for pdf_parser
 
-            # Reset file pointer for pdfplumber
-            file.seek(0)
-
-            # --- Extract data ---
+            # ✅ Extract data from PDF
             broker, json_data = process_pdf(file, category, subcategory)
 
             if not json_data:
-                print(f"DEBUG: No data extracted from {filename}")
+                print(f"No actionable data found in PDF: {filename}")
                 continue
 
             for item in json_data:
-                entity = item.get("entityTable") or {}
-                action = item.get("actionTable") or {}
+                entity = item.get("entityTable", {})
+                action = item.get("actionTable", {})
 
-                # Use existing entityid or generate new
                 eid = entity.get("entityid") or entityid_to_use
 
-                if not eid:
-                    # --- Insert entity if not exists ---
+                # ✅ Insert entity if not exists (for safety)
+                if not entity.get("entityid"):
                     entity_fields = (
                         entity.get("scripname"),
                         entity.get("scripcode"),
@@ -2796,9 +2798,9 @@ def upload_and_save():
                         now
                     )
                     eid = queries.insert_entity_return_id(entity_fields)
-                    print("DEBUG: New entityid inserted ->", eid)
+                    print("Inserted new entityid:", eid)
 
-                # --- Insert action ---
+                # ✅ Insert action into action table
                 data_tuple = (
                     action.get("scrip_code"),
                     action.get("mode"),
@@ -2834,7 +2836,7 @@ def upload_and_save():
         )
 
     except Exception as e:
-        print("ERROR in upload_and_save:", e)
+        print("Error in upload_and_save:", e)
         return make_response(
             middleware.exe_msgs(responses.insert_501, str(e.args), "1020500"),
             500

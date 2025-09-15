@@ -2737,53 +2737,53 @@ def upload_and_save():
         if request.method != "POST":
             return make_response({"error": "Method not allowed"}, 405)
 
+        # 1️⃣ Check files
         if "files" not in request.files:
             return make_response({"error": "No files uploaded"}, 400)
         files = request.files.getlist("files")
         if not files:
             return make_response({"error": "Empty files list"}, 400)
 
+        # 2️⃣ Category & subcategory from frontend
         category = request.form.get("category")
         subcategory = request.form.get("subcategory")
         if not category or not subcategory:
             return make_response({"error": "Category & Subcategory are required"}, 400)
 
-        now = datetime.now()
         inserted_records = []
+        now = datetime.now()
 
         for file in files:
             filename = secure_filename(file.filename)
             file_bytes = file.read()
-
-            # ✅ Generate new entityid per PDF
-            entityid = queries.generate_new_entityid()
-
-            # ✅ Insert PDF
-            queries.insert_pdf_file(entityid, filename, file_bytes, now)
-
-            # Reset file pointer for parser
             file.seek(0)
 
-            # ✅ Extract data
+            # 3️⃣ Extract data
             broker, json_data = process_pdf(file, category, subcategory)
+            if not json_data or len(json_data) == 0:
+                continue
 
-            # Insert entity (using first row)
-            if json_data and len(json_data) > 0:
-                first_entity = json_data[0].get("entityTable", {})
-                entity_tuple = (
-                    first_entity.get("scripname"),
-                    first_entity.get("scripcode"),
-                    entityid,
-                    first_entity.get("benchmark", "0"),
-                    category,
-                    subcategory,
-                    first_entity.get("nickname"),
-                    first_entity.get("isin"),
-                    now
-                )
-                queries.insert_entity_return_id(entity_tuple)
+            # 4️⃣ Insert entity (Postgres trigger generates entityid)
+            first_entity = json_data[0].get("entityTable", {})
+            entity_tuple = (
+                first_entity.get("scripname"),
+                first_entity.get("scripcode"),
+                first_entity.get("benchmark", "0"),
+                category,
+                subcategory,
+                first_entity.get("nickname"),
+                first_entity.get("isin"),
+                now
+            )
+            entityid = queries.insert_entity_return_id(entity_tuple)
 
-            # Insert all actions
+            if not entityid:
+                continue  # Skip if entityid could not be generated
+
+            # 5️⃣ Insert PDF bytes
+            queries.insert_pdf_file(entityid, filename, file_bytes, now)
+
+            # 6️⃣ Insert all actions for this entity
             for item in json_data:
                 action = item.get("actionTable", {})
                 action_tuple = (
@@ -2813,13 +2813,10 @@ def upload_and_save():
                     action.get("sett_no")
                 )
                 queries.auto_action_table(action_tuple)
-                inserted_records.append({
-                    "entityid": entityid,
-                    "order_number": action.get("order_number")
-                })
+                inserted_records.append({"entityid": entityid, "order_number": action.get("order_number")})
 
         return make_response(
-            {"data": inserted_records, "successmsgs": "Inserted Successfully", "code": "1020200"},
+            middleware.exs_msgs(inserted_records, responses.insert_200, "1020200"),
             200
         )
 
@@ -2829,7 +2826,6 @@ def upload_and_save():
             middleware.exe_msgs(responses.insert_501, str(e.args), "1020500"),
             500
         )
-
 # ============================= Auto PDF Read and Insert Into DB =========================
 
 

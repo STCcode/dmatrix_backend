@@ -1333,6 +1333,7 @@ def getDirectEquityCommodityIRR(entityid):
 
 
 # ============================= Auto PDF Read and Insert Into DB  Start queries=========================
+# ================= Insert Entity & Return ID =================
 def insert_entity_return_id(data):
     """
     Insert a new entity in tbl_entity and return generated entityid.
@@ -1345,19 +1346,17 @@ def insert_entity_return_id(data):
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING entityid
         """
-        msg = executeSql.ExecuteOne(sql, data)
-        return msg  # should return {"entityid": "..."}
+        result = executeSql.ExecuteAllNew(sql, data)  # use ExecuteAllNew for RETURNING
+        if result and isinstance(result, list) and len(result) > 0:
+            return result[0]  # e.g. {"entityid": "ENT-0001"}
+        return None
     except Exception as e:
         print("Error in insert_entity_return_id ==================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020301')
+        return None
 
 
 # ================= Insert Action Table =================
 def auto_action_table(data):
-    """
-    Insert mutual fund action data in tbl_pms_mf_action (example).
-    Adjust table/columns based on your schema.
-    """
     try:
         sql = """
             INSERT INTO tbl_pms_mf_action
@@ -1371,18 +1370,14 @@ def auto_action_table(data):
              %s, %s, %s, %s, %s, %s,
              %s, %s, %s, %s, %s, %s)
         """
-        msg = executeSql.ExecuteOne(sql, data)
-        return msg
+        return executeSql.ExecuteOne(sql, data)
     except Exception as e:
         print("Error in auto_action_table ==================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020302')
+        return None
 
 
 # ================= Insert PDF File =================
 def insert_pdf_file(entityid, filename, file_bytes, created_at=None):
-    """
-    Store uploaded PDF into tbl_action_pdf.
-    """
     try:
         if created_at is None:
             created_at = datetime.now()
@@ -1392,18 +1387,14 @@ def insert_pdf_file(entityid, filename, file_bytes, created_at=None):
             VALUES (%s, %s, %s, %s)
         """
         data = (entityid, filename, file_bytes, created_at)
-        msg = executeSql.ExecuteOne(sql, data)
-        return msg
+        return executeSql.ExecuteOne(sql, data)
     except Exception as e:
         print("Error in insert_pdf_file ==================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020303')
+        return None
 
 
 # ================= Get Entity by Category/Subcategory =================
 def get_entity_by_category_subcategory(category, subcategory):
-    """
-    Get the first entityid for given category & subcategory.
-    """
     try:
         sql = """
             SELECT entityid
@@ -1412,14 +1403,14 @@ def get_entity_by_category_subcategory(category, subcategory):
             LIMIT 1
         """
         data = (category, subcategory)
-        msg = executeSql.ExecuteAllNew(sql, data)
+        result = executeSql.ExecuteAllNew(sql, data)
 
-        if msg and isinstance(msg, list) and len(msg) > 0:
-            return msg[0]  # return first row
+        if result and isinstance(result, list) and len(result) > 0:
+            return result[0]  # {"entityid": "..."}
         return None
     except Exception as e:
         print("Error in get_entity_by_category_subcategory ==================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020304')
+        return None
 
 # =================== AIF ===================
 # def auto_InsertAifData(data):

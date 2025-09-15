@@ -1,216 +1,94 @@
-import pdfplumber
-import pandas as pd
-import json
-import re
+from flask import request, make_response
+from werkzeug.utils import secure_filename
+from datetime import datetime
+import os
+import queries, middleware, responses
+from pdf_parser import process_pdf   # <-- your PDF extraction file
 
-def extract_pdf_content(pdf_path):
-    tables = []
-    broker_name = "Unknown"
+UPLOAD_FOLDER = "uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-    with pdfplumber.open(pdf_path) as pdf:
-        for page_num, page in enumerate(pdf.pages, start=1):
-            text = page.extract_text() or ""
-
-            # ✅ Detect broker from text (only once)
-            if broker_name == "Unknown" and text:
-                broker_name = detect_broker_name(text)
-
-            # ✅ Contract Note Date
-            contract_match = re.search(r"BSE MUTUAL FUND CONTRACT NOTE\s*:\s*(\d{2}/\d{2}/\d{4})", text)
-            contract_date = contract_match.group(1) if contract_match else None
-
-            # ✅ Order Date & Sett No
-            order_match = re.search(r"Order Date\s+(\d{2}/\d{2}/\d{4})", text)
-            sett_match = re.search(r"Sett No\s+(\d+)", text)
-            order_date = order_match.group(1) if order_match else None
-            sett_no = sett_match.group(1) if sett_match else None
-
-            # ✅ Stamp Duty
-            stamp_match = re.search(r"STAMPDUTY\s+([\d.,]+)", text)
-            stamp_duty = float(stamp_match.group(1).replace(",", "")) if stamp_match else 0.0
-
-            # ✅ Extract all tables first
-            page_tables = [pd.DataFrame(t[1:], columns=t[0]) 
-                           for t in page.extract_tables() if t and len(t) > 1]
-
-            if not page_tables:
-                continue
-
-            # ✅ Count total rows across all tables on this page
-            total_rows = 3
-            per_row_stamp_duty = stamp_duty / total_rows if total_rows > 0 else 0.0
-
-            # ✅ Tag metadata & distribute stamp duty
-            for df in page_tables:
-                df["__page__"] = page_num
-                df["__contract_date__"] = contract_date
-                df["__order_date__"] = order_date
-                df["__sett_no__"] = sett_no
-                df["__stamp_duty__"] = per_row_stamp_duty
-                df["__broker__"] = broker_name
-                tables.append(df)
-
-    return {"tables": tables, "broker": broker_name}
-
-def detect_broker_name(text: str) -> str:
-    """Detect broker name from text"""
-    brokers = {
-        "motilal oswal": "Motilal Oswal Financial Services Limited",
-        "zerodha": "Zerodha Broking Limited",
-        "hdfc": "HDFC Securities Limited",
-        "icici": "ICICI Securities Limited",
-        "phillip capital": "Phillip Capital (India) Pvt Ltd"
-    }
-
-    text_lower = text.lower()
-    for key, fullname in brokers.items():
-        if key in text_lower:
-            return fullname
-    return "Unknown"
-
-def build_json_from_tables(tables, category, subcategory):
-    results = []
-
-    for df in tables:
-        if "ISIN" not in df.columns:
-            continue
-
-        for _, row in df.iterrows():
-            scrip_name = str(row.get("Scrip Name", "")).strip()
-            if not scrip_name or scrip_name.lower() == "none":
-                continue
-
-            isin = str(row.get("ISIN", "")).strip()
-            contract_date = row.get("__contract_date__", "Unknown")
-            order_date = row.get("__order_date__", None)
-            sett_no = row.get("__sett_no__", None)
-            per_row_stamp_duty = row.get("__stamp_duty__", 0.0)
-            broker_name = row.get("__broker__", "Unknown")
-
-            entity_table = {
-                "scripname": scrip_name,
-                "scripcode": str(row.get("Scrip Code", "")),
-                "benchmark": "0",
-                "category": category,
-                "subcategory": subcategory,
-                "nickname": scrip_name,
-                "isin": isin
-            }
-
-            action_table = {
-                "scrip_code": str(row.get("Scrip Code", "")),
-                "mode": str(row.get("Mode", "")),
-                "order_type": str(row.get("Order Type", "")),
-                "scrip_name": scrip_name,
-                "isin": isin,
-                "order_number": str(row.get("Order No", "")),
-                "folio_number": str(row.get("Folio No", "")),
-                "nav": try_float(row.get("NAV")),
-                "stt": try_float(row.get("STT")),
-                "unit": try_float(row.get("Unit")),
-                "redeem_amount": try_float(row.get("Reedem Amt")),
-                "purchase_amount": try_float(row.get("Purchase Amt")),
-                "net_amount": try_float(row.get("Net Amount")),
-                "order_date": order_date,
-                "sett_no": sett_no,
-                "stamp_duty": per_row_stamp_duty,
-                "page_number": row.get("__page__", None),
-            }
-
-            results.append({
-                "entityTable": entity_table,
-                "actionTable": action_table
-            })
-
-    return results
-
-def build_json_phillip(tables, category, subcategory):
-    results = []
-
-    for df in tables:
-        # Phillip Capital tables have different headers
-        if "Mutual Fund Name" not in df.columns or "Mutual Fund Scheme" not in df.columns:
-            continue
-
-        for _, row in df.iterrows():
-            scrip_code = str(row.get("Mutual Fund Name", "")).strip()
-            scrip_name = str(row.get("Mutual Fund Scheme", "")).strip()
-            unit = try_float(row.get("Purchase Units"))
-            nav = try_float(row.get("Buy Rate"))
-            purchase_amount = try_float(row.get("Buy Total"))
-            order_date = str(row.get("Date", "")).strip()
-
-            # ⚠️ ISIN may not exist in Phillip PDF
-            isin = str(row.get("ISIN", "")).strip() if "ISIN" in df.columns else ""
-
-            entity_table = {
-                "scripname": scrip_name,
-                "scripcode": scrip_code,
-                "benchmark": "0",
-                "category": category,
-                "subcategory": subcategory,
-                "nickname": scrip_name,
-                "isin": isin
-            }
-
-            action_table = {
-                "scrip_code": scrip_code,
-                "mode": "DEMAT",
-                "order_type": "PURCHASE",
-                "scrip_name": scrip_name,
-                "isin": isin,
-                "order_number": str(row.get("Order No", "")),
-                "folio_number": str(row.get("Folio No", "")),
-                "nav": nav,
-                "stt": 0.0,
-                "unit": unit,
-                "redeem_amount": 0.0,
-                "purchase_amount": purchase_amount,
-                "net_amount": 0.0,   # can be computed later
-                "order_date": order_date,
-                "sett_no": str(row.get("Sett No", "")),
-                "stamp_duty": try_float(row.get("__stamp_duty__", 0.0)),
-                "page_number": row.get("__page__", None)
-            }
-
-            results.append({
-                "entityTable": entity_table,
-                "actionTable": action_table
-            })
-
-    return results
-
-def process_pdf(pdf_file, category, subcategory):
-    extracted = extract_pdf_content(pdf_file)
-    broker = extracted["broker"]
-
-    if broker == "Motilal Oswal Financial Services Limited":
-        json_data = build_json_from_tables(extracted["tables"], category, subcategory)
-    elif broker == "Phillip Capital (India) Pvt Ltd":
-        json_data = build_json_phillip(extracted["tables"], category, subcategory)
-    else:
-        raise ValueError(f"❌ No parser available for broker: {broker}")
-
-    return broker, json_data
-
-def try_float(val):
+def upload_and_save():
     try:
-        return float(val)
-    except (ValueError, TypeError):
-        return 0
+        if request.method != 'POST':
+            return make_response({"error": "Method not allowed"}, 405)
 
-if __name__ == "__main__":
-    pdf_file = "Motilal.pdf"
-    category = "Equity"
-    subcategory = "Mutual Fund"
+        if 'files' not in request.files:
+            return make_response({"error": "No files uploaded"}, 400)
 
-    data = extract_pdf_content(pdf_file)
-    json_data = build_json_from_tables(data["tables"], category, subcategory)
+        files = request.files.getlist('files')
+        if not files:
+            return make_response({"error": "Empty files list"}, 400)
 
-    print(f"✅ Detected Broker: {data['broker']}")
-    print(json.dumps(json_data, indent=4))
+        category = request.form.get("category")
+        subcategory = request.form.get("subcategory")
+        if not category or not subcategory:
+            return make_response({"error": "Category and Subcategory are required"}, 400)
 
-    with open("output.json", "w") as f:
-        json.dump(json_data, f, indent=4)
+        inserted_records = []
+        now = datetime.now()
 
-    print("✅ JSON saved to output.json")
+        for file in files:
+            filename = secure_filename(file.filename)
+
+            # Parse PDF → structured JSON
+            broker, json_data = process_pdf(file, category, subcategory)
+
+            for row in json_data:
+                entity = row.get("entityTable", {})
+                action = row.get("actionTable", {})
+
+                # Insert entity if not already existing
+                entityid = entity.get("entityid")
+                if not entityid:
+                    entity_fields = (
+                        entity.get("scripname"),
+                        entity.get("scripcode"),
+                        entity.get("benchmark"),
+                        entity.get("category"),
+                        entity.get("subcategory"),
+                        entity.get("nickname"),
+                        entity.get("isin"),
+                        now
+                    )
+                    entityid = queries.insert_entity_return_id(entity_fields)
+
+                # Insert action
+                action_fields = (
+                    action.get("scrip_code"),
+                    action.get("mode"),
+                    action.get("order_type"),
+                    action.get("scrip_name"),
+                    action.get("isin"),
+                    action.get("order_number"),
+                    action.get("folio_number"),
+                    action.get("nav"),
+                    action.get("stt"),
+                    action.get("unit"),
+                    action.get("redeem_amount"),
+                    action.get("purchase_amount"),
+                    action.get("net_amount"),
+                    action.get("stamp_duty"),
+                    now,
+                    entityid,
+                    action.get("order_date"),
+                    action.get("sett_no"),
+                )
+                queries.auto_action_table(action_fields)
+
+                inserted_records.append({
+                    "entityid": entityid,
+                    "order_number": action.get("order_number")
+                })
+
+        return make_response(
+            middleware.exs_msgs(inserted_records, responses.insert_200, '1020200'),
+            200
+        )
+
+    except Exception as e:
+        print("Error in upload_and_save:", e)
+        return make_response(
+            middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
+            500
+        )

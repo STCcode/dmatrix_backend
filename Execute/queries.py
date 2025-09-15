@@ -1,6 +1,7 @@
 from datetime import datetime
 from Execute import executeSql,responses,middleware
 import platform
+import psycopg2
 from flask import jsonify, request
 import numpy as np
 import json  
@@ -1336,6 +1337,7 @@ def log_sql(sql, data):
     print(f"[DEBUG] SQL: {sql}")
     print(f"[DEBUG] Parameters: {data}")
 
+# Insert action table data
 def auto_action_table(data):
     try:
         sql = """INSERT INTO tbl_action_table 
@@ -1344,12 +1346,22 @@ def auto_action_table(data):
                   created_at, entityid, purchase_value, order_date, sett_no) 
                  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         log_sql(sql, data)
-        msg = executeSql.ExecuteReturnId(sql, data)
-        return msg
+        return executeSql.ExecuteReturnId(sql, data)
     except Exception as e:
         print("Error in auto_action_table:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
 
+# Insert PDF file
+def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):
+    try:
+        sql = """INSERT INTO tbl_action_pdf (entityid, pdf_name, pdf_file, uploaded_at)
+                 VALUES (%s, %s, %s, %s)"""
+        data = (entityid, pdf_name, psycopg2.Binary(pdf_file), uploaded_at)
+        log_sql(sql, data)
+        return executeSql.ExecuteOne(sql, data)
+    except Exception as e:
+        print("Error in insert_pdf_file:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020320')
 # =================== AIF ===================
 # def auto_InsertAifData(data):
 #     try:

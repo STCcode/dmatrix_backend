@@ -2738,7 +2738,7 @@ def upload_and_save():
         if request.method != 'POST':
             return make_response({"error": "Method not allowed"}, 405)
 
-        # Check if files are in the request
+        # Check files
         if 'files' not in request.files:
             return make_response({"error": "No files uploaded"}, 400)
 
@@ -2755,22 +2755,31 @@ def upload_and_save():
         inserted_records = []
         now = datetime.now()
 
-        # Process each uploaded PDF
         for file in files:
             filename = secure_filename(file.filename)
 
-            # Parse PDF directly from file stream
+            # Save PDF into separate table
+            file_bytes = file.read()
+            queries.insert_pdf_file(
+                entityid=request.form.get("entityid"),
+                pdf_name=filename,
+                pdf_file=file_bytes,
+                uploaded_at=now
+            )
+
+            # Reset file pointer for parsing
+            file.seek(0)
+
+            # Extract PDF data
             broker, json_data = process_pdf(file, category, subcategory)
 
             for item in json_data:
                 entity = item.get("entityTable", {})
                 action = item.get("actionTable", {})
 
-                entityid = entity.get("entityid")  # Use existing entityid if available
-
-                # If entityid does not exist, you can generate or insert entity here
-                # Example: insert into tbl_entity if entityid is None
+                entityid = entity.get("entityid")
                 if not entityid:
+                    # Insert entity if not exists
                     entity_fields = (
                         entity.get("scripname"),
                         entity.get("scripcode"),
@@ -2783,38 +2792,34 @@ def upload_and_save():
                     )
                     entityid = queries.insert_entity_return_id(entity_fields)
 
-                # Prepare action data based on category
-                if category.lower() == "mutual_fund":
-                    data_tuple = (
-                        action.get("scrip_code"),
-                        action.get("mode"),
-                        action.get("order_type"),
-                        action.get("scrip_name"),
-                        action.get("isin"),
-                        action.get("order_number"),
-                        action.get("folio_number"),
-                        action.get("nav"),
-                        action.get("stt"),
-                        action.get("unit"),
-                        action.get("redeem_amount"),
-                        action.get("purchase_amount"),
-                        action.get("cgst"),
-                        action.get("sgst"),
-                        action.get("igst"),
-                        action.get("ugst"),
-                        action.get("stamp_duty"),
-                        action.get("cess_value"),
-                        action.get("net_amount"),
-                        now,
-                        entityid,
-                        action.get("purchase_value"),
-                        action.get("order_date"),
-                        action.get("sett_no"),
-                    )
-                    queries.auto_action_table(data_tuple)
-
-                # You can extend here for aif, etf, commodities, direct_equity
-                # using the same pattern as your current function.py
+                # Insert action data
+                data_tuple = (
+                    action.get("scrip_code"),
+                    action.get("mode"),
+                    action.get("order_type"),
+                    action.get("scrip_name"),
+                    action.get("isin"),
+                    action.get("order_number"),
+                    action.get("folio_number"),
+                    action.get("nav"),
+                    action.get("stt"),
+                    action.get("unit"),
+                    action.get("redeem_amount"),
+                    action.get("purchase_amount"),
+                    action.get("cgst"),
+                    action.get("sgst"),
+                    action.get("igst"),
+                    action.get("ugst"),
+                    action.get("stamp_duty"),
+                    action.get("cess_value"),
+                    action.get("net_amount"),
+                    now,
+                    entityid,
+                    action.get("purchase_value"),
+                    action.get("order_date"),
+                    action.get("sett_no")
+                )
+                queries.auto_action_table(data_tuple)
 
                 inserted_records.append({"entityid": entityid, "order_number": action.get("order_number")})
 
@@ -2829,7 +2834,6 @@ def upload_and_save():
             middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
             500
         )
-
 # ============================= Auto PDF Read and Insert Into DB =========================
 
 

@@ -4,7 +4,7 @@ from datetime import  date, datetime, time
 from werkzeug.utils import secure_filename
 import wheel
 import pandas
-from pdf_parser import process_pdf
+from Execute.Functions.pdf_parser import process_pdf
 import numpy as np
 import os
 import json 

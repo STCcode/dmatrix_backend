@@ -2738,14 +2738,14 @@ def upload_and_save():
         if request.method != "POST":
             return make_response({"error": "Method not allowed"}, 405)
 
-        # ---------------- File Validation ----------------
+        # --- Check files ---
         if "files" not in request.files:
             return make_response({"error": "No files uploaded"}, 400)
         files = request.files.getlist("files")
         if not files:
             return make_response({"error": "Empty files list"}, 400)
 
-        # ---------------- Category & Subcategory ----------------
+        # --- Category & subcategory from frontend ---
         category = request.form.get("category")
         subcategory = request.form.get("subcategory")
         if not category or not subcategory:
@@ -2754,47 +2754,37 @@ def upload_and_save():
         inserted_records = []
         now = datetime.now()
 
-        # ---------------- Get Existing Entity ----------------
-        existing_entity = queries.get_entity_by_category_subcategory(category, subcategory) or {}
-        print("DEBUG: existing_entity ->", existing_entity)
+        # --- Get existing entityid by category/subcategory ---
+        existing_entity = queries.get_entity_by_category_subcategory(category, subcategory)
+        entityid_to_use = existing_entity.get("entityid") if existing_entity else None
+        print("DEBUG: Existing entityid ->", entityid_to_use)
 
-        entityid_to_use = existing_entity.get("entityid")
-        print("DEBUG: entityid_to_use ->", entityid_to_use)
-
-        # ---------------- Loop Over Files ----------------
         for file in files:
             filename = secure_filename(file.filename)
-            print("DEBUG: Processing file ->", filename)
-
             file_bytes = file.read()
 
-            # Save PDF in tbl_action_pdf
+            # --- Save PDF in tbl_action_pdf ---
             queries.insert_pdf_file(entityid_to_use, filename, file_bytes, now)
-            print("DEBUG: Inserted into tbl_action_pdf with entityid ->", entityid_to_use)
 
             # Reset file pointer for pdfplumber
             file.seek(0)
 
-            # Extract structured data from PDF
+            # --- Extract data ---
             broker, json_data = process_pdf(file, category, subcategory)
-            print("DEBUG: PDF Parser Output broker ->", broker)
-            print("DEBUG: PDF Parser Output json_data length ->", len(json_data) if json_data else 0)
 
             if not json_data:
-                print("DEBUG: Skipping file, no json_data extracted")
-                continue  # skip if parser gave nothing
+                print(f"DEBUG: No data extracted from {filename}")
+                continue
 
             for item in json_data:
-                entity = item.get("entityTable", {}) or {}
-                action = item.get("actionTable", {}) or {}
-                print("DEBUG: entity dict ->", entity)
-                print("DEBUG: action dict ->", action)
+                entity = item.get("entityTable") or {}
+                action = item.get("actionTable") or {}
 
-                # ---------------- Handle Entity ----------------
+                # Use existing entityid or generate new
                 eid = entity.get("entityid") or entityid_to_use
-                print("DEBUG: Initial eid ->", eid)
 
                 if not eid:
+                    # --- Insert entity if not exists ---
                     entity_fields = (
                         entity.get("scripname"),
                         entity.get("scripcode"),
@@ -2805,51 +2795,38 @@ def upload_and_save():
                         entity.get("isin"),
                         now
                     )
-                    inserted_entity = queries.insert_entity_return_id(entity_fields) or {}
-                    print("DEBUG: inserted_entity ->", inserted_entity)
+                    eid = queries.insert_entity_return_id(entity_fields)
+                    print("DEBUG: New entityid inserted ->", eid)
 
-                    eid = inserted_entity.get("entityid")
-                    print("DEBUG: eid after insert ->", eid)
-
-                # ---------------- Handle Action ----------------
-                if eid:  # only insert if we have a valid entityid
-                    data_tuple = (
-                        action.get("scrip_code"),
-                        action.get("mode"),
-                        action.get("order_type"),
-                        action.get("scrip_name"),
-                        action.get("isin"),
-                        action.get("order_number"),
-                        action.get("folio_number"),
-                        action.get("nav"),
-                        action.get("stt"),
-                        action.get("unit"),
-                        action.get("redeem_amount"),
-                        action.get("purchase_amount"),
-                        action.get("cgst"),
-                        action.get("sgst"),
-                        action.get("igst"),
-                        action.get("ugst"),
-                        action.get("stamp_duty"),
-                        action.get("cess_value"),
-                        action.get("net_amount"),
-                        now,
-                        eid,
-                        action.get("purchase_value"),
-                        action.get("order_date"),
-                        action.get("sett_no")
-                    )
-                    queries.auto_action_table(data_tuple)
-                    print("DEBUG: Inserted action for eid ->", eid)
-
-                    inserted_records.append({
-                        "entityid": eid,
-                        "order_number": action.get("order_number")
-                    })
-                else:
-                    print("DEBUG: Skipped action insert, eid is None")
-
-        print("DEBUG: Final inserted_records ->", inserted_records)
+                # --- Insert action ---
+                data_tuple = (
+                    action.get("scrip_code"),
+                    action.get("mode"),
+                    action.get("order_type"),
+                    action.get("scrip_name"),
+                    action.get("isin"),
+                    action.get("order_number"),
+                    action.get("folio_number"),
+                    action.get("nav"),
+                    action.get("stt"),
+                    action.get("unit"),
+                    action.get("redeem_amount"),
+                    action.get("purchase_amount"),
+                    action.get("cgst"),
+                    action.get("sgst"),
+                    action.get("igst"),
+                    action.get("ugst"),
+                    action.get("stamp_duty"),
+                    action.get("cess_value"),
+                    action.get("net_amount"),
+                    now,
+                    eid,
+                    action.get("purchase_value"),
+                    action.get("order_date"),
+                    action.get("sett_no")
+                )
+                queries.auto_action_table(data_tuple)
+                inserted_records.append({"entityid": eid, "order_number": action.get("order_number")})
 
         return make_response(
             middleware.exs_msgs(inserted_records, responses.insert_200, "1020200"),
@@ -2857,7 +2834,7 @@ def upload_and_save():
         )
 
     except Exception as e:
-        print("Error in upload_and_save:", e)
+        print("ERROR in upload_and_save:", e)
         return make_response(
             middleware.exe_msgs(responses.insert_501, str(e.args), "1020500"),
             500

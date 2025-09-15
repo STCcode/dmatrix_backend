@@ -2738,14 +2738,14 @@ def upload_and_save():
         if request.method != "POST":
             return make_response({"error": "Method not allowed"}, 405)
 
-        # Check files
+        # ✅ Check uploaded files
         if "files" not in request.files:
             return make_response({"error": "No files uploaded"}, 400)
         files = request.files.getlist("files")
         if not files:
             return make_response({"error": "Empty files list"}, 400)
 
-        # Category & subcategory from frontend
+        # ✅ Category & Subcategory from frontend
         category = request.form.get("category")
         subcategory = request.form.get("subcategory")
         if not category or not subcategory:
@@ -2754,7 +2754,7 @@ def upload_and_save():
         inserted_records = []
         now = datetime.now()
 
-        # Get existing entityid by category/subcategory
+        # ✅ Get existing entityid
         existing_entity = queries.get_entity_by_category_subcategory(category, subcategory)
         entityid_to_use = existing_entity.get("entityid") if existing_entity else None
 
@@ -2762,13 +2762,13 @@ def upload_and_save():
             filename = secure_filename(file.filename)
             file_bytes = file.read()
 
-            # Save PDF in tbl_action_pdf
+            # ✅ Insert PDF into tbl_action_pdf
             queries.insert_pdf_file(entityid_to_use, filename, file_bytes, now)
 
-            # Reset file pointer for pdfplumber
+            # Reset file pointer so pdfplumber can read
             file.seek(0)
 
-            # Extract data
+            # ✅ Parse PDF → structured JSON
             broker, json_data = process_pdf(file, category, subcategory)
 
             for item in json_data:
@@ -2777,7 +2777,7 @@ def upload_and_save():
 
                 eid = entity.get("entityid") or entityid_to_use
 
-                # Insert entity if not exists
+                # ✅ Insert entity if not already present
                 if not eid:
                     entity_fields = (
                         entity.get("scripname"),
@@ -2791,7 +2791,7 @@ def upload_and_save():
                     )
                     eid = queries.insert_entity_return_id(entity_fields)
 
-                # Insert action
+                # ✅ Insert action record
                 data_tuple = (
                     action.get("scrip_code"),
                     action.get("mode"),
@@ -2822,16 +2822,15 @@ def upload_and_save():
                 inserted_records.append({"entityid": eid, "order_number": action.get("order_number")})
 
         return make_response(
-            middleware.exs_msgs(inserted_records, responses.insert_200, "1020200"),
-            200
+            middleware.exs_msgs(inserted_records, responses.insert_200, "1020200"), 200
         )
 
     except Exception as e:
-        print("Error in upload_and_save:", e)
+        print("❌ Error in upload_and_save:", e)
         return make_response(
-            middleware.exe_msgs(responses.insert_501, str(e.args), "1020500"),
-            500
+            middleware.exe_msgs(responses.insert_501, str(e.args), "1020500"), 500
         )
+
 # ============================= Auto PDF Read and Insert Into DB =========================
 
 

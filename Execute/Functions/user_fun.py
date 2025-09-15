@@ -2744,7 +2744,7 @@ def upload_and_save():
         if not files:
             return make_response({"error": "Empty files list"}, 400)
 
-        # 2️⃣ Category & subcategory from frontend
+        # 2️⃣ Get category & subcategory
         category = request.form.get("category")
         subcategory = request.form.get("subcategory")
         if not category or not subcategory:
@@ -2756,37 +2756,38 @@ def upload_and_save():
         for file in files:
             filename = secure_filename(file.filename)
             file_bytes = file.read()
-            file.seek(0)
 
-            # 3️⃣ Extract data
+            # 3️⃣ Insert PDF
+            # Temporarily use entityid=None, trigger will generate later if needed
+            queries.insert_pdf_file(entityid=None, pdf_name=filename, pdf_file=file_bytes, uploaded_at=now)
+
+            file.seek(0)  # reset pointer for pdf parser
+
+            # 4️⃣ Extract data from PDF
             broker, json_data = process_pdf(file, category, subcategory)
-            if not json_data or len(json_data) == 0:
-                continue
 
-            # 4️⃣ Insert entity (Postgres trigger generates entityid)
-            first_entity = json_data[0].get("entityTable", {})
-            entity_tuple = (
-                first_entity.get("scripname"),
-                first_entity.get("scripcode"),
-                first_entity.get("benchmark", "0"),
-                category,
-                subcategory,
-                first_entity.get("nickname"),
-                first_entity.get("isin"),
-                now
-            )
-            entityid = queries.insert_entity_return_id(entity_tuple)
-
-            if not entityid:
-                continue  # Skip if entityid could not be generated
-
-            # 5️⃣ Insert PDF bytes
-            queries.insert_pdf_file(entityid, filename, file_bytes, now)
-
-            # 6️⃣ Insert all actions for this entity
+            # 5️⃣ Insert entities and actions
             for item in json_data:
+                entity = item.get("entityTable", {})
                 action = item.get("actionTable", {})
-                action_tuple = (
+
+                # Prepare entity data tuple (trigger will generate entityid)
+                entity_tuple = (
+                    entity.get("scripname"),
+                    entity.get("scripcode"),
+                    entity.get("benchmark", "0"),
+                    entity.get("category", category),
+                    entity.get("subcategory", subcategory),
+                    entity.get("nickname", entity.get("scripname")),
+                    entity.get("isin"),
+                    now
+                )
+
+                # Insert entity and get generated entityid
+                eid = queries.insert_entity_return_id(entity_tuple)
+
+                # Insert action
+                data_tuple = (
                     action.get("scrip_code"),
                     action.get("mode"),
                     action.get("order_type"),
@@ -2799,24 +2800,25 @@ def upload_and_save():
                     action.get("unit"),
                     action.get("redeem_amount"),
                     action.get("purchase_amount"),
-                    action.get("cgst",0.0),
-                    action.get("sgst",0.0),
-                    action.get("igst",0.0),
-                    action.get("ugst",0.0),
+                    action.get("cgst", 0.0),
+                    action.get("sgst", 0.0),
+                    action.get("igst", 0.0),
+                    action.get("ugst", 0.0),
                     action.get("stamp_duty"),
-                    action.get("cess_value",0.0),
+                    action.get("cess_value", 0.0),
                     action.get("net_amount"),
                     now,
-                    entityid,
-                    action.get("purchase_value",0.0),
+                    eid,
+                    action.get("purchase_value", 0.0),
                     action.get("order_date"),
                     action.get("sett_no")
                 )
-                queries.auto_action_table(action_tuple)
-                inserted_records.append({"entityid": entityid, "order_number": action.get("order_number")})
+                queries.auto_action_table(data_tuple)
+
+                inserted_records.append({"entityid": eid, "order_number": action.get("order_number")})
 
         return make_response(
-            middleware.exs_msgs(inserted_records, responses.insert_200, "1020200"),
+            {"data": inserted_records, "successmsgs": "Inserted Successfully", "code": "1020200"},
             200
         )
 

@@ -1334,83 +1334,55 @@ def getDirectEquityCommodityIRR(entityid):
 
 # ============================= Auto PDF Read and Insert Into DB  Start queries=========================
 def generate_new_entityid():
-    try:
-        sql = "SELECT entityid FROM tbl_entity ORDER BY n_id DESC LIMIT 1;"
-        last = executeSql.ExecuteAllNew(sql, '')
-        if last and len(last) > 0:
-            last_id = last[0]["entityid"]
-            num = int(last_id.split("-")[1]) + 1
-        else:
-            num = 1
-        new_id = f"ENT-{num:04d}"
-        return new_id
-    except Exception as e:
-        print("Error in generate_new_entityid:", e)
-        return f"ENT-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    """Generate new unique entityid like ENT-YYYYMMDDHHMMSS"""
+    return f"ENT-{datetime.now().strftime('%Y%m%d%H%M%S')}"
 
-# ----------------------------
-# Insert PDF file into tbl_action_pdf
-# ----------------------------
-def insert_pdf_file(entityid, pdf_name, pdf_bytes, uploaded_at):
-    try:
-        sql = "INSERT INTO tbl_action_pdf (entityid, pdf_name, pdf_file, uploaded_at) VALUES (%s, %s, %s, %s);"
-        data = (entityid, pdf_name, pdf_bytes, uploaded_at)
-        executeSql.ExecuteOne(sql, data)
-        return True
-    except Exception as e:
-        print("Error in insert_pdf_file:", e)
-        return False
+def insert_pdf_file(entityid, filename, file_bytes, uploaded_at):
+    sql = """
+        INSERT INTO tbl_action_pdf (entityid, pdf_name, pdf_file, uploaded_at)
+        VALUES (%s, %s, %s, %s)
+    """
+    data = (entityid, filename, file_bytes, uploaded_at)
+    return executeSql.ExecuteOne(sql, data)
 
-# ----------------------------
-# Insert new entity and return entityid
-# ----------------------------
-def insert_entity_return_id(fields):
-    try:
-        entityid = generate_new_entityid()
-        sql = """
-            INSERT INTO tbl_entity
-            (entityid, scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
-        """
-        data = (entityid,) + fields
-        executeSql.ExecuteOne(sql, data)
-        return entityid
-    except Exception as e:
-        print("Error in insert_entity_return_id:", e)
-        return None
+def insert_entity_return_id(entity_data):
+    """
+    entity_data: tuple of
+    (scripname, scripcode, entityid, benchmark, category, subcategory, nickname, isin, created_at)
+    """
+    sql = """
+        INSERT INTO tbl_entity (scripname, scripcode, entityid, benchmark, category, subcategory, nickname, isin, created_at)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        RETURNING entityid
+    """
+    return executeSql.ExecuteOne(sql, entity_data)
 
-# ----------------------------
-# Insert action record into tbl_pms_amc_action
-# ----------------------------
-def auto_action_table(data_tuple):
-    try:
-        sql = """
-        INSERT INTO tbl_action_table
-        (scrip_code, mode, order_type, scrip_name, isin, order_number, folio_number, nav, stt, unit,
-        redeem_amount, purchase_amount, cgst, sgst, igst, ugst, stamp_duty, cess_value, net_amount,
-        created_at, entityid, purchase_value, order_date, sett_no)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-        """
-        executeSql.ExecuteOne(sql, data_tuple)
-        return True
-    except Exception as e:
-        print("Error in auto_action_table:", e)
-        return False
+def auto_action_table(action_data):
+    """
+    Insert into tbl_action_table
+    action_data: tuple of all action fields in correct order:
+    (scrip_code, mode, order_type, scrip_name, isin, order_number, folio_number,
+    nav, stt, unit, redeem_amount, purchase_amount, cgst, sgst, igst, ugst,
+    stamp_duty, cess_value, net_amount, created_at, entityid, purchase_value,
+    order_date, sett_no)
+    """
+    sql = """
+        INSERT INTO tbl_action_table (
+            scrip_code, mode, order_type, scrip_name, isin, order_number, folio_number,
+            nav, stt, unit, redeem_amount, purchase_amount, cgst, sgst, igst, ugst,
+            stamp_duty, cess_value, net_amount, created_at, entityid, purchase_value,
+            order_date, sett_no
+        ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+    """
+    return executeSql.ExecuteOne(sql, action_data)
 
-# ----------------------------
-# Get existing entity by category/subcategory
-# ----------------------------
 def get_entity_by_category_subcategory(category, subcategory):
-    try:
-        sql = "SELECT entityid FROM tbl_entity WHERE category=%s AND subcategory=%s ORDER BY n_id DESC LIMIT 1;"
-        data = (category, subcategory)
-        result = executeSql.ExecuteAllNew(sql, data)
-        if result and len(result) > 0:
-            return result[0]
-        return None
-    except Exception as e:
-        print("Error in get_entity_by_category_subcategory:", e)
-        return None
+    sql = "SELECT entityid FROM tbl_entity WHERE category=%s AND subcategory=%s ORDER BY created_at DESC LIMIT 1"
+    data = (category, subcategory)
+    result = executeSql.ExecuteAllNew(sql, data)
+    if result and len(result) > 0:
+        return result[0]
+    return None
 # =================== AIF ===================
 # def auto_InsertAifData(data):
 #     try:

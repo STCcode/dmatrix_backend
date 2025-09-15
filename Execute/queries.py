@@ -1337,7 +1337,6 @@ def getDirectEquityCommodityIRR(entityid):
 def insert_entity_return_id(data):
     """
     Insert a new entity in tbl_entity and return generated entityid.
-    Data = (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at)
     """
     try:
         sql = """
@@ -1346,13 +1345,13 @@ def insert_entity_return_id(data):
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING entityid
         """
-        result = executeSql.ExecuteAllNew(sql, data)  # use ExecuteAllNew for RETURNING
-        if result and isinstance(result, list) and len(result) > 0:
-            return result[0]  # e.g. {"entityid": "ENT-0001"}
-        return None
+        result = executeSql.ExecuteAllNew(sql, data) or []  # make sure it's list, not None
+        if result and len(result) > 0:
+            return result[0]   # {"entityid": "ENT-0001"}
+        return {}
     except Exception as e:
         print("Error in insert_entity_return_id ==================", e)
-        return None
+        return {}
 
 
 # ================= Insert Action Table =================
@@ -1370,10 +1369,11 @@ def auto_action_table(data):
              %s, %s, %s, %s, %s, %s,
              %s, %s, %s, %s, %s, %s)
         """
-        return executeSql.ExecuteOne(sql, data)
+        result = executeSql.ExecuteOne(sql, data)
+        return result if result else {}
     except Exception as e:
         print("Error in auto_action_table ==================", e)
-        return None
+        return {}
 
 
 # ================= Insert PDF File =================
@@ -1387,10 +1387,11 @@ def insert_pdf_file(entityid, filename, file_bytes, created_at=None):
             VALUES (%s, %s, %s, %s)
         """
         data = (entityid, filename, file_bytes, created_at)
-        return executeSql.ExecuteOne(sql, data)
+        result = executeSql.ExecuteOne(sql, data)
+        return result if result else {}
     except Exception as e:
         print("Error in insert_pdf_file ==================", e)
-        return None
+        return {}
 
 
 # ================= Get Entity by Category/Subcategory =================
@@ -1403,15 +1404,13 @@ def get_entity_by_category_subcategory(category, subcategory):
             LIMIT 1
         """
         data = (category, subcategory)
-        result = executeSql.ExecuteAllNew(sql, data)
-
-        if result and isinstance(result, list) and len(result) > 0:
+        result = executeSql.ExecuteAllNew(sql, data) or []
+        if result and len(result) > 0:
             return result[0]  # {"entityid": "..."}
-        return None
+        return {}
     except Exception as e:
         print("Error in get_entity_by_category_subcategory ==================", e)
-        return None
-
+        return {}
 # =================== AIF ===================
 # def auto_InsertAifData(data):
 #     try:

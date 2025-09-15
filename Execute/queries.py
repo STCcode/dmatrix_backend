@@ -1332,66 +1332,84 @@ def getDirectEquityCommodityIRR(entityid):
 
 
 # ============================= Auto PDF Read and Insert Into DB  Start queries=========================
+def log_sql(sql, data):
+    print(f"[DEBUG] SQL: {sql}")
+    print(f"[DEBUG] Parameters: {data}")
+
 def auto_action_table(data):
     try:
-        sql = " INSERT INTO tbl_action_table (scrip_code, mode, order_type, scrip_name, isin, order_number, folio_number, nav, stt, unit, redeem_amount, purchase_amount, cgst, sgst, igst, ugst, stamp_duty, cess_value,net_amount,created_at,entityid,purchase_value,order_date,sett_no) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s,%s,%s,%s)"
+        sql = """INSERT INTO tbl_action_table 
+                 (scrip_code, mode, order_type, scrip_name, isin, order_number, folio_number, nav, stt, unit,
+                  redeem_amount, purchase_amount, cgst, sgst, igst, ugst, stamp_duty, cess_value, net_amount, 
+                  created_at, entityid, purchase_value, order_date, sett_no) 
+                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        log_sql(sql, data)
         msg = executeSql.ExecuteReturnId(sql, data)
         return msg
     except Exception as e:
-        print("Error in save_user query==========================", e)
+        print("Error in auto_action_table:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
-    
 
+# =================== AIF ===================
+# def auto_InsertAifData(data):
+#     try:
+#         sql = """INSERT INTO tbl_aif 
+#                  (entityid, trans_date, trans_type, contribution_amount, setup_expense, stamp_duty, 
+#                   amount_invested, post_tax_nav, num_units, balance_units, strategy_name, amc_name, created_at)
+#                  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+#         log_sql(sql, data)
+#         msg = executeSql.ExecuteOne(sql, data)
+#         return msg
+#     except Exception as e:
+#         print("Error in auto_InsertAifData:", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
 
-def auto_InsertAifData(data):
-    try:
-        sql = " INSERT INTO tbl_aif (entityid, trans_date, trans_type, contribution_amount, setup_expense, stamp_duty, amount_invested, post_tax_nav, num_units, balance_units, strategy_name, amc_name, created_at) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s, %s)"
-        msg = executeSql.ExecuteOne(sql, data)
-        return msg
-    except Exception as e:
-        print("Error in save_user query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
-    
+# # =================== ETF ===================
+# def auto_InsertEtfData(data):
+#     try:
+#         sql = """INSERT INTO tbl_etf_action 
+#                  (entityid, order_number, order_time, trade_number, trade_time, security_description, order_type, 
+#                   quantity, gross_rate, trade_price_per_unit, brokerage_per_unit, net_rate_per_unit, closing_rate, 
+#                   gst, stt, net_total_before_levies, remarks, created_at, trade_date)
+#                  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+#         log_sql(sql, data)
+#         msg = executeSql.ExecuteOne(sql, data)
+#         return msg
+#     except Exception as e:
+#         print("Error in auto_InsertEtfData:", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
 
+# # =================== Commodities ===================
+# def auto_insertcommoditiesDirect(data):
+#     try:
+#         sql = """INSERT INTO tbl_commodities_direct 
+#                  (entityid, contract_note_number, trade_date, client_code, client_name, order_number, order_time, 
+#                   trade_number, description, order_type, qty, trade_price, brokerage_per_unit, net_rate_per_unit, 
+#                   gst, stt, security_transaction_tax, exchange_transaction_charges, sebi_turnover_fees, stamp_duty, 
+#                   ipft, net_total, net_amount_receivable, created_at)
+#                  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+#         log_sql(sql, data)
+#         msg = executeSql.ExecuteOne(sql, data)
+#         return msg
+#     except Exception as e:
+#         print("Error in auto_insertcommoditiesDirect:", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
 
-def auto_insertNavData(data):
-    try:
-        sql = " INSERT INTO tbl_aif_nav (entityid, pre_tax_nav, post_tax_nav, nav_date, created_at) VALUES (%s, %s, %s, %s, %s)"
-        msg = executeSql.ExecuteOne(sql, data)
-        return msg
-    except Exception as e:
-        print("Error in save_user query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')  
-
-
-def auto_InsertEtfData(data):
-    try:
-        sql = " INSERT INTO tbl_etf_action (entityid, order_number, order_time, trade_number, trade_time, security_description, order_type, quantity, gross_rate, trade_price_per_unit, brokerage_per_unit, net_rate_per_unit, closing_rate, gst, stt, net_total_before_levies, remarks, created_at, trade_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        msg = executeSql.ExecuteOne(sql, data)
-        return msg
-    except Exception as e:
-        print("Error in save_user query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
-		
-		
-def auto_insertcommoditiesDirect(data):
-    try:
-        sql = "INSERT INTO tbl_commodities_direct (entityid, contract_note_number, trade_date, client_code, client_name, order_number, order_time, trade_number, description, order_type,qty, trade_price, brokerage_per_unit, net_rate_per_unit, gst, stt, security_transaction_tax, exchange_transaction_charges, sebi_turnover_fees,stamp_duty, ipft, net_total, net_amount_receivable, created_at) VALUES (%s, %s, %s::date, %s, %s, %s, %s::time, %s, %s, %s,%s::int, %s::numeric, %s::numeric, %s::numeric, %s::numeric, %s::numeric, %s::numeric, %s::numeric, %s::numeric,%s::numeric, %s::numeric, %s::numeric, %s::numeric, %s)"
-        msg = executeSql.ExecuteOne(sql, data)
-        return msg
-    except Exception as e:
-        print("Error in save_user query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')    
-
-
-def auto_insert_directdata(data):
-    try:
-        sql = "INSERT INTO tbl_direct_equity (entityid, contract_note_number, trade_date, client_code, client_name, order_number, order_time, trade_number, description, order_type,qty, trade_price, brokerage_per_unit, net_rate_per_unit, gst, stt, security_transaction_tax, exchange_transaction_charges, sebi_turnover_fees,stamp_duty, ipft, net_total, net_amount_receivable, created_at) VALUES (%s, %s, %s::date, %s, %s, %s, %s::time, %s, %s, %s,%s::int, %s::numeric, %s::numeric, %s::numeric, %s::numeric, %s::numeric, %s::numeric, %s::numeric, %s::numeric,%s::numeric, %s::numeric, %s::numeric, %s::numeric, %s)"
-        msg = executeSql.ExecuteOne(sql, data)
-        return msg
-    except Exception as e:
-        print("Error in save_user query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')      
+# # =================== Direct Equity ===================
+# def auto_insert_directdata(data):
+#     try:
+#         sql = """INSERT INTO tbl_direct_equity 
+#                  (entityid, contract_note_number, trade_date, client_code, client_name, order_number, order_time, 
+#                   trade_number, description, order_type, qty, trade_price, brokerage_per_unit, net_rate_per_unit, 
+#                   gst, stt, security_transaction_tax, exchange_transaction_charges, sebi_turnover_fees, stamp_duty, 
+#                   ipft, net_total, net_amount_receivable, created_at)
+#                  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+#         log_sql(sql, data)
+#         msg = executeSql.ExecuteOne(sql, data)
+#         return msg
+#     except Exception as e:
+#         print("Error in auto_insert_directdata:", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310') 
 
 
 # ============================= Auto PDF Read and Insert Into DB  END queries=========================

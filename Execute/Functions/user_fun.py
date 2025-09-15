@@ -4,6 +4,7 @@ from datetime import  date, datetime, time
 from werkzeug.utils import secure_filename
 import wheel
 import pandas
+from pdf_parser import process_pdf
 import numpy as np
 import os
 import json 
@@ -2618,125 +2619,209 @@ def getDirectEquityCommodityIRR():
 
 
 # ============================= Auto PDF Read and Insert Into DB =========================
+# old 
+# def upload_and_save():
+#     try:
+#         if request.method != 'POST':
+#             return make_response({"error": "Method not allowed"}, 405)
+
+#         files = request.files.getlist("files")
+#         if not files:
+#             return make_response({"error": "No PDF uploaded"}, 400)
+
+#         category = request.form.get("category")
+#         subcategory = request.form.get("subcategory")
+
+#         if not category:
+#             return make_response({"error": "Category is required"}, 400)
+
+#         all_inserted = []
+
+#         # Process each PDF
+#         for pdf_file in files:
+#             broker, parsed_data = process_pdf(pdf_file, category, subcategory)
+
+#             for record in parsed_data:
+#                 entity = record.get("entityTable", {})
+#                 action = record.get("actionTable", {})
+
+#                 # Ensure unique entityid
+#                 entityid = entity.get("entityid")
+#                 if entityid and not queries.entity_exists(entityid):
+#                     entityid = queries.auto_insert_entity(entity)
+#                 elif not entityid:
+#                     entityid = queries.auto_insert_entity(entity)
+#                 entity["entityid"] = entityid
+
+#                 # Category-based insert (using your existing queries)
+#                 action["category"] = action.get("category") or category
+#                 now = datetime.now()
+
+#                 def get_val(key):
+#                     return action.get(key) or None
+
+#                 def get_entity_val(key):
+#                     return entity.get(key) or None
+
+#                 # ================= Insert based on category =================
+#                 result = None
+#                 cat = action["category"].lower()
+#                 if cat == "mutual_fund":
+#                     data_tuple = (
+#                         get_val("scrip_code"), get_val("mode"), get_val("order_type"),
+#                         get_val("scrip_name"), get_val("isin"), get_val("order_number"),
+#                         get_val("folio_number"), get_val("nav"), get_val("stt"), get_val("unit"),
+#                         get_val("redeem_amount"), get_val("purchase_amount"), get_val("cgst"),
+#                         get_val("sgst"), get_val("igst"), get_val("ugst"), get_val("stamp_duty"),
+#                         get_val("cess_value"), get_val("net_amount"), now,
+#                         get_entity_val("entityid"), get_val("purchase_value"), get_val("order_date"), get_val("sett_no")
+#                     )
+#                     result = queries.auto_action_table(data_tuple)
+
+#                 elif cat == "aif":
+#                     data_tuple = (
+#                         get_entity_val("entityid"), get_val("trans_date"), get_val("trans_type"),
+#                         get_val("contribution_amount"), get_val("setup_expense"), get_val("stamp_duty"),
+#                         get_val("amount_invested"), get_val("post_tax_nav"), get_val("num_units"),
+#                         get_val("balance_units"), get_val("strategy_name"), get_val("amc_name"), now
+#                     )
+#                     result = queries.auto_InsertAifData(data_tuple)
+
+#                 elif cat == "etf":
+#                     data_tuple = (
+#                         get_entity_val("entityid"), get_val("order_number"), get_val("order_time"),
+#                         get_val("trade_number"), get_val("trade_time"), get_val("security_description"),
+#                         get_val("order_type"), get_val("quantity"), get_val("gross_rate"),
+#                         get_val("trade_price_per_unit"), get_val("brokerage_per_unit"), get_val("net_rate_per_unit"),
+#                         get_val("closing_rate"), get_val("gst"), get_val("stt"), get_val("net_total_before_levies"),
+#                         get_val("remarks"), now, get_val("trade_date")
+#                     )
+#                     result = queries.auto_InsertEtfData(data_tuple)
+
+#                 elif cat == "commodities":
+#                     data_tuple = (
+#                         get_entity_val("entityid"), get_val("contract_note_number"), get_val("trade_date"),
+#                         get_val("client_code"), get_val("client_name"), get_val("order_number"), get_val("order_time"),
+#                         get_val("trade_number"), get_val("description"), get_val("order_type"), get_val("qty"),
+#                         get_val("trade_price"), get_val("brokerage_per_unit"), get_val("net_rate_per_unit"),
+#                         get_val("gst"), get_val("stt"), get_val("security_transaction_tax"), get_val("exchange_transaction_charges"),
+#                         get_val("sebi_turnover_fees"), get_val("stamp_duty"), get_val("ipft"), get_val("net_total"),
+#                         get_val("net_amount_receivable"), now
+#                     )
+#                     result = queries.auto_insertcommoditiesDirect(data_tuple)
+
+#                 elif cat == "direct_equity":
+#                     data_tuple = (
+#                         get_entity_val("entityid"), get_val("contract_note_number"), get_val("trade_date"),
+#                         get_val("client_code"), get_val("client_name"), get_val("order_number"), get_val("order_time"),
+#                         get_val("trade_number"), get_val("description"), get_val("order_type"), get_val("qty"),
+#                         get_val("trade_price"), get_val("brokerage_per_unit"), get_val("net_rate_per_unit"),
+#                         get_val("gst"), get_val("stt"), get_val("security_transaction_tax"), get_val("exchange_transaction_charges"),
+#                         get_val("sebi_turnover_fees"), get_val("stamp_duty"), get_val("ipft"), get_val("net_total"),
+#                         get_val("net_amount_receivable"), now
+#                     )
+#                     result = queries.auto_insert_directdata(data_tuple)
+
+#                 if result:
+#                     all_inserted.append({"entityid": entityid, "category": cat, "broker": broker})
+
+#         return make_response({"status": "success", "inserted": all_inserted}, 200)
+
+#     except Exception as e:
+#         print("Error in upload_and_save:", e)
+#         return make_response({"error": str(e)}, 500)
+# old ent
+
 
 def upload_and_save():
     try:
-        if request.method == 'POST':
-            formData = request.get_json()
+        if request.method != 'POST':
+            return make_response({"error": "Method not allowed"}, 405)
 
-            # Data comes from parser with category + entity + action
-            entity = formData.get("entity", {})
-            action = formData.get("action", {})
-            category = action.get("category")  # mutual_fund, aif, etf, commodities, direct_equity
+        # Check if files are in the request
+        if 'files' not in request.files:
+            return make_response({"error": "No files uploaded"}, 400)
 
-            result = None
+        files = request.files.getlist('files')
+        if not files:
+            return make_response({"error": "Empty files list"}, 400)
 
-            # ✅ Mutual Fund → tbl_action_table
-            if category == "mutual_fund":
-                data_tuple = (
-                    action.get("scrip_code"),
-                    action.get("mode"),
-                    action.get("order_type"),
-                    action.get("scrip_name"),
-                    action.get("isin"),
-                    action.get("order_number"),
-                    action.get("folio_number"),
-                    action.get("nav"),
-                    action.get("stt"),
-                    action.get("unit"),
-                    action.get("redeem_amount"),
-                    action.get("purchase_amount"),
-                    action.get("cgst"),
-                    action.get("sgst"),
-                    action.get("igst"),
-                    action.get("ugst"),
-                    action.get("stamp_duty"),
-                    action.get("cess_value"),
-                    action.get("net_amount"),
-                    datetime.now(),
-                    entity.get("entityid"),
-                    action.get("purchase_value"),
-                    action.get("order_date"),
-                    action.get("sett_no"),
-                )
-                result = queries.auto_action_table(data_tuple)
+        category = request.form.get("category")
+        subcategory = request.form.get("subcategory")
 
-            # ✅ AIF → tbl_pms_amc_action
-            elif category == "aif":
-                data_tuple = (
-                    entity.get("entityid"),
-                    action.get("security_description"),
-                    action.get("order_type"),
-                    action.get("quantity"),
-                    action.get("trade_price"),
-                    action.get("net_amount"),
-                    datetime.now(),
-                    entity.get("created_by"),
-                )
-                result = queries.auto_InsertAifData(data_tuple)
+        if not category:
+            return make_response({"error": "Category is required"}, 400)
 
-            # ✅ ETF → tbl_etf_action
-            elif category == "etf":
-                data_tuple = (
-                    entity.get("entityid"),
-                    action.get("security_description"),
-                    action.get("order_type"),
-                    action.get("quantity"),
-                    action.get("trade_price"),
-                    action.get("net_amount"),
-                    datetime.now(),
-                )
-                result = queries.auto_InsertEtfDataInsert(data_tuple)
+        inserted_records = []
+        now = datetime.now()
 
-            # ✅ Commodities → tbl_commodities_direct
-            elif category == "commodities":
-                data_tuple = (
-                    entity.get("entityid"),
-                    action.get("security_name"),
-                    action.get("order_type"),
-                    action.get("quantity"),
-                    action.get("trade_price"),
-                    action.get("net_amount"),
-                    datetime.now(),
-                )
-                result = queries.auto_insertcommoditiesDirect(data_tuple)
+        # Process each uploaded PDF
+        for file in files:
+            filename = secure_filename(file.filename)
 
-            # ✅ Direct Equity → tbl_direct_equity
-            elif category == "direct_equity":
-                data_tuple = (
-                    entity.get("entityid"),
-                    action.get("security_name"),
-                    action.get("order_type"),
-                    action.get("quantity"),
-                    action.get("trade_price"),
-                    action.get("net_amount"),
-                    datetime.now(),
-                )
-                result = queries.auto_insert_directdata(data_tuple)
+            # Parse PDF directly from file stream
+            broker, json_data = process_pdf(file, category, subcategory)
 
-            else:
-                return make_response(
-                    middleware.exe_msgs(
-                        responses.insert_501,
-                        f"Unknown category: {category}",
-                        '1020999'
-                    ), 400
-                )
+            for item in json_data:
+                entity = item.get("entityTable", {})
+                action = item.get("actionTable", {})
 
-            # ✅ Insert success check
-            if not result or (isinstance(result, int) and result <= 0):
-                return make_response(
-                    middleware.exe_msgs(
-                        responses.insert_501,
-                        f"Insert failed for category {category}, entityid {entity.get('entityid')}",
-                        '1020502'
-                    ), 400
-                )
+                entityid = entity.get("entityid")  # Use existing entityid if available
 
-            return make_response(
-                middleware.exs_msgs(result, responses.insert_200, '1020200'),
-                200
-            )
+                # If entityid does not exist, you can generate or insert entity here
+                # Example: insert into tbl_entity if entityid is None
+                if not entityid:
+                    entity_fields = (
+                        entity.get("scripname"),
+                        entity.get("scripcode"),
+                        entity.get("benchmark"),
+                        entity.get("category"),
+                        entity.get("subcategory"),
+                        entity.get("nickname"),
+                        entity.get("isin"),
+                        now
+                    )
+                    entityid = queries.insert_entity_return_id(entity_fields)
+
+                # Prepare action data based on category
+                if category.lower() == "mutual_fund":
+                    data_tuple = (
+                        action.get("scrip_code"),
+                        action.get("mode"),
+                        action.get("order_type"),
+                        action.get("scrip_name"),
+                        action.get("isin"),
+                        action.get("order_number"),
+                        action.get("folio_number"),
+                        action.get("nav"),
+                        action.get("stt"),
+                        action.get("unit"),
+                        action.get("redeem_amount"),
+                        action.get("purchase_amount"),
+                        action.get("cgst"),
+                        action.get("sgst"),
+                        action.get("igst"),
+                        action.get("ugst"),
+                        action.get("stamp_duty"),
+                        action.get("cess_value"),
+                        action.get("net_amount"),
+                        now,
+                        entityid,
+                        action.get("purchase_value"),
+                        action.get("order_date"),
+                        action.get("sett_no"),
+                    )
+                    queries.auto_action_table(data_tuple)
+
+                # You can extend here for aif, etf, commodities, direct_equity
+                # using the same pattern as your current function.py
+
+                inserted_records.append({"entityid": entityid, "order_number": action.get("order_number")})
+
+        return make_response(
+            middleware.exs_msgs(inserted_records, responses.insert_200, '1020200'),
+            200
+        )
 
     except Exception as e:
         print("Error in upload_and_save:", e)
@@ -2744,7 +2829,6 @@ def upload_and_save():
             middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
             500
         )
-
 
 # ============================= Auto PDF Read and Insert Into DB =========================
 

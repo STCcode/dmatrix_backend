@@ -83,7 +83,7 @@ app.add_url_rule('/wcare/deleteuserById',view_func=user_fun.deleteuserById,metho
 
 #=======================================Auto Ectract and Upload ALL Actio Table Data Start====================================
 
-app.add_url_rule('/upload_and_save', view_func=user_fun.upload_and_save, methods=['POST'])
+app.add_url_rule('/uploadAutomationData', view_func=user_fun.upload_and_save, methods=['POST'])
 
 
 #=======================================Auto Ectract and Upload ALL Actio Table Data Start====================================

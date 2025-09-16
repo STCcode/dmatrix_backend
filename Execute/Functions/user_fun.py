@@ -2835,13 +2835,13 @@ def upload_and_save():
             file_bytes = file.read()
             file.seek(0)
 
-            # Parse PDF → returns multiple entities each with multiple actions
+            # Step 1: Parse PDF → returns multiple entities each with multiple actions
             broker, json_data = process_pdf(file, category, subcategory)
             if not json_data:
                 continue
 
             for item in json_data:
-                # Insert or get entityid
+                # Step 2: Insert or get entityid
                 entity_info = item.get("entityTable", {})
                 entityid = queries.get_or_create_entity(
                     entity_info.get("scripname"),
@@ -2856,12 +2856,12 @@ def upload_and_save():
                 if not entityid:
                     continue
 
-                # Save PDF once per entity
+                # Step 3: Save PDF once per entity
                 queries.insert_pdf_file(entityid, filename, file_bytes, now)
 
-                # Handle multiple actions per entity
+                # Step 4: Handle multiple actions per entity
                 actions = item.get("actionTable", [])
-                if isinstance(actions, dict):  # single action as dict
+                if isinstance(actions, dict):  # Single action as dict
                     actions = [actions]
 
                 for action in actions:

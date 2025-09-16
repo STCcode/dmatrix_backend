@@ -1334,82 +1334,76 @@ def getDirectEquityCommodityIRR(entityid):
 
 # ============================= Auto PDF Read and Insert Into DB  Start queries=========================
 # Insert entity, letting Postgres trigger generate entityid
-def insert_entity_return_id(entity_tuple):
-    """
-    Inserts a new entity and returns generated entityid.
-    entity_tuple = (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at)
-    """
-    try:
-        sql = """
-            INSERT INTO tbl_entity
-            (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """
-        executeSql.ExecuteOne(sql, entity_tuple)
-
-        last_id_sql = "SELECT entityid FROM tbl_entity ORDER BY id DESC LIMIT 1"
-        result = executeSql.ExecuteAllNew(last_id_sql, ())
-        if result and len(result) > 0:
-            return result[0]["entityid"]
-        return None
-    except Exception as e:
-        print("Error in insert_entity_return_id:", e)
-        return None
-
-# -----------------------------
-# Get existing entity by ISIN/scripcode or insert new
-# -----------------------------
 def get_or_create_entity(scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at):
     """
-    Returns entityid for existing entity (matching ISIN or scripcode),
-    otherwise inserts a new entity and returns its entityid.
+    Returns entityid. Inserts new entity if not exists.
     """
     try:
+        # Check if entity already exists (by scripname + scripcode + category + subcategory)
         sql_check = """
-            SELECT entityid FROM tbl_entity
-            WHERE category = %s AND subcategory = %s
-              AND (isin = %s OR scripcode = %s)
+            SELECT entityid
+            FROM tbl_entity
+            WHERE scripname = %s AND scripcode = %s AND category = %s AND subcategory = %s
             ORDER BY id DESC
             LIMIT 1
         """
-        result = executeSql.ExecuteAllNew(sql_check, (category, subcategory, isin, scripcode))
+        result = executeSql.ExecuteAllNew(sql_check, (scripname, scripcode, category, subcategory))
         if result and len(result) > 0:
             return result[0]["entityid"]
 
-        entity_tuple = (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at)
-        return insert_entity_return_id(entity_tuple)
+        # Insert new entity
+        sql_insert = """
+            INSERT INTO tbl_entity
+            (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING entityid
+        """
+        inserted = executeSql.ExecuteAllNew(sql_insert, (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at))
+        if inserted and len(inserted) > 0:
+            return inserted[0]["entityid"]
 
+        return None
     except Exception as e:
         print("Error in get_or_create_entity:", e)
         return None
 
-# -----------------------------
-# Insert action record
-# -----------------------------
+
+# ---------------------------------------------
+# Insert an action into tbl_action_table
+# ---------------------------------------------
 def auto_action_table(action_tuple):
+    """
+    Insert a mutual fund action record.
+    """
     try:
         sql = """
             INSERT INTO tbl_action_table
             (scrip_code, mode, order_type, scrip_name, isin, order_number, folio_number, nav, stt,
-            unit, redeem_amount, purchase_amount, cgst, sgst, igst, ugst, stamp_duty, cess_value,
-            net_amount, created_at, entityid, purchase_value, order_date, sett_no)
+             unit, redeem_amount, purchase_amount, cgst, sgst, igst, ugst, stamp_duty, cess_value,
+             net_amount, created_at, entityid, purchase_value, order_date, sett_no)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         executeSql.ExecuteOne(sql, action_tuple)
     except Exception as e:
         print("Error in auto_action_table:", e)
 
-# -----------------------------
-# Insert PDF file
-# -----------------------------
+
+# ---------------------------------------------
+# Insert PDF for entity (once per entity)
+# ---------------------------------------------
 def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):
+    """
+    Insert PDF bytes. Avoid duplicates.
+    """
     try:
-        sql = """
-            INSERT INTO tbl_action_pdf
-            (entityid, pdf_name, pdf_file, uploaded_at)
-            VALUES (%s, %s, %s, %s)
-        """
-        executeSql.ExecuteOne(sql, (entityid, pdf_name, pdf_file, uploaded_at))
+        # Check if PDF already exists for this entity
+        sql_check = """SELECT id FROM tbl_action_pdf WHERE entityid = %s AND pdf_name = %s LIMIT 1"""
+        result = executeSql.ExecuteAllNew(sql_check, (entityid, pdf_name))
+        if result and len(result) > 0:
+            return  # PDF already stored
+
+        sql_insert = """INSERT INTO tbl_action_pdf(entityid, pdf_name, pdf_file, uploaded_at) VALUES (%s, %s, %s, %s)"""
+        executeSql.ExecuteOne(sql_insert, (entityid, pdf_name, pdf_file, uploaded_at))
     except Exception as e:
         print("Error in insert_pdf_file:", e)
 

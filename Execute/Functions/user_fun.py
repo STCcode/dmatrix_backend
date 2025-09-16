@@ -2815,6 +2815,7 @@ def getDirectEquityCommodityIRR():
 
 def upload_and_save():
     try:
+        # Only POST allowed
         if request.method != "POST":
             return make_response({"error": "Method not allowed"}, 405)
 
@@ -2827,21 +2828,21 @@ def upload_and_save():
         if not category or not subcategory:
             return make_response({"error": "Category & Subcategory required"}, 400)
 
-        inserted_records = []
         now = datetime.now()
+        inserted_records = []
 
         for file in files:
             filename = secure_filename(file.filename)
             file_bytes = file.read()
-            file.seek(0)
+            file.seek(0)  # Reset pointer for parser
 
-            # Step 1: Parse PDF → returns multiple entities each with multiple actions
+            # Parse PDF → returns multiple entities each with multiple actions
             broker, json_data = process_pdf(file, category, subcategory)
             if not json_data:
                 continue
 
             for item in json_data:
-                # Step 2: Insert or get entityid
+                # Insert or get entityid
                 entity_info = item.get("entityTable", {})
                 entityid = queries.get_or_create_entity(
                     entity_info.get("scripname"),
@@ -2856,12 +2857,13 @@ def upload_and_save():
                 if not entityid:
                     continue
 
-                # Step 3: Save PDF once per entity
+                # Save PDF once per entity
                 queries.insert_pdf_file(entityid, filename, file_bytes, now)
 
-                # Step 4: Handle multiple actions per entity
+                # Handle multiple actions per entity
                 actions = item.get("actionTable", [])
-                if isinstance(actions, dict):  # Single action as dict
+                # If single action is dict, convert to list
+                if isinstance(actions, dict):
                     actions = [actions]
 
                 for action in actions:

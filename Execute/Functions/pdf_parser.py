@@ -207,9 +207,15 @@ def build_json_from_tables(tables, category, subcategory):
                 "unit": try_float(row.get("unit")),
                 "redeem_amount": try_float(row.get("redeem_amt") or row.get("reedem_amt")),
                 "purchase_amount": try_float(row.get("purchase_amt") or row.get("purchase_amount")),
+                "cgst": try_float(row.get("cgst")),
+                "cgst": try_float(row.get("sgst")),
+                "igst": try_float(row.get("igst")),
+                "ugst": try_float(row.get("ugst")),
                 "net_amount": try_float(row.get("net_amount")),
                 "order_date": contract_date,
                 "stamp_duty": per_row_stamp_duty,
+                "cess_value": try_float(row.get("cess_value")),
+                "purchase_value ": try_float(row.get("purchase_value ")),
                 "page_number": row.get("__page__", None),
             }
 

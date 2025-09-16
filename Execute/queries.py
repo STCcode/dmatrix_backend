@@ -1336,12 +1336,8 @@ def getDirectEquityCommodityIRR(entityid):
 # Insert entity, letting Postgres trigger generate entityid
 def insert_entity_return_id(entity_tuple):
     """
-    Insert a new entity into tbl_entity.
-    Trigger generates entityid automatically.
-    Returns the generated entityid.
-    entity_tuple = (
-        scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at
-    )
+    Inserts a new entity and returns generated entityid.
+    entity_tuple = (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at)
     """
     try:
         sql = """
@@ -1351,7 +1347,6 @@ def insert_entity_return_id(entity_tuple):
         """
         executeSql.ExecuteOne(sql, entity_tuple)
 
-        # Get last inserted id to construct entityid (trigger already generated it)
         last_id_sql = "SELECT entityid FROM tbl_entity ORDER BY id DESC LIMIT 1"
         result = executeSql.ExecuteAllNew(last_id_sql, ())
         if result and len(result) > 0:
@@ -1361,18 +1356,37 @@ def insert_entity_return_id(entity_tuple):
         print("Error in insert_entity_return_id:", e)
         return None
 
-# ---------------------------------------------
-# Insert action into tbl_action_table
-# ---------------------------------------------
+# -----------------------------
+# Get existing entity by ISIN/scripcode or insert new
+# -----------------------------
+def get_or_create_entity(scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at):
+    """
+    Returns entityid for existing entity (matching ISIN or scripcode),
+    otherwise inserts a new entity and returns its entityid.
+    """
+    try:
+        sql_check = """
+            SELECT entityid FROM tbl_entity
+            WHERE category = %s AND subcategory = %s
+              AND (isin = %s OR scripcode = %s)
+            ORDER BY id DESC
+            LIMIT 1
+        """
+        result = executeSql.ExecuteAllNew(sql_check, (category, subcategory, isin, scripcode))
+        if result and len(result) > 0:
+            return result[0]["entityid"]
+
+        entity_tuple = (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at)
+        return insert_entity_return_id(entity_tuple)
+
+    except Exception as e:
+        print("Error in get_or_create_entity:", e)
+        return None
+
+# -----------------------------
+# Insert action record
+# -----------------------------
 def auto_action_table(action_tuple):
-    """
-    Insert a mutual fund action record.
-    action_tuple = (
-        scrip_code, mode, order_type, scrip_name, isin, order_number, folio_number, nav, stt,
-        unit, redeem_amount, purchase_amount, cgst, sgst, igst, ugst, stamp_duty, cess_value,
-        net_amount, created_at, entityid, purchase_value, order_date, sett_no
-    )
-    """
     try:
         sql = """
             INSERT INTO tbl_action_table
@@ -1385,13 +1399,10 @@ def auto_action_table(action_tuple):
     except Exception as e:
         print("Error in auto_action_table:", e)
 
-# ---------------------------------------------
-# Insert PDF into tbl_action_pdf
-# ---------------------------------------------
+# -----------------------------
+# Insert PDF file
+# -----------------------------
 def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):
-    """
-    Insert PDF bytes. If entityid is None, can be updated later after trigger generates entityid.
-    """
     try:
         sql = """
             INSERT INTO tbl_action_pdf
@@ -1401,29 +1412,6 @@ def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):
         executeSql.ExecuteOne(sql, (entityid, pdf_name, pdf_file, uploaded_at))
     except Exception as e:
         print("Error in insert_pdf_file:", e)
-
-# ---------------------------------------------
-# Get existing entity by category & subcategory
-# ---------------------------------------------
-def get_entity_by_category_subcategory(category, subcategory):
-    """
-    Returns the last inserted entityid for given category/subcategory, if exists.
-    """
-    try:
-        sql = """
-            SELECT entityid
-            FROM tbl_entity
-            WHERE category = %s AND subcategory = %s
-            ORDER BY id DESC
-            LIMIT 1
-        """
-        result = executeSql.ExecuteAllNew(sql, (category, subcategory))
-        if result and len(result) > 0:
-            return result[0]
-        return None
-    except Exception as e:
-        print("Error in get_entity_by_category_subcategory:", e)
-        return None
 
 
 # =================== AIF ===================

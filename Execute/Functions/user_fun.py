@@ -2933,58 +2933,51 @@ def getDirectEquityCommodityIRR():
 
 def upload_and_save():
     try:
-        # ✅ Only allow POST
         if request.method != "POST":
             return make_response({"error": "Method not allowed"}, 405)
 
-        # ✅ Check files
-        if "files" not in request.files:
-            return make_response({"error": "No files uploaded"}, 400)
-
         files = request.files.getlist("files")
         if not files:
-            return make_response({"error": "Empty files list"}, 400)
+            return make_response({"error": "No files uploaded"}, 400)
 
-        # ✅ Category & Subcategory from frontend
         category = request.form.get("category")
         subcategory = request.form.get("subcategory")
         if not category or not subcategory:
-            return make_response({"error": "Category & Subcategory are required"}, 400)
+            return make_response({"error": "Category & Subcategory required"}, 400)
 
-        now = datetime.now()
         inserted_records = []
+        now = datetime.now()
 
         for file in files:
             filename = secure_filename(file.filename)
             file_bytes = file.read()
-            file.seek(0)  # Reset pointer (needed for parser)
+            file.seek(0)
 
-            # ✅ Step 1: Parse PDF → (entity info + action info)
+            # Parse PDF → returns entity + actions
             broker, json_data = process_pdf(file, category, subcategory)
             if not json_data:
-                continue  # Skip if nothing found in PDF
+                continue
 
-            # ✅ Step 2: Insert entity (trigger generates entityid)
-            entity_info = json_data[0].get("entityTable", {})
-            entity_tuple = (
-                entity_info.get("scripname"),
-                entity_info.get("scripcode"),
-                entity_info.get("benchmark"),
-                entity_info.get("category"),
-                entity_info.get("subcategory"),
-                entity_info.get("nickname"),
-                entity_info.get("isin"),
-                now
-            )
-            entityid = queries.insert_entity_return_id(entity_tuple)
-            if not entityid:
-                continue  # Skip if entity insert failed
-
-            # ✅ Step 3: Save PDF into tbl_action_pdf
-            queries.insert_pdf_file(entityid, filename, file_bytes, now)
-
-            # ✅ Step 4: Save all actions into tbl_action_table
+            # Loop through each entity in PDF (each fund gets separate entityid)
             for item in json_data:
+                entity_info = item.get("entityTable", {})
+                entityid = queries.get_or_create_entity(
+                    entity_info.get("scripname"),
+                    entity_info.get("scripcode"),
+                    entity_info.get("benchmark"),
+                    category,
+                    subcategory,
+                    entity_info.get("nickname"),
+                    entity_info.get("isin"),
+                    now
+                )
+                if not entityid:
+                    continue
+
+                # Save PDF
+                queries.insert_pdf_file(entityid, filename, file_bytes, now)
+
+                # Save actions
                 action = item.get("actionTable", {})
                 action_tuple = (
                     action.get("scrip_code"),
@@ -3007,7 +3000,7 @@ def upload_and_save():
                     action.get("cess_value"),
                     action.get("net_amount"),
                     now,
-                    entityid,  # ✅ use the same entityid for all actions
+                    entityid,
                     action.get("purchase_value"),
                     action.get("order_date"),
                     action.get("sett_no")
@@ -3019,7 +3012,6 @@ def upload_and_save():
                     "order_number": action.get("order_number")
                 })
 
-        # ✅ Success response
         return make_response(
             middleware.exs_msgs(inserted_records, responses.insert_200, "1020200"),
             200
@@ -3031,8 +3023,6 @@ def upload_and_save():
             middleware.exe_msgs(responses.insert_501, str(e.args), "1020500"),
             500
         )
-
-
 
 # ============================= Auto PDF Read and Insert Into DB =========================
 

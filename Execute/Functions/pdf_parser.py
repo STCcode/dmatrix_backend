@@ -286,12 +286,13 @@ def build_json_phillip(tables, category, subcategory):
                 "igst": try_float(row.get("igst")),
                 "ugst": try_float(row.get("ugst")),
                 "net_amount": try_float(row.get("net_amount")),
-                "order_date": contract_date,
-                "stamp_duty": per_row_stamp_duty,
+                "order_date": order_date,
+                 "stamp_duty": try_float(row.get("__stamp_duty__", 0.0)),
                 "cess_value": try_float(row.get("cess_value")),
                 "purchase_value ": try_float(row.get("purchase_value ")),
                 "page_number": row.get("__page__", None),
             }
+
                 results.append({"entityTable": entity_table, "actionTable": action_table})
                 
             except Exception as e:

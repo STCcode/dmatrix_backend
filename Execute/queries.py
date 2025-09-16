@@ -1424,6 +1424,8 @@ def get_entity_by_category_subcategory(category, subcategory):
     except Exception as e:
         print("Error in get_entity_by_category_subcategory:", e)
         return None
+
+
 # =================== AIF ===================
 # def auto_InsertAifData(data):
 #     try:

@@ -207,15 +207,9 @@ def build_json_from_tables(tables, category, subcategory):
                 "unit": try_float(row.get("unit")),
                 "redeem_amount": try_float(row.get("redeem_amt") or row.get("reedem_amt")),
                 "purchase_amount": try_float(row.get("purchase_amt") or row.get("purchase_amount")),
-                "cgst": try_float(row.get("cgst")),
-                "cgst": try_float(row.get("sgst")),
-                "igst": try_float(row.get("igst")),
-                "ugst": try_float(row.get("ugst")),
                 "net_amount": try_float(row.get("net_amount")),
                 "order_date": contract_date,
                 "stamp_duty": per_row_stamp_duty,
-                "cess_value": try_float(row.get("cess_value")),
-                "purchase_value ": try_float(row.get("purchase_value ")),
                 "page_number": row.get("__page__", None),
             }
 
@@ -275,25 +269,29 @@ def build_json_phillip(tables, category, subcategory):
                 }
 
                 action_table = {
-                    "scrip_code": scrip_code,
-                    "mode": "DEMAT",
-                    "order_type": "PURCHASE",
-                    "scrip_name": scrip_name,
-                    "isin": isin,
-                    "order_number": order_number,
-                    "folio_number": "",  # Not available in Phillip format
-                    "nav": nav,
-                    "stt": 0.0,  # Not specified in the format
-                    "unit": unit,
-                    "redeem_amount": 0.0,
-                    "purchase_amount": purchase_amount,
-                    "net_amount": purchase_amount,  # Assuming same as purchase amount
-                    "order_date": order_date,
-                    "sett_no": "",  # Not available
-                    "stamp_duty": try_float(row.get("__stamp_duty__", 0.0)),
-                    "page_number": row.get("__page__", None)
-                }
-
+                "scrip_code": str(row.get("scrip_code") or ""),
+                "mode": str(row.get("mode") or ""),
+                "order_type": str(row.get("order_type") or ""),
+                "scrip_name": scrip_name,
+                "isin": isin,
+                "order_number": str(row.get("order_no") or ""),
+                "folio_number": str(row.get("folio_no") or ""),
+                "nav": try_float(row.get("nav")),
+                "stt": try_float(row.get("stt")),
+                "unit": try_float(row.get("unit")),
+                "redeem_amount": try_float(row.get("redeem_amt") or row.get("reedem_amt")),
+                "purchase_amount": try_float(row.get("purchase_amt") or row.get("purchase_amount")),
+                "cgst": try_float(row.get("cgst")),
+                "cgst": try_float(row.get("sgst")),
+                "igst": try_float(row.get("igst")),
+                "ugst": try_float(row.get("ugst")),
+                "net_amount": try_float(row.get("net_amount")),
+                "order_date": contract_date,
+                "stamp_duty": per_row_stamp_duty,
+                "cess_value": try_float(row.get("cess_value")),
+                "purchase_value ": try_float(row.get("purchase_value ")),
+                "page_number": row.get("__page__", None),
+            }
                 results.append({"entityTable": entity_table, "actionTable": action_table})
                 
             except Exception as e:
@@ -351,12 +349,48 @@ if __name__ == "__main__":
             print("\nSample transaction:")
             print(json.dumps(json_data[0], indent=2))
             
+            # Validate data before saving
+            print("\n=== VALIDATION CHECK ===")
+            for i, record in enumerate(json_data[:3]):  # Check first 3 records
+                entity = record.get("entityTable", {})
+                action = record.get("actionTable", {})
+                
+                print(f"Record {i+1}:")
+                print(f"  - ISIN: {entity.get('isin', 'MISSING')}")
+                print(f"  - Script Name: {entity.get('scripname', 'MISSING')}")
+                print(f"  - Units: {action.get('unit', 'MISSING')}")
+                print(f"  - NAV: {action.get('nav', 'MISSING')}")
+                print(f"  - Purchase Amount: {action.get('purchase_amount', 'MISSING')}")
+                
+                # Check for common issues
+                if not entity.get('isin'):
+                    print(f"  ⚠️ WARNING: Missing ISIN")
+                if action.get('unit', 0) == 0:
+                    print(f"  ⚠️ WARNING: Zero units")
+                if action.get('purchase_amount', 0) == 0:
+                    print(f"  ⚠️ WARNING: Zero purchase amount")
+            
             # Save to file
             with open("output.json", "w") as f:
                 json.dump(json_data, f, indent=4)
             print(f"\nJSON saved to output.json")
+            
+            # Additional check - save raw extracted data for debugging
+            with open("debug_raw_data.json", "w") as f:
+                debug_data = {
+                    "broker": broker,
+                    "total_records": len(json_data),
+                    "sample_record": json_data[0] if json_data else None,
+                    "all_records": json_data
+                }
+                json.dump(debug_data, f, indent=4)
+            print("Debug data saved to debug_raw_data.json")
+            
         else:
-            print("No transactions were extracted from the PDF")
+            print("❌ No transactions were extracted from the PDF")
+            print("This might be why your API shows 'success' but inserts no data!")
             
     except Exception as e:
         print(f"Error processing PDF: {e}")
+        import traceback
+        traceback.print_exc()

@@ -1336,18 +1336,18 @@ def getDirectEquityCommodityIRR(entityid):
 # Insert entity, letting Postgres trigger generate entityid
 def get_or_create_entity(scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at):
     """
-    Returns entityid. Inserts new entity if not exists.
+    Returns existing entityid if scripname + scripcode exists.
+    Otherwise, inserts a new entity and returns the new entityid.
     """
     try:
-        # Check if entity already exists (by scripname + scripcode + category + subcategory)
+        # Check if entity already exists
         sql_check = """
             SELECT entityid
             FROM tbl_entity
-            WHERE scripname = %s AND scripcode = %s AND category = %s AND subcategory = %s
-            ORDER BY id DESC
+            WHERE scripname = %s AND scripcode = %s
             LIMIT 1
         """
-        result = executeSql.ExecuteAllNew(sql_check, (scripname, scripcode, category, subcategory))
+        result = executeSql.ExecuteAllNew(sql_check, (scripname, scripcode))
         if result and len(result) > 0:
             return result[0]["entityid"]
 
@@ -1356,24 +1356,29 @@ def get_or_create_entity(scripname, scripcode, benchmark, category, subcategory,
             INSERT INTO tbl_entity
             (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            RETURNING entityid
         """
-        inserted = executeSql.ExecuteAllNew(sql_insert, (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at))
-        if inserted and len(inserted) > 0:
-            return inserted[0]["entityid"]
+        executeSql.ExecuteOne(sql_insert, (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at))
+
+        # Get the newly generated entityid (trigger handles it)
+        sql_last = "SELECT entityid FROM tbl_entity ORDER BY id DESC LIMIT 1"
+        last = executeSql.ExecuteAllNew(sql_last, ())
+        if last and len(last) > 0:
+            return last[0]["entityid"]
 
         return None
+
     except Exception as e:
         print("Error in get_or_create_entity:", e)
         return None
 
 
-# ---------------------------------------------
-# Insert an action into tbl_action_table
-# ---------------------------------------------
+# ------------------------------
+# Insert multiple actions per entity
+# ------------------------------
 def auto_action_table(action_tuple):
     """
-    Insert a mutual fund action record.
+    Insert a single mutual fund action record.
+    action_tuple must match the table columns in order.
     """
     try:
         sql = """
@@ -1388,22 +1393,20 @@ def auto_action_table(action_tuple):
         print("Error in auto_action_table:", e)
 
 
-# ---------------------------------------------
-# Insert PDF for entity (once per entity)
-# ---------------------------------------------
+# ------------------------------
+# Insert PDF file for an entity
+# ------------------------------
 def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):
     """
-    Insert PDF bytes. Avoid duplicates.
+    Inserts a PDF file record for a specific entityid.
     """
     try:
-        # Check if PDF already exists for this entity
-        sql_check = """SELECT id FROM tbl_action_pdf WHERE entityid = %s AND pdf_name = %s LIMIT 1"""
-        result = executeSql.ExecuteAllNew(sql_check, (entityid, pdf_name))
-        if result and len(result) > 0:
-            return  # PDF already stored
-
-        sql_insert = """INSERT INTO tbl_action_pdf(entityid, pdf_name, pdf_file, uploaded_at) VALUES (%s, %s, %s, %s)"""
-        executeSql.ExecuteOne(sql_insert, (entityid, pdf_name, pdf_file, uploaded_at))
+        sql = """
+            INSERT INTO tbl_action_pdf
+            (entityid, pdf_name, pdf_file, uploaded_at)
+            VALUES (%s, %s, %s, %s)
+        """
+        executeSql.ExecuteOne(sql, (entityid, pdf_name, pdf_file, uploaded_at))
     except Exception as e:
         print("Error in insert_pdf_file:", e)
 

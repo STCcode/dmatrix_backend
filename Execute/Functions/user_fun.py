@@ -2815,7 +2815,7 @@ def getDirectEquityCommodityIRR():
 
 def upload_and_save():
     try:
-        # Only POST allowed
+        # Only allow POST
         if request.method != "POST":
             return make_response({"error": "Method not allowed"}, 405)
 
@@ -2828,21 +2828,21 @@ def upload_and_save():
         if not category or not subcategory:
             return make_response({"error": "Category & Subcategory required"}, 400)
 
-        now = datetime.now()
         inserted_records = []
+        now = datetime.now()
 
         for file in files:
             filename = secure_filename(file.filename)
             file_bytes = file.read()
-            file.seek(0)  # Reset pointer for parser
+            file.seek(0)  # reset pointer for parser
 
-            # Parse PDF → returns multiple entities each with multiple actions
+            # Step 1: Parse PDF → returns multiple entities each with multiple actions
             broker, json_data = process_pdf(file, category, subcategory)
             if not json_data:
                 continue
 
             for item in json_data:
-                # Insert or get entityid
+                # Step 2: Get or create entityid
                 entity_info = item.get("entityTable", {})
                 entityid = queries.get_or_create_entity(
                     entity_info.get("scripname"),
@@ -2857,13 +2857,12 @@ def upload_and_save():
                 if not entityid:
                     continue
 
-                # Save PDF once per entity
+                # Step 3: Save PDF once per entity
                 queries.insert_pdf_file(entityid, filename, file_bytes, now)
 
-                # Handle multiple actions per entity
+                # Step 4: Handle multiple actions per entity
                 actions = item.get("actionTable", [])
-                # If single action is dict, convert to list
-                if isinstance(actions, dict):
+                if isinstance(actions, dict):  # single action as dict
                     actions = [actions]
 
                 for action in actions:
@@ -2900,6 +2899,7 @@ def upload_and_save():
                         "order_number": action.get("order_number")
                     })
 
+        # Return all inserted records
         return make_response(
             middleware.exs_msgs(inserted_records, responses.insert_200, "1020200"),
             200

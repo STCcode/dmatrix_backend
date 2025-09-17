@@ -2814,7 +2814,6 @@ def getDirectEquityCommodityIRR():
 
 def upload_and_save():
     try:
-        # Only allow POST
         if request.method != "POST":
             return make_response({"error": "Method not allowed"}, 405)
 
@@ -2833,17 +2832,16 @@ def upload_and_save():
         for file in files:
             filename = secure_filename(file.filename)
             file_bytes = file.read()
-            file.seek(0)  # reset pointer for parser
+            file.seek(0)
 
-            # Step 1: Parse PDF → returns multiple entities each with multiple actions
             broker, json_data = process_pdf(file, category, subcategory)
             if not json_data:
                 continue
 
             for item in json_data:
-                # Step 2: Get or create entityid
+                # Step 1: Always create a new entity
                 entity_info = item.get("entityTable", {})
-                entityid = queries.get_or_create_entity(
+                entityid = queries.create_entity(
                     entity_info.get("scripname"),
                     entity_info.get("scripcode"),
                     entity_info.get("benchmark"),
@@ -2856,19 +2854,19 @@ def upload_and_save():
                 if not entityid:
                     continue
 
-                # Step 3: Save PDF once per entity
+                # Step 2: Save PDF once per entity
                 queries.insert_pdf_file(entityid, filename, file_bytes, now)
 
-                # Step 4: Handle multiple actions per entity
+                # Step 3: Handle multiple actions for this entity
                 actions = item.get("actionTable", [])
-                if isinstance(actions, dict):  # single action as dict
+                if isinstance(actions, dict):
                     actions = [actions]
 
                 for action in actions:
                     order_number = action.get("order_number")
 
-                    # ✅ skip duplicate order_number
-                    if queries.check_order_exists(order_number):
+                    # ✅ Prevent duplicate order_number for THIS entity only
+                    if queries.order_exists_for_entity(order_number, entityid):
                         continue
 
                     action_tuple = (
@@ -2905,7 +2903,6 @@ def upload_and_save():
                         "pdf": filename
                     })
 
-        # Return all inserted records
         return make_response(
             middleware.exs_msgs(inserted_records, responses.insert_200, "1020200"),
             200
@@ -2917,6 +2914,8 @@ def upload_and_save():
             middleware.exe_msgs(responses.insert_501, str(e.args), "1020500"),
             500
         )
+
+
 # ============================= Auto PDF Read and Insert Into DB =========================
 
 

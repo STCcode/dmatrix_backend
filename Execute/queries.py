@@ -1335,37 +1335,25 @@ def getDirectEquityCommodityIRR(entityid):
 # ============================= Auto PDF Read and Insert Into DB  Start queries=========================
 # Insert entity, letting Postgres trigger generate entityid
 
-def check_order_exists(order_number):
-    """
-    Check if order_number already exists in tbl_action_table
-    """
+def order_exists_for_entity(order_number, entityid):
     try:
-        sql = "SELECT 1 FROM tbl_action_table WHERE order_number = %s LIMIT 1"
-        result = executeSql.ExecuteAllNew(sql, (order_number,))
-        return len(result) > 0
-    except Exception as e:
-        print("Error in check_order_exists:", e)
-        return False
-
-
-def get_or_create_entity(scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at):
-    """
-    Returns existing entityid if scripname + scripcode exists.
-    Otherwise, inserts a new entity and returns the new entityid.
-    """
-    try:
-        # Check if entity already exists
-        sql_check = """
-            SELECT entityid
-            FROM tbl_entity
-            WHERE scripname = %s AND scripcode = %s
+        sql = """
+            SELECT 1 FROM tbl_action_table
+            WHERE order_number = %s AND entityid = %s
             LIMIT 1
         """
-        result = executeSql.ExecuteAllNew(sql_check, (scripname, scripcode))
-        if result and len(result) > 0:
-            return result[0]["entityid"]
+        result = executeSql.ExecuteAllNew(sql, (order_number, entityid))
+        return len(result) > 0
+    except Exception as e:
+        print("Error in order_exists_for_entity:", e)
+        return False
 
-        # Insert new entity
+def create_entity(scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at):
+    """
+    Always inserts a new entity and returns its new entityid.
+    Trigger on tbl_entity will auto-generate entityid like ENT-0001.
+    """
+    try:
         sql_insert = """
             INSERT INTO tbl_entity
             (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at)
@@ -1373,7 +1361,7 @@ def get_or_create_entity(scripname, scripcode, benchmark, category, subcategory,
         """
         executeSql.ExecuteOne(sql_insert, (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at))
 
-        # Get the newly generated entityid (trigger handles it)
+        # Get the newly generated entityid
         sql_last = "SELECT entityid FROM tbl_entity ORDER BY id DESC LIMIT 1"
         last = executeSql.ExecuteAllNew(sql_last, ())
         if last and len(last) > 0:
@@ -1382,9 +1370,8 @@ def get_or_create_entity(scripname, scripcode, benchmark, category, subcategory,
         return None
 
     except Exception as e:
-        print("Error in get_or_create_entity:", e)
+        print("Error in create_entity:", e)
         return None
-
 
 # ------------------------------
 # Insert multiple actions per entity

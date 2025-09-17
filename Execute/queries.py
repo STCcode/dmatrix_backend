@@ -1334,6 +1334,20 @@ def getDirectEquityCommodityIRR(entityid):
 
 # ============================= Auto PDF Read and Insert Into DB  Start queries=========================
 # Insert entity, letting Postgres trigger generate entityid
+
+def check_order_exists(order_number):
+    """
+    Check if order_number already exists in tbl_action_table
+    """
+    try:
+        sql = "SELECT 1 FROM tbl_action_table WHERE order_number = %s LIMIT 1"
+        result = executeSql.ExecuteAllNew(sql, (order_number,))
+        return len(result) > 0
+    except Exception as e:
+        print("Error in check_order_exists:", e)
+        return False
+
+
 def get_or_create_entity(scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at):
     """
     Returns existing entityid if scripname + scripcode exists.

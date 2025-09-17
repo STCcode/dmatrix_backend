@@ -2903,6 +2903,7 @@ def upload_and_save():
 
                     inserted_records.append({
                         "entityid": entityid,
+                        "scripname": entity_info.get("scripname"),
                         "order_number": order_number,
                         "pdf": filename
                     })

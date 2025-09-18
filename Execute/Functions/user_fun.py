@@ -2743,6 +2743,7 @@ def upload_and_save():
             return make_response({"error": "Category & Subcategory required"}, 400)
 
         inserted_records = []
+        skipped_records = []
         now = datetime.now()
 
         for file in files:
@@ -2755,6 +2756,25 @@ def upload_and_save():
                 continue
 
             for item in json_data:
+                # Step 1: Always create a new entity
+                entity_info = item.get("entityTable", {})
+                entityid = queries.create_entity(
+                    entity_info.get("scripname"),
+                    entity_info.get("scripcode"),
+                    entity_info.get("benchmark"),
+                    category,
+                    subcategory,
+                    entity_info.get("nickname"),
+                    entity_info.get("isin"),
+                    now
+                )
+                if not entityid:
+                    continue
+
+                # Step 2: Save PDF once per entity
+                queries.insert_pdf_file(entityid, filename, file_bytes, now)
+
+                # Step 3: Handle multiple actions for this entity
                 actions = item.get("actionTable", [])
                 if isinstance(actions, dict):
                     actions = [actions]
@@ -2762,29 +2782,16 @@ def upload_and_save():
                 for action in actions:
                     order_number = action.get("order_number")
 
-                    # ✅ Skip if order_number already exists globally
+                    # ✅ Prevent duplicate order_number globally
                     if queries.order_exists(order_number):
-                        continue  
-
-                    # ✅ Only create entity AFTER confirming order_number is new
-                    entity_info = item.get("entityTable", {})
-                    entityid = queries.create_entity(
-                        entity_info.get("scripname"),
-                        entity_info.get("scripcode"),
-                        entity_info.get("benchmark"),
-                        category,
-                        subcategory,
-                        entity_info.get("nickname"),
-                        entity_info.get("isin"),
-                        now
-                    )
-                    if not entityid:
+                        skipped_records.append({
+                            "entityid": entityid,
+                            "order_number": order_number,
+                            "pdf": filename,
+                            "status": "skipped (duplicate order_number)"
+                        })
                         continue
 
-                    # Save PDF once per entity
-                    queries.insert_pdf_file(entityid, filename, file_bytes, now)
-
-                    # Insert action
                     action_tuple = (
                         action.get("scrip_code"),
                         action.get("mode"),
@@ -2811,18 +2818,35 @@ def upload_and_save():
                         action.get("order_date"),
                         action.get("sett_no")
                     )
-                    queries.auto_action_table(action_tuple)
+                    # Insert with duplicate protection
+                    inserted = queries.auto_action_table(action_tuple)
 
-                    inserted_records.append({
-                        "entityid": entityid,
-                        "order_number": order_number,
-                        "pdf": filename
-                    })
+                    if inserted:
+                        inserted_records.append({
+                            "entityid": entityid,
+                            "order_number": order_number,
+                            "pdf": filename,
+                            "status": "inserted"
+                        })
+                    else:
+                        skipped_records.append({
+                            "entityid": entityid,
+                            "order_number": order_number,
+                            "pdf": filename,
+                            "status": "skipped (duplicate)"
+                        })
 
-        return make_response(
-            middleware.exs_msgs(inserted_records, responses.insert_200, "1020200"),
-            200
-        )
+        # ✅ Return detailed response
+        return make_response({
+            "inserted": inserted_records,
+            "skipped": skipped_records,
+            "summary": {
+                "inserted_count": len(inserted_records),
+                "skipped_count": len(skipped_records),
+                "total_processed": len(inserted_records) + len(skipped_records)
+            },
+            "code": "1020200"
+        }, 200)
 
     except Exception as e:
         print("Error in upload_and_save:", e)
@@ -2830,7 +2854,6 @@ def upload_and_save():
             middleware.exe_msgs(responses.insert_501, str(e.args), "1020500"),
             500
         )
-
 
 # ============================= Auto PDF Read and Insert Into DB =========================
 

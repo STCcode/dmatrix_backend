@@ -1461,6 +1461,7 @@ def create_entity(scripname, scripcode, benchmark, category, subcategory, nickna
 def auto_action_table(action_tuple):
     """
     Insert a single mutual fund action record.
+    Returns True if inserted, False if duplicate.
     """
     try:
         sql = """
@@ -1471,8 +1472,15 @@ def auto_action_table(action_tuple):
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         executeSql.ExecuteOne(sql, action_tuple)
+        return True  # ✅ Insert success
+
     except Exception as e:
+        # Detect duplicate from DB-level constraint
+        if "duplicate key value violates unique constraint" in str(e):
+            return False  # ⚠️ Skipped due to duplicate
         print("Error in auto_action_table:", e)
+        return False
+
 
 
 def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):

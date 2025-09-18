@@ -2868,35 +2868,46 @@ def upload_and_save():
         files = request.files.getlist("files") if "files" in request.files else []
         json_data = None
 
-        # 🔹 Case 1: multipart/form-data (files + jsonData string)
+        # Case 1️⃣: multipart/form-data (files + optional jsonData)
         if files:
             json_raw = request.form.get("jsonData")
-            if not json_raw:
-                return make_response({"error": "Missing jsonData in form"}, 400)
-            try:
-                json_data = json.loads(json_raw)
-            except Exception as e:
-                return make_response({"error": f"Invalid JSON in form: {str(e)}"}, 400)
 
-        # 🔹 Case 2: application/json (raw JSON, no files)
+            if json_raw:  # jsonData explicitly sent
+                try:
+                    json_data = json.loads(json_raw)
+                except Exception as e:
+                    return make_response({"error": f"Invalid JSON in form: {str(e)}"}, 400)
+
+            else:  # Case 2️⃣: files only → parse PDF directly
+                all_parsed = []
+                for file in files:
+                    file.seek(0)
+                    broker, parsed_json = process_pdf(file, request.form.get("category"), request.form.get("subcategory"))
+                    if parsed_json:
+                        all_parsed.extend(parsed_json)
+                json_data = all_parsed
+
+        # Case 3️⃣: application/json (raw JSON, no files)
         else:
-            if not request.is_json:
-                return make_response({"error": "Expected JSON body"}, 400)
-            json_data = request.get_json()
-            if not json_data:
-                return make_response({"error": "Empty JSON body"}, 400)
+            if request.is_json:
+                json_data = request.get_json()
+            else:
+                return make_response({"error": "Expected JSON body or files"}, 400)
 
-        # Always process json_data as list
+        # Normalize json_data
         if isinstance(json_data, dict):
             json_data = [json_data]
+        if not json_data:
+            return make_response({"error": "No data to process"}, 400)
 
+        # 🔄 Loop through parsed items
         for item in json_data:
             entity_info = item.get("entityTable", {})
             actions = item.get("actionTable", [])
             if isinstance(actions, dict):
                 actions = [actions]
 
-            # Step 1️⃣: Check if ANY action order_number already exists globally
+            # ✅ Step 1: Check for duplicates before creating entity
             duplicate_found = False
             for action in actions:
                 if queries.order_exists(action.get("order_number")):
@@ -2910,13 +2921,13 @@ def upload_and_save():
             if duplicate_found:
                 continue  # skip entity creation
 
-            # Step 2️⃣: Create entity only if no duplicates
+            # ✅ Step 2: Create entity
             entityid = queries.create_entity(
                 entity_info.get("scripname"),
                 entity_info.get("scripcode"),
                 entity_info.get("benchmark"),
-                entity_info.get("category"),
-                entity_info.get("subcategory"),
+                entity_info.get("category") or request.form.get("category"),
+                entity_info.get("subcategory") or request.form.get("subcategory"),
                 entity_info.get("nickname"),
                 entity_info.get("isin"),
                 now
@@ -2924,14 +2935,15 @@ def upload_and_save():
             if not entityid:
                 continue
 
-            # Step 3️⃣: Save PDF (only if files exist)
+            # ✅ Step 3: Save PDF if uploaded
             if files:
-                filename = secure_filename(files[0].filename)
-                file_bytes = files[0].read()
-                files[0].seek(0)
-                queries.insert_pdf_file(entityid, filename, file_bytes, now)
+                for file in files:
+                    filename = secure_filename(file.filename)
+                    file_bytes = file.read()
+                    file.seek(0)
+                    queries.insert_pdf_file(entityid, filename, file_bytes, now)
 
-            # Step 4️⃣: Insert actions
+            # ✅ Step 4: Insert actions
             for action in actions:
                 inserted = queries.auto_action_table((
                     action.get("scrip_code"),
@@ -2959,6 +2971,7 @@ def upload_and_save():
                     action.get("order_date"),
                     action.get("sett_no")
                 ))
+
                 if inserted:
                     inserted_records.append({
                         "entityid": entityid,
@@ -2974,6 +2987,7 @@ def upload_and_save():
                         "status": "skipped (duplicate at DB-level)"
                     })
 
+        # ✅ Summary response
         summary = {
             "inserted_count": len(inserted_records),
             "skipped_count": len(skipped_records),
@@ -2989,9 +3003,7 @@ def upload_and_save():
 
     except Exception as e:
         print("Error in upload_and_save:", e)
-        return make_response(
-            {"error": str(e), "code": "1020500"}, 500
-        )
+        return make_response({"error": str(e), "code": "1020500"}, 500)
 
 
 # ============================= Auto PDF Read and Insert Into DB =========================

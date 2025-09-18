@@ -2619,6 +2619,7 @@ def getDirectEquityCommodityIRR():
 
 
 # ============================= Auto PDF Read and Insert Into DB =========================
+# old corect working code
 
 # def upload_and_save():
 #     try:
@@ -2642,15 +2643,14 @@ def getDirectEquityCommodityIRR():
 #             file_bytes = file.read()
 #             file.seek(0)
 
-#             # Parse PDF → returns entity + actions
 #             broker, json_data = process_pdf(file, category, subcategory)
 #             if not json_data:
 #                 continue
 
-#             # Loop through each entity in PDF (each fund gets separate entityid)
 #             for item in json_data:
+#                 # Step 1: Always create a new entity
 #                 entity_info = item.get("entityTable", {})
-#                 entityid = queries.get_or_create_entity(
+#                 entityid = queries.create_entity(
 #                     entity_info.get("scripname"),
 #                     entity_info.get("scripcode"),
 #                     entity_info.get("benchmark"),
@@ -2663,116 +2663,28 @@ def getDirectEquityCommodityIRR():
 #                 if not entityid:
 #                     continue
 
-#                 # Save PDF
+#                 # Step 2: Save PDF once per entity
 #                 queries.insert_pdf_file(entityid, filename, file_bytes, now)
 
-#                 # Save actions
-#                 action = item.get("actionTable", {})
-#                 action_tuple = (
-#                     action.get("scrip_code"),
-#                     action.get("mode"),
-#                     action.get("order_type"),
-#                     action.get("scrip_name"),
-#                     action.get("isin"),
-#                     action.get("order_number"),
-#                     action.get("folio_number"),
-#                     action.get("nav"),
-#                     action.get("stt"),
-#                     action.get("unit"),
-#                     action.get("redeem_amount"),
-#                     action.get("purchase_amount"),
-#                     action.get("cgst"),
-#                     action.get("sgst"),
-#                     action.get("igst"),
-#                     action.get("ugst"),
-#                     action.get("stamp_duty"),
-#                     action.get("cess_value"),
-#                     action.get("net_amount"),
-#                     now,
-#                     entityid,
-#                     action.get("purchase_value"),
-#                     action.get("order_date"),
-#                     action.get("sett_no")
-#                 )
-#                 queries.auto_action_table(action_tuple)
-
-#                 inserted_records.append({
-#                     "entityid": entityid,
-#                     "order_number": action.get("order_number")
-#                 })
-
-#         return make_response(
-#             middleware.exs_msgs(inserted_records, responses.insert_200, "1020200"),
-#             200
-#         )
-
-#     except Exception as e:
-#         print("Error in upload_and_save:", e)
-#         return make_response(
-#             middleware.exe_msgs(responses.insert_501, str(e.args), "1020500"),
-#             500
-#         )
-
-# def upload_and_save():
-#     try:
-#         # Only allow POST
-#         if request.method != "POST":
-#             return make_response({"error": "Method not allowed"}, 405)
-
-#         files = request.files.getlist("files")
-#         if not files:
-#             return make_response({"error": "No files uploaded"}, 400)
-
-#         category = request.form.get("category")
-#         subcategory = request.form.get("subcategory")
-#         if not category or not subcategory:
-#             return make_response({"error": "Category & Subcategory required"}, 400)
-
-#         inserted_records = []
-#         now = datetime.now()
-
-#         for file in files:
-#             filename = secure_filename(file.filename)
-#             file_bytes = file.read()
-#             file.seek(0)  # reset pointer for parser
-
-#             # Step 1: Parse PDF → returns multiple entities each with multiple actions
-#             broker, json_data = process_pdf(file, category, subcategory)
-#             if not json_data:
-#                 continue
-
-#             for item in json_data:
-#                 # Step 2: Get or create entityid
-#                 entity_info = item.get("entityTable", {})
-#                 entityid = queries.get_or_create_entity(
-#                     entity_info.get("scripname"),
-#                     entity_info.get("scripcode"),
-#                     entity_info.get("benchmark"),
-#                     category,
-#                     subcategory,
-#                     entity_info.get("nickname"),
-#                     entity_info.get("isin"),
-#                     now
-#                 )
-#                 if not entityid:
-#                     continue
-
-#                 # Step 3: Save PDF once per entity
-#                 queries.insert_pdf_file(entityid, filename, file_bytes, now)
-
-#                 # Step 4: Handle multiple actions per entity
+#                 # Step 3: Handle multiple actions for this entity
 #                 actions = item.get("actionTable", [])
-#                 if isinstance(actions, dict):  # single action as dict
+#                 if isinstance(actions, dict):
 #                     actions = [actions]
 
 #                 for action in actions:
+#                     order_number = action.get("order_number")
+
+#                     # ✅ Prevent duplicate order_number for THIS entity only
+#                     if queries.order_exists_for_entity(order_number, entityid):
+#                         continue
+
 #                     action_tuple = (
 #                         action.get("scrip_code"),
 #                         action.get("mode"),
 #                         action.get("order_type"),
 #                         action.get("scrip_name"),
 #                         action.get("isin"),
-#                         action.get("order_number"),
+#                         order_number,
 #                         action.get("folio_number"),
 #                         action.get("nav"),
 #                         action.get("stt"),
@@ -2796,10 +2708,10 @@ def getDirectEquityCommodityIRR():
 
 #                     inserted_records.append({
 #                         "entityid": entityid,
-#                         "order_number": action.get("order_number")
+#                         "order_number": order_number,
+#                         "pdf": filename
 #                     })
 
-#         # Return all inserted records
 #         return make_response(
 #             middleware.exs_msgs(inserted_records, responses.insert_200, "1020200"),
 #             200
@@ -2811,6 +2723,10 @@ def getDirectEquityCommodityIRR():
 #             middleware.exe_msgs(responses.insert_501, str(e.args), "1020500"),
 #             500
 #         )
+# old corect working code
+
+
+
 
 def upload_and_save():
     try:
@@ -2839,25 +2755,6 @@ def upload_and_save():
                 continue
 
             for item in json_data:
-                # Step 1: Always create a new entity
-                entity_info = item.get("entityTable", {})
-                entityid = queries.create_entity(
-                    entity_info.get("scripname"),
-                    entity_info.get("scripcode"),
-                    entity_info.get("benchmark"),
-                    category,
-                    subcategory,
-                    entity_info.get("nickname"),
-                    entity_info.get("isin"),
-                    now
-                )
-                if not entityid:
-                    continue
-
-                # Step 2: Save PDF once per entity
-                queries.insert_pdf_file(entityid, filename, file_bytes, now)
-
-                # Step 3: Handle multiple actions for this entity
                 actions = item.get("actionTable", [])
                 if isinstance(actions, dict):
                     actions = [actions]
@@ -2865,10 +2762,29 @@ def upload_and_save():
                 for action in actions:
                     order_number = action.get("order_number")
 
-                    # ✅ Prevent duplicate order_number for THIS entity only
-                    if queries.order_exists_for_entity(order_number, entityid):
+                    # ✅ Skip if order_number already exists globally
+                    if queries.order_exists(order_number):
+                        continue  
+
+                    # ✅ Only create entity AFTER confirming order_number is new
+                    entity_info = item.get("entityTable", {})
+                    entityid = queries.create_entity(
+                        entity_info.get("scripname"),
+                        entity_info.get("scripcode"),
+                        entity_info.get("benchmark"),
+                        category,
+                        subcategory,
+                        entity_info.get("nickname"),
+                        entity_info.get("isin"),
+                        now
+                    )
+                    if not entityid:
                         continue
 
+                    # Save PDF once per entity
+                    queries.insert_pdf_file(entityid, filename, file_bytes, now)
+
+                    # Insert action
                     action_tuple = (
                         action.get("scrip_code"),
                         action.get("mode"),

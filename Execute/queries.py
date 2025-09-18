@@ -1335,18 +1335,102 @@ def getDirectEquityCommodityIRR(entityid):
 # ============================= Auto PDF Read and Insert Into DB  Start queries=========================
 # Insert entity, letting Postgres trigger generate entityid
 
-def order_exists_for_entity(order_number, entityid):
+# def order_exists_for_entity(order_number, entityid):
+#     try:
+#         sql = """
+#             SELECT 1 FROM tbl_action_table
+#             WHERE order_number = %s AND entityid = %s
+#             LIMIT 1
+#         """
+#         result = executeSql.ExecuteAllNew(sql, (order_number, entityid))
+#         return len(result) > 0
+#     except Exception as e:
+#         print("Error in order_exists_for_entity:", e)
+#         return False
+
+# def create_entity(scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at):
+#     """
+#     Always inserts a new entity and returns its new entityid.
+#     Trigger on tbl_entity will auto-generate entityid like ENT-0001.
+#     """
+#     try:
+#         sql_insert = """
+#             INSERT INTO tbl_entity
+#             (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at)
+#             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+#         """
+#         executeSql.ExecuteOne(sql_insert, (scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at))
+
+#         # Get the newly generated entityid
+#         sql_last = "SELECT entityid FROM tbl_entity ORDER BY id DESC LIMIT 1"
+#         last = executeSql.ExecuteAllNew(sql_last, ())
+#         if last and len(last) > 0:
+#             return last[0]["entityid"]
+
+#         return None
+
+#     except Exception as e:
+#         print("Error in create_entity:", e)
+#         return None
+
+# # ------------------------------
+# # Insert multiple actions per entity
+# # ------------------------------
+# def auto_action_table(action_tuple):
+#     """
+#     Insert a single mutual fund action record.
+#     action_tuple must match the table columns in order.
+#     """
+#     try:
+#         sql = """
+#             INSERT INTO tbl_action_table
+#             (scrip_code, mode, order_type, scrip_name, isin, order_number, folio_number, nav, stt,
+#              unit, redeem_amount, purchase_amount, cgst, sgst, igst, ugst, stamp_duty, cess_value,
+#              net_amount, created_at, entityid, purchase_value, order_date, sett_no)
+#             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+#         """
+#         executeSql.ExecuteOne(sql, action_tuple)
+#     except Exception as e:
+#         print("Error in auto_action_table:", e)
+
+
+# # ------------------------------
+# # Insert PDF file for an entity
+# # ------------------------------
+# def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):
+#     """
+#     Inserts a PDF file record for a specific entityid.
+#     """
+#     try:
+#         sql = """
+#             INSERT INTO tbl_action_pdf
+#             (entityid, pdf_name, pdf_file, uploaded_at)
+#             VALUES (%s, %s, %s, %s)
+#         """
+#         executeSql.ExecuteOne(sql, (entityid, pdf_name, pdf_file, uploaded_at))
+#     except Exception as e:
+#         print("Error in insert_pdf_file:", e)
+
+
+
+# /////////////////////
+
+def order_exists(order_number):
+    """
+    Check if an order_number already exists in tbl_action_table (any entity).
+    """
     try:
         sql = """
             SELECT 1 FROM tbl_action_table
-            WHERE order_number = %s AND entityid = %s
+            WHERE order_number = %s
             LIMIT 1
         """
-        result = executeSql.ExecuteAllNew(sql, (order_number, entityid))
+        result = executeSql.ExecuteAllNew(sql, (order_number,))
         return len(result) > 0
     except Exception as e:
-        print("Error in order_exists_for_entity:", e)
+        print("Error in order_exists:", e)
         return False
+
 
 def create_entity(scripname, scripcode, benchmark, category, subcategory, nickname, isin, created_at):
     """
@@ -1373,13 +1457,10 @@ def create_entity(scripname, scripcode, benchmark, category, subcategory, nickna
         print("Error in create_entity:", e)
         return None
 
-# ------------------------------
-# Insert multiple actions per entity
-# ------------------------------
+
 def auto_action_table(action_tuple):
     """
     Insert a single mutual fund action record.
-    action_tuple must match the table columns in order.
     """
     try:
         sql = """
@@ -1394,9 +1475,6 @@ def auto_action_table(action_tuple):
         print("Error in auto_action_table:", e)
 
 
-# ------------------------------
-# Insert PDF file for an entity
-# ------------------------------
 def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):
     """
     Inserts a PDF file record for a specific entityid.
@@ -1410,7 +1488,6 @@ def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):
         executeSql.ExecuteOne(sql, (entityid, pdf_name, pdf_file, uploaded_at))
     except Exception as e:
         print("Error in insert_pdf_file:", e)
-
 
 # =================== AIF ===================
 # def auto_InsertAifData(data):

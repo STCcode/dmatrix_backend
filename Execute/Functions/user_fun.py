@@ -2858,49 +2858,59 @@ def getDirectEquityCommodityIRR():
 
 def upload_and_save():
     try:
-        file = request.files["file"]
-        filename = file.filename
-        file_bytes = file.read()
+        if request.method != "POST":
+            return make_response({"error": "Method not allowed"}, 405)
 
-        # Parse JSON payload
-        json_data = request.form.get("jsonData")
-        if not json_data:
-            return jsonify({"error": "No jsonData provided"}), 400
-
-        import json
-        json_data = json.loads(json_data)
-
+        now = datetime.now()
         inserted_records = []
         skipped_records = []
-        now = datetime.utcnow()
 
-        # Loop over each entity payload
+        files = request.files.getlist("files") if "files" in request.files else []
+        json_data = None
+
+        # 🔹 Case 1: multipart/form-data (files + jsonData string)
+        if files:
+            json_raw = request.form.get("jsonData")
+            if not json_raw:
+                return make_response({"error": "Missing jsonData in form"}, 400)
+            try:
+                json_data = json.loads(json_raw)
+            except Exception as e:
+                return make_response({"error": f"Invalid JSON in form: {str(e)}"}, 400)
+
+        # 🔹 Case 2: application/json (raw JSON, no files)
+        else:
+            if not request.is_json:
+                return make_response({"error": "Expected JSON body"}, 400)
+            json_data = request.get_json()
+            if not json_data:
+                return make_response({"error": "Empty JSON body"}, 400)
+
+        # Always process json_data as list
+        if isinstance(json_data, dict):
+            json_data = [json_data]
+
         for item in json_data:
             entity_info = item.get("entityTable", {})
             actions = item.get("actionTable", [])
-            if isinstance(actions, dict):  # normalize
+            if isinstance(actions, dict):
                 actions = [actions]
 
-            # Step 1: Filter out duplicate orders before entity creation
-            new_actions = []
-            skipped_actions = []
+            # Step 1️⃣: Check if ANY action order_number already exists globally
+            duplicate_found = False
             for action in actions:
-                order_number = action.get("order_number")
-                if queries.order_exists(order_number):
-                    skipped_actions.append({
-                        "order_number": order_number,
-                        "pdf": filename,
+                if queries.order_exists(action.get("order_number")):
+                    skipped_records.append({
+                        "entityid": None,
+                        "order_number": action.get("order_number"),
+                        "pdf": files[0].filename if files else None,
                         "status": "skipped (duplicate order_number)"
                     })
-                else:
-                    new_actions.append(action)
+                    duplicate_found = True
+            if duplicate_found:
+                continue  # skip entity creation
 
-            # Step 2: If no new actions, skip entity creation
-            if not new_actions:
-                skipped_records.extend(skipped_actions)
-                continue
-
-            # Step 3: Create entity (only now, after ensuring fresh orders exist)
+            # Step 2️⃣: Create entity only if no duplicates
             entityid = queries.create_entity(
                 entity_info.get("scripname"),
                 entity_info.get("scripcode"),
@@ -2914,19 +2924,22 @@ def upload_and_save():
             if not entityid:
                 continue
 
-            # Step 4: Save PDF once per entity
-            queries.insert_pdf_file(entityid, filename, file_bytes, now)
+            # Step 3️⃣: Save PDF (only if files exist)
+            if files:
+                filename = secure_filename(files[0].filename)
+                file_bytes = files[0].read()
+                files[0].seek(0)
+                queries.insert_pdf_file(entityid, filename, file_bytes, now)
 
-            # Step 5: Insert only fresh orders
-            for action in new_actions:
-                order_number = action.get("order_number")
-                action_tuple = (
+            # Step 4️⃣: Insert actions
+            for action in actions:
+                inserted = queries.auto_action_table((
                     action.get("scrip_code"),
                     action.get("mode"),
                     action.get("order_type"),
                     action.get("scrip_name"),
                     action.get("isin"),
-                    order_number,
+                    action.get("order_number"),
                     action.get("folio_number"),
                     action.get("nav"),
                     action.get("stt"),
@@ -2945,41 +2958,40 @@ def upload_and_save():
                     action.get("purchase_value"),
                     action.get("order_date"),
                     action.get("sett_no")
-                )
-
-                inserted = queries.auto_action_table(action_tuple)
+                ))
                 if inserted:
                     inserted_records.append({
                         "entityid": entityid,
-                        "order_number": order_number,
-                        "pdf": filename,
+                        "order_number": action.get("order_number"),
+                        "pdf": files[0].filename if files else None,
                         "status": "inserted"
                     })
+                else:
+                    skipped_records.append({
+                        "entityid": entityid,
+                        "order_number": action.get("order_number"),
+                        "pdf": files[0].filename if files else None,
+                        "status": "skipped (duplicate at DB-level)"
+                    })
 
-            # Step 6: Add skipped (if any), but now attach entityid
-            for sa in skipped_actions:
-                sa["entityid"] = entityid
-                skipped_records.append(sa)
-
-        # Build final response
-        response = {
-            "inserted": inserted_records,
-            "skipped": skipped_records,
-            "summary": {
-                "inserted_count": len(inserted_records),
-                "skipped_count": len(skipped_records),
-                "total_processed": len(inserted_records) + len(skipped_records),
-            },
-            "code": "1020200"
+        summary = {
+            "inserted_count": len(inserted_records),
+            "skipped_count": len(skipped_records),
+            "total_processed": len(inserted_records) + len(skipped_records)
         }
 
-        return jsonify(response)
+        return make_response({
+            "inserted": inserted_records,
+            "skipped": skipped_records,
+            "summary": summary,
+            "code": "1020200"
+        }, 200)
 
     except Exception as e:
-        return jsonify({
-            "error": str(e),
-            "code": "1020500"
-        }), 500
+        print("Error in upload_and_save:", e)
+        return make_response(
+            {"error": str(e), "code": "1020500"}, 500
+        )
 
 
 # ============================= Auto PDF Read and Insert Into DB =========================

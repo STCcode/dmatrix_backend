@@ -774,7 +774,7 @@ def getAllActionTableOfFixIncomeETF():
      
 def getFixIncomeDetailsETFById (entity_id):
     try:
-        sql = "SELECT * FROM tbl_etf_action WHERE entityid = %s;"
+        sql = "SELECT * FROM tbl_entity WHERE entityid = %s;"
         data = (entity_id,)  # tuple, not set
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs
@@ -784,7 +784,7 @@ def getFixIncomeDetailsETFById (entity_id):
 
 def getFixIncomeETFDetailActionTable(entity_id):
     try:
-        sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
+        sql = "SELECT * FROM tbl_etf_action  WHERE entityid = %s;"
         data = (entity_id,)  # tuple, not set
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs

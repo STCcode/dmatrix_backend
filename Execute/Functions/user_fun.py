@@ -1889,7 +1889,7 @@ def insertClientAction():
         if request.method == 'POST':
             formData = request.get_json()
 
-            formlist = (formData['entityid'],formData['order_type'],formData['trade_price'],formData['cheque'], datetime.now(),formData['trade_date'])
+            formlist = (formData['entityid'],formData['pms_order_type'],formData['price'],formData['cheque'], datetime.now(),formData['trade_date'])
 
             insert_msg = queries.insertClientAction(formlist)
 

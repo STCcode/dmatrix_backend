@@ -693,7 +693,7 @@ def getETFDetailsById(entity_id):
 # ==================================== Equity ETF Table End====================================
 def getAllETFEquity():
      try:
-        sql="SELECT e.scripname, b.* FROM tbl_entity e join tbl_etf_action b ON e.entityid = b.entityid;"
+        sql=" SELECT * FROM tbl_entity WHERE category ILIKE 'Equity' AND subcategory ILIKE 'ETF';"
 
         data=''
         msgs=executeSql.ExecuteAllNew(sql,data)
@@ -705,7 +705,7 @@ def getAllETFEquity():
 
 def getAllActionTableOfETFEquity():
      try:
-        sql=" SELECT * FROM tbl_entity WHERE category ILIKE 'Equity' AND subcategory ILIKE 'ETF';"
+        sql="SELECT e.scripname, b.* FROM tbl_entity e join tbl_etf_action b ON e.entityid = b.entityid;"
         data=''
         msgs=executeSql.ExecuteAllNew(sql,data)
         return msgs

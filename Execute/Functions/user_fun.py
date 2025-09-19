@@ -1674,6 +1674,160 @@ def getETFEquityDetailUnderlyingTable():
             500
         )
 
+# ========================================== Fix Income ETF start===============================================================
+
+
+def getAllFixIncomeEquity():
+     if request.method == 'GET':
+        try:
+            data=queries.getAllFixIncomeEquity()
+            if type(data).__name__  != "list":
+                if data.json:
+                    result=data
+                    status=500
+            else:
+                result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
+                status=200
+                        
+            return make_response(result,status)
+        except Exception as e:
+            print("Error in getting role data=============================", e)
+            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)  
+        
+def getAllActionTableOfFixIncomeEquity():
+     if request.method == 'GET':
+        try:
+            data=queries.getAllActionTableOfFixIncomeEquity()
+            if type(data).__name__  != "list":
+                if data.json:
+                    result=data
+                    status=500
+            else:
+                result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
+                status=200
+                        
+            return make_response(result,status)
+        except Exception as e:
+            print("Error in getting role data=============================", e)
+            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)  
+
+
+def  getFixIncomeDetailsEquityById ():
+    try:
+        entity_id = None
+
+        # Handle GET → from query params
+        if request.method == 'GET':
+            entity_id = request.args.get('entityid')
+
+        # Handle POST → from JSON or form-data
+        elif request.method == 'POST':
+            if request.is_json:
+                entity_id = request.json.get('entityid')
+            else:
+                entity_id = request.form.get('entityid')
+
+        if not entity_id:
+            return make_response(
+                middleware.exe_msgs(responses.getAll_501, "Missing entityid parameter", '1023501'),
+                400
+            )
+
+        data = queries.getFixIncomeDetailsEquityById (entity_id)
+
+        # Return proper response
+        if isinstance(data, list):
+            result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+            status = 200
+        else:
+            result = data
+            status = 500
+
+        return make_response(result, status)
+
+    except Exception as e:
+        print("Error in getting underlying by id:", e)
+        return make_response(
+            middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
+            500
+        )
+
+
+
+def getFixIncomeEquityDetailActionTable():
+    try:
+        if request.method == 'GET':
+            # Get entityid from query param and strip extra spaces
+            entity_id = request.args.get('entityid')
+            if not entity_id:
+                return make_response(
+                    middleware.exe_msgs(responses.getAll_501, "Missing entityid in request", "1023501"),
+                    400
+                )
+
+            entity_id = entity_id.strip()
+
+            # Pass entity_id to query function
+            data = queries.getFixIncomeEquityDetailActionTable(entity_id)
+
+            if isinstance(data, list):
+                result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+                status = 200
+            else:
+                result = data
+                status = 500
+
+            return make_response(result, status)
+
+    except Exception as e:
+        print("Error in getETFEquityDetailActionTable:", e)
+        return make_response(
+            middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
+            500
+        )
+  
+def getFixIncomeEquityDetailUnderlyingTable():
+    try:
+        entity_id = None
+
+        # Handle GET → from query params
+        if request.method == 'GET':
+            entity_id = request.args.get('entityid')
+
+        # Handle POST → from JSON or form-data
+        elif request.method == 'POST':
+            if request.is_json:
+                entity_id = request.json.get('entityid')
+            else:
+                entity_id = request.form.get('entityid')
+
+        # Validate entity_id
+        if not entity_id:
+            return make_response(
+                middleware.exe_msgs(responses.getAll_501, "Missing entityid parameter", '1023501'),
+                400
+            )
+
+        # Query the database
+        data = queries.getFixIncomeEquityDetailUnderlyingTable(entity_id)
+
+        # Return proper response
+        if isinstance(data, list):
+            result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+            status = 200
+        else:
+            result = data
+            status = 500
+
+        return make_response(result, status)
+
+    except Exception as e:
+        print("Error in getting underlying by id:", e)
+        return make_response(
+            middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
+            500
+        )
+
  
 
 

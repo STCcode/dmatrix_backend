@@ -182,7 +182,7 @@ app.add_url_rule('/getETFActionTablebyId',view_func=user_fun.getEtfActionTableby
 app.add_url_rule('/getETFEntity',view_func=user_fun.getEtfEntity,methods=['GET','POST'])
 app.add_url_rule('/getETFDetailsById',view_func=user_fun.getETFDetailsById,methods=['GET','POST'])
 
-#==========================================Equity ETF etc Table Start ====================================
+#==========================================Equity ETF  Table Start ====================================
 app.add_url_rule('/getAllETFEquity',view_func=user_fun.getAllETFEquity,methods=['GET','POST'])
 app.add_url_rule('/getAllActionTableOfETFEquity',view_func=user_fun.getAllActionTableOfETFEquity,methods=['GET','POST'])
 app.add_url_rule('/getETFDetailsEquityById',view_func=user_fun.getETFDetailsEquityById,methods=['GET','POST'])
@@ -190,7 +190,17 @@ app.add_url_rule('/getETFEquityDetailActionTable',view_func=user_fun.getETFEquit
 app.add_url_rule('/getETFEquityDetailUnderlyingTable',view_func=user_fun.getETFEquityDetailUnderlyingTable,methods=['GET','POST'])
 
 
-# ======================================  ETF etc Table End =========================================
+# ====================================== Equity ETF etc Table End =========================================
+
+#========================================== Fix Income ETF Table Start ====================================
+app.add_url_rule('/getAllFixIncomeETF',view_func=user_fun.getAllFixIncomeEquity,methods=['GET','POST'])
+app.add_url_rule('/getAllActionTableOfFixIncomeETF',view_func=user_fun.getAllActionTableOfFixIncomeEquity,methods=['GET','POST'])
+app.add_url_rule('/getFixIncomeETFById',view_func=user_fun.getFixIncomeDetailsEquityById,methods=['GET','POST'])
+app.add_url_rule('/getFixIncomeETFDetailActionTable',view_func=user_fun.getFixIncomeEquityDetailActionTable,methods=['GET','POST'])
+app.add_url_rule('/getFixIncomeEquityDetailUnderlyingTable',view_func=user_fun.getFixIncomeEquityDetailUnderlyingTable,methods=['GET','POST'])
+
+
+# ====================================== Fix Income Table End =========================================
 
 
 

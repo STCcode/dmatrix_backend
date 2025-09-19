@@ -705,7 +705,7 @@ def getAllETFEquity():
 
 def getAllActionTableOfETFEquity():
      try:
-        sql="SELECT e.scripname, b.* FROM tbl_entity e join tbl_etf_action b ON e.entityid = b.entityid;"
+        sql="SELECT e.scripname, b.* FROM tbl_entity e join tbl_etf_action b ON e.entityid = b.entityid where e.category ILIKE 'Equity';"
         data=''
         msgs=executeSql.ExecuteAllNew(sql,data)
         return msgs
@@ -749,7 +749,7 @@ def getETFEquityDetailUnderlyingTable(entity_id):
 
 
 # ==================================== Equity ETF Table End====================================
-def getAllFixIncomeEquity():
+def getAllFixIncomeETF():
      try:
         sql=" SELECT * FROM tbl_entity WHERE category ILIKE 'Fixed_Income' AND subcategory ILIKE 'ETF';"
 
@@ -761,9 +761,10 @@ def getAllFixIncomeEquity():
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
      
 
-def getAllActionTableOfFixIncomeEquity():
+def getAllActionTableOfFixIncomeETF():
      try:
-        sql="SELECT e.scripname, b.* FROM tbl_entity e join tbl_etf_action b ON e.entityid = b.entityid;"
+        # sql="SELECT e.scripname, b.* FROM tbl_entity e join tbl_etf_action b ON e.entityid = b.entityid;"
+        sql=" SELECT e.scripname, b.* FROM tbl_entity e join tbl_etf_action b ON e.entityid = b.entityid where e.category ILIKE 'Fix_Income';"
         data=''
         msgs=executeSql.ExecuteAllNew(sql,data)
         return msgs
@@ -771,7 +772,7 @@ def getAllActionTableOfFixIncomeEquity():
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')      
      
-def getFixIncomeDetailsEquityById (entity_id):
+def getFixIncomeDetailsETFById (entity_id):
     try:
         sql = "SELECT * FROM tbl_etf_action WHERE entityid = %s;"
         data = (entity_id,)  # tuple, not set
@@ -781,7 +782,7 @@ def getFixIncomeDetailsEquityById (entity_id):
         print("Error in getting underlying by id query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
 
-def getFixIncomeEquityDetailActionTable(entity_id):
+def getFixIncomeETFDetailActionTable(entity_id):
     try:
         sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
         data = (entity_id,)  # tuple, not set
@@ -793,7 +794,7 @@ def getFixIncomeEquityDetailActionTable(entity_id):
 
 
 
-def getFixIncomeEquityDetailUnderlyingTable(entity_id):
+def getFixIncomeETFDetailUnderlyingTable(entity_id):
     try:
         sql = "SELECT u.*, e.scripname FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE u.entityid = %s;"
         data = (entity_id,)  # tuple, not set

@@ -1677,10 +1677,10 @@ def getETFEquityDetailUnderlyingTable():
 # ========================================== Fix Income ETF start===============================================================
 
 
-def getAllFixIncomeEquity():
+def getAllFixIncomeETF():
      if request.method == 'GET':
         try:
-            data=queries.getAllFixIncomeEquity()
+            data=queries.getAllFixIncomeETF()
             if type(data).__name__  != "list":
                 if data.json:
                     result=data
@@ -1694,10 +1694,10 @@ def getAllFixIncomeEquity():
             print("Error in getting role data=============================", e)
             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)  
         
-def getAllActionTableOfFixIncomeEquity():
+def getAllActionTableOfFixIncomeETF():
      if request.method == 'GET':
         try:
-            data=queries.getAllActionTableOfFixIncomeEquity()
+            data=queries.getAllActionTableOfFixIncomeETF()
             if type(data).__name__  != "list":
                 if data.json:
                     result=data
@@ -1712,7 +1712,7 @@ def getAllActionTableOfFixIncomeEquity():
             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)  
 
 
-def  getFixIncomeDetailsEquityById ():
+def  getFixIncomeDetailsETFById ():
     try:
         entity_id = None
 
@@ -1733,7 +1733,7 @@ def  getFixIncomeDetailsEquityById ():
                 400
             )
 
-        data = queries.getFixIncomeDetailsEquityById (entity_id)
+        data = queries.getFixIncomeDetailsETFById (entity_id)
 
         # Return proper response
         if isinstance(data, list):
@@ -1754,7 +1754,7 @@ def  getFixIncomeDetailsEquityById ():
 
 
 
-def getFixIncomeEquityDetailActionTable():
+def getFixIncomeETFDetailActionTable():
     try:
         if request.method == 'GET':
             # Get entityid from query param and strip extra spaces
@@ -1768,7 +1768,7 @@ def getFixIncomeEquityDetailActionTable():
             entity_id = entity_id.strip()
 
             # Pass entity_id to query function
-            data = queries.getFixIncomeEquityDetailActionTable(entity_id)
+            data = queries.getFixIncomeETFDetailActionTable(entity_id)
 
             if isinstance(data, list):
                 result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
@@ -1786,7 +1786,7 @@ def getFixIncomeEquityDetailActionTable():
             500
         )
   
-def getFixIncomeEquityDetailUnderlyingTable():
+def getFixIncomeETFDetailUnderlyingTable():
     try:
         entity_id = None
 
@@ -1809,7 +1809,7 @@ def getFixIncomeEquityDetailUnderlyingTable():
             )
 
         # Query the database
-        data = queries.getFixIncomeEquityDetailUnderlyingTable(entity_id)
+        data = queries.getFixIncomeETFDetailUnderlyingTable(entity_id)
 
         # Return proper response
         if isinstance(data, list):

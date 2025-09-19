@@ -193,11 +193,11 @@ app.add_url_rule('/getETFEquityDetailUnderlyingTable',view_func=user_fun.getETFE
 # ====================================== Equity ETF etc Table End =========================================
 
 #========================================== Fix Income ETF Table Start ====================================
-app.add_url_rule('/getAllFixIncomeETF',view_func=user_fun.getAllFixIncomeEquity,methods=['GET','POST'])
-app.add_url_rule('/getAllActionTableOfFixIncomeETF',view_func=user_fun.getAllActionTableOfFixIncomeEquity,methods=['GET','POST'])
-app.add_url_rule('/getFixIncomeETFById',view_func=user_fun.getFixIncomeDetailsEquityById,methods=['GET','POST'])
-app.add_url_rule('/getFixIncomeETFDetailActionTable',view_func=user_fun.getFixIncomeEquityDetailActionTable,methods=['GET','POST'])
-app.add_url_rule('/getFixIncomeEquityDetailUnderlyingTable',view_func=user_fun.getFixIncomeEquityDetailUnderlyingTable,methods=['GET','POST'])
+app.add_url_rule('/getAllFixIncomeETF',view_func=user_fun.getAllFixIncomeETF,methods=['GET','POST'])
+app.add_url_rule('/getAllActionTableOfFixIncomeETF',view_func=user_fun.getAllActionTableOfFixIncomeETF,methods=['GET','POST'])
+app.add_url_rule('/getFixIncomeETFById',view_func=user_fun.getFixIncomeDetailsETFById,methods=['GET','POST'])
+app.add_url_rule('/getFixIncomeETFDetailActionTable',view_func=user_fun.getFixIncomeETFDetailActionTable,methods=['GET','POST'])
+app.add_url_rule('/getFixIncomeEquityDetailUnderlyingTable',view_func=user_fun.getFixIncomeETFDetailUnderlyingTable,methods=['GET','POST'])
 
 
 # ====================================== Fix Income Table End =========================================

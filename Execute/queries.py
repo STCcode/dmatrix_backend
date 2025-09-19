@@ -644,8 +644,8 @@ def InsertEtfData(data):
 
 def getAllEtf():
      try:
-        #   sql="SELECT * FROM tbl_etf_action;"
-        sql="SELECT e.scripname, b.* FROM tbl_entity e join tbl_etf_action b ON e.entityid = b.entityid;"
+        # sql="SELECT e.scripname, b.* FROM tbl_entity e join tbl_etf_action b ON e.entityid = b.entityid;"
+        sql="SELECT e.scripname, b.* FROM tbl_entity e join tbl_etf_action b ON e.entityid = b.entityid where e.category ILIKE 'Commodities';"
 
         data=''
         msgs=executeSql.ExecuteAllNew(sql,data)
@@ -764,7 +764,7 @@ def getAllFixIncomeETF():
 def getAllActionTableOfFixIncomeETF():
      try:
         # sql="SELECT e.scripname, b.* FROM tbl_entity e join tbl_etf_action b ON e.entityid = b.entityid;"
-        sql=" SELECT e.scripname, b.* FROM tbl_entity e join tbl_etf_action b ON e.entityid = b.entityid where e.category ILIKE 'Fix_Income';"
+        sql=" SELECT e.scripname, b.* FROM tbl_entity e join tbl_etf_action b ON e.entityid = b.entityid where e.category ILIKE 'Fixed_Income';"
         data=''
         msgs=executeSql.ExecuteAllNew(sql,data)
         return msgs

@@ -178,10 +178,19 @@ app.add_url_rule('/delete_entity_data',view_func=user_fun.delete_entity_data,met
 
 app.add_url_rule('/insertETFActionTable',view_func=user_fun.InsertEtfData,methods=['GET','POST'])
 app.add_url_rule('/getAllActionTableOfETF',view_func=user_fun.getAllEtf,methods=['GET','POST'])
-app.add_url_rule('/getETFActionTablebyId',view_func=user_fun.getEtfActionTablebyId,methods=['GET','POST'])
-
+app.add_url_rule('/getETFActionTablebyId',view_func=user_fun.getEtfActionTablebyId,methods=['GET','POST'])      
 app.add_url_rule('/getETFEntity',view_func=user_fun.getEtfEntity,methods=['GET','POST'])
-# ======================================  ETF etc Table End======================================
+app.add_url_rule('/getETFDetailsById',view_func=user_fun.getETFDetailsById,methods=['GET','POST'])
+
+#==========================================Equity ETF etc Table Start ====================================
+app.add_url_rule('/getAllETFEquity',view_func=user_fun.getAllETFEquity,methods=['GET','POST'])
+app.add_url_rule('/getAllActionTableOfETFEquity',view_func=user_fun.getAllActionTableOfETFEquity,methods=['GET','POST'])
+app.add_url_rule('/getETFDetailsEquityById',view_func=user_fun.getETFDetailsEquityById,methods=['GET','POST'])
+app.add_url_rule('/getETFEquityDetailActionTable',view_func=user_fun.getETFEquityDetailActionTable,methods=['GET','POST'])
+app.add_url_rule('/getETFEquityDetailUnderlyingTable',view_func=user_fun.getETFEquityDetailUnderlyingTable,methods=['GET','POST'])
+
+
+# ======================================  ETF etc Table End =========================================
 
 
 
@@ -192,7 +201,6 @@ app.add_url_rule('/InsertCommoditiesDirect' ,view_func=user_fun.Insert_Commoditi
 app.add_url_rule('/getAllDirectEquityCommodities',view_func=user_fun.getAllDirectEquityCommodities,methods=['GET','POST'])
 app.add_url_rule('/getDEDetailCommoditiesActionTable',view_func=user_fun.getCommoditiesActionTablebyId,methods=['GET','POST'])
 app.add_url_rule('/getDEDetailCommoditiesEntityById',view_func=user_fun.getDEDetailCommoditiesEntityById,methods=['GET','POST'])
-
 app.add_url_rule('/getAllActionOfDirectEquityCommodity',view_func=user_fun.getCommoditiesEntity,methods=['GET','POST'])
 
 app.add_url_rule('/getCountOfAllCommodities',view_func=user_fun.getCountOfAllCommodities,methods=['GET','POST'])

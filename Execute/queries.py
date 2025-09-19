@@ -675,11 +675,77 @@ def getEtfEntity():
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')   
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+
+def getETFDetailsById(entity_id):
+    try:
+        sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
+        data = (entity_id,)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')       
 
 
 # ==================================== Commodities ETF Table End====================================
 
+# ==================================== Equity ETF Table End====================================
+def getAllETFEquity():
+     try:
+        sql="SELECT e.scripname, b.* FROM tbl_entity e join tbl_etf_action b ON e.entityid = b.entityid;"
+
+        data=''
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+     
+
+def getAllActionTableOfETFEquity():
+     try:
+        sql=" SELECT * FROM tbl_entity WHERE category ILIKE 'Equity' AND subcategory ILIKE 'ETF';"
+        data=''
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')      
+     
+def getETFDetailsEquityById (entity_id):
+    try:
+        sql = "SELECT * FROM tbl_etf_action WHERE entityid = %s;"
+        data = (entity_id,)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
+
+def getETFEquityDetailActionTable(entity_id):
+    try:
+        sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
+        data = (entity_id,)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')   
+
+
+
+def getETFEquityDetailUnderlyingTable(entity_id):
+    try:
+        sql = "SELECT u.*, e.scripname FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE u.entityid = %s;"
+        data = (entity_id,)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')       
+
+# ==================================== Equity Fund ETF Table End====================================
 
 # ==================================== Commodities Direct Table Start==================================
 

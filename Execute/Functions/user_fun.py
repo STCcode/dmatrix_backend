@@ -6,11 +6,43 @@ import wheel
 import pandas
 from Execute.Functions.pdf_parser import process_pdf
 import numpy as np
+import threading
+import schedule
 import os
 import json 
 from scipy.optimize import newton 
 from email.utils import parsedate_to_datetime   # <-- new import
 from Execute import queries,middleware,responses
+from nav_scheduler_flask import daily_nav_update, run_scheduler 
+
+# =======================start auto services fro mutual fund NAV========================
+
+scheduler_thread = None
+stop_scheduler = False
+
+def start_nav_scheduler():
+    global scheduler_thread, stop_scheduler
+    stop_scheduler = False
+    schedule.clear()
+    schedule.every(1).minutes.do(daily_nav_update)  # adjust interval
+    if scheduler_thread is None or not scheduler_thread.is_alive():
+        scheduler_thread = threading.Thread(target=run_scheduler)
+        scheduler_thread.start()
+    return jsonify({"status": "Scheduler started"})
+
+def stop_nav_scheduler():
+    global stop_scheduler
+    stop_scheduler = True
+    return jsonify({"status": "Scheduler stopped"})
+
+# =======================End auto services fro mutual fund NAV========================
+
+
+
+
+
+
+
 
 # def getallrole():
 #      if request.method == 'POST':

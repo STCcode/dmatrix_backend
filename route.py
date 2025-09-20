@@ -58,6 +58,8 @@ if __name__ == '__main__':
 
 from Execute.Functions import functions,user_fun
 
+
+
 #----------------------------------written -----------------------
 
 #For login page
@@ -137,6 +139,15 @@ app.add_url_rule('/getUnderlyingByMf',view_func=user_fun.getUnderlyingByMf,metho
 app.add_url_rule('/clearUnderlyingByEntityId',view_func=user_fun.ClearUnderlyingdata,methods=['DELETE','POST'])
 
 # ======================================Underlying Table End========================================  
+
+
+# =======================start auto services fro mutual fund NAV========================
+app.add_url_rule("/start", view_func=user_fun.start_nav_scheduler, methods=["GET"])
+app.add_url_rule("/stop", view_func=user_fun.stop_nav_scheduler, methods=["GET"])
+
+# =======================end auto services fro mutual fund NAV========================
+
+
 
 #========================================bigsheet Table Start====================================
 

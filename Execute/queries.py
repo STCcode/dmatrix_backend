@@ -267,11 +267,11 @@ def insert_MF_NavData(data):
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
 
 
-def getAll_Mutual_Fund_Nav(entity_id):
+def getAll_Mutual_Fund_Nav(isin):
      try:
         #   sql="SELECT * FROM tbl_mutual_fund_nav"
           sql="SELECT * FROM tbl_mutual_fund_nav where isin= %s;"
-          data=(entity_id,)
+          data=(isin,)
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs
      except Exception as e:

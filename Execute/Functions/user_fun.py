@@ -645,28 +645,28 @@ def insertMFNavData():
 
 def  getAllMutualFundNav():
     try:
-        entity_id = None
+        isin = None
 
         # Handle GET → from query params
         if request.method == 'GET':
-            entity_id = request.args.get('entityid')
+           isin = request.args.get('isin')
 
         # Handle POST → from JSON or form-data
         elif request.method == 'POST':
             if request.is_json:
-                entity_id = request.json.get('entityid')
+                isin = request.json.get('isin')
             else:
-                entity_id = request.form.get('entityid')
+                isin = request.form.get('isin')
 
         # Validate entity_id
-        if not entity_id:
+        if not isin:
             return make_response(
                 middleware.exe_msgs(responses.getAll_501, "Missing entityid parameter", '1023501'),
                 400
             )
 
         # Query the database
-        data = queries.getAll_Mutual_Fund_Nav(entity_id)
+        data = queries.getAll_Mutual_Fund_Nav(isin)
 
         # Return proper response
         if isinstance(data, list):

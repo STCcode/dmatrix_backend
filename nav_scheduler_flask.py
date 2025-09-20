@@ -6,7 +6,7 @@ import psycopg2
 from psycopg2.extras import execute_batch
 from sqlalchemy import create_engine
 import schedule
-import threading
+# import threading
 import time
 from datetime import datetime
 
@@ -132,25 +132,25 @@ def run_scheduler():
 # -----------------------------
 # Step 3: Flask Routes
 # -----------------------------
-@app.route("/start", methods=["GET"])
-def start_nav_scheduler():
-    global scheduler_thread, stop_scheduler
-    stop_scheduler = False
-    schedule.clear()
-    schedule.every(1).minutes.do(daily_nav_update)  # For testing, adjust interval
-    if scheduler_thread is None or not scheduler_thread.is_alive():
-        scheduler_thread = threading.Thread(target=run_scheduler)
-        scheduler_thread.start()
-    return jsonify({"status": "Scheduler started"})
+# @app.route("/start", methods=["GET"])
+# def start_nav_scheduler():
+#     global scheduler_thread, stop_scheduler
+#     stop_scheduler = False
+#     schedule.clear()
+#     schedule.every(1).minutes.do(daily_nav_update)  # For testing, adjust interval
+#     if scheduler_thread is None or not scheduler_thread.is_alive():
+#         scheduler_thread = threading.Thread(target=run_scheduler)
+#         scheduler_thread.start()
+#     return jsonify({"status": "Scheduler started"})
 
-@app.route("/stop", methods=["GET"])
-def stop_nav_scheduler():
-    global stop_scheduler
-    stop_scheduler = True
-    return jsonify({"status": "Scheduler stopped"})
+# @app.route("/stop", methods=["GET"])
+# def stop_nav_scheduler():
+#     global stop_scheduler
+#     stop_scheduler = True
+#     return jsonify({"status": "Scheduler stopped"})
 
 # -----------------------------
 # Step 4: Run Flask
 # -----------------------------
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+# if __name__ == "__main__":
+#     app.run(host="0.0.0.0", port=5000)

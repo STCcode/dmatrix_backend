@@ -118,7 +118,7 @@ app.add_url_rule('/getActionByentId',view_func=user_fun.getActionByentId,methods
 app.add_url_rule('/getMfByentId',view_func=user_fun.getMfByentId,methods=['GET','POST'])
 
 app.add_url_rule('/insertMutualFundNavData',view_func=user_fun.insertMFNavData,methods=['GET','POST'])
-app.add_url_rule('/getAllMutualFundDetailNav',view_func=user_fun.getAllMutualFundNav,methods=['GET','POST'])
+app.add_url_rule('/getMutualFundbyIsinId',view_func=user_fun.getAllMutualFundNav,methods=['GET','POST'])
 
 # ====================================== Mutual Fund Action Table End======================================
 
@@ -141,7 +141,7 @@ app.add_url_rule('/clearUnderlyingByEntityId',view_func=user_fun.ClearUnderlying
 # ======================================Underlying Table End========================================  
 
 
-# =======================start auto services fro mutual fund NAV========================
+# =======================Api auto services of mutual fund NAV========================
 app.add_url_rule("/start", view_func=user_fun.start_nav_scheduler, methods=["GET"])
 app.add_url_rule("/stop", view_func=user_fun.stop_nav_scheduler, methods=["GET"])
 

@@ -270,7 +270,7 @@ def insert_MF_NavData(data):
 def getAll_Mutual_Fund_Nav(entity_id):
      try:
         #   sql="SELECT * FROM tbl_mutual_fund_nav"
-          sql="SELECT * FROM tbl_mutual_fund_nav where entityid= %s;"
+          sql="SELECT * FROM tbl_mutual_fund_nav where isin= %s;"
           data=(entity_id,)
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs

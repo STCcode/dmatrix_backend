@@ -3266,27 +3266,29 @@ def upload_and_save():
                 except Exception as e:
                     return make_response({"error": f"Invalid JSON in form: {str(e)}"}, 400)
 
-            else:  # Case 2️⃣: files only → parse PDF directly
-                password = request.form.get("password", "")
-                all_parsed = []
+                else:  # Case 2️⃣: files only → parse PDF directly
+                    password = request.form.get("password", "")
+                    all_parsed = []
+
                 for file in files:
                     file.seek(0)
-                try:
-                    broker, parsed_json = process_pdf(
-                    file,
-                    request.form.get("category"),
-                    request.form.get("subcategory"),
-                    password=password
+                    try:
+                        broker, parsed_json = process_pdf(
+                        file,
+                        request.form.get("category"),
+                        request.form.get("subcategory"),
+                        password=password
                     )
-                    if parsed_json:
-                        all_parsed.extend(parsed_json)
-                except ValueError as ve:
-                 # Handles PDF password errors
-                    return make_response({"error": str(ve), "code": "1020500"}, 400)
-                except Exception as e:
-                    import traceback
-                    tb = traceback.format_exc()
-                    print("PDF parsing failed:\n", tb)
+                        if parsed_json:
+                            all_parsed.extend(parsed_json)
+                    except ValueError as ve:
+                     # Handles PDF password errors
+                     return make_response({"error": str(ve), "code": "1020500"}, 400)
+
+                    except Exception as e:
+                        import traceback
+                        tb = traceback.format_exc()
+                        print("PDF parsing failed:\n", tb)
                     return make_response({"error": f"Failed to parse PDF: {str(e)}", "code": "1020500"}, 500)
 
                 json_data = all_parsed

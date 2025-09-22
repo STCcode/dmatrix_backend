@@ -14,48 +14,50 @@ def extract_pdf_content(pdf_path_or_file, password=None):
     broker_name = "Unknown"
 
     try:
-     with pdfplumber.open(pdf_path_or_file, password=password or "") as pdf:
-        for page_num, page in enumerate(pdf.pages, start=1):
-            text = page.extract_text() or ""
-            if broker_name == "Unknown" and text:
-                broker_name = detect_broker_name(text)
-            
-            # Extract contract date
-            contract_date = extract_date_from_text(text)
-            
-            # Stamp duty
-            stamp_match = re.search(r"Stamp Duty\s+([\d.,]+)", text, re.IGNORECASE)
-            stamp_duty = float(stamp_match.group(1).replace(",", "")) if stamp_match else 0.0
+        with pdfplumber.open(pdf_path_or_file, password=password or "") as pdf:
+            for page_num, page in enumerate(pdf.pages, start=1):
+                text = page.extract_text() or ""
+                if broker_name == "Unknown" and text:
+                    broker_name = detect_broker_name(text)
 
-            # Extract tables
-            page_tables = [
-                pd.DataFrame(t[1:], columns=t[0])
-                for t in page.extract_tables() if t and len(t) > 1
-            ]
+                # Extract contract date
+                contract_date = extract_date_from_text(text)
 
-            # Phillip Capital fallback
-            if not page_tables and "PHILLIPCAPITAL" in text.upper():
-                page_tables = parse_phillip_text_format(text)
+                # Stamp duty
+                stamp_match = re.search(r"Stamp Duty\s+([\d.,]+)", text, re.IGNORECASE)
+                stamp_duty = float(stamp_match.group(1).replace(",", "")) if stamp_match else 0.0
 
-            if not page_tables:
-                continue
+                # Extract tables
+                page_tables = [
+                    pd.DataFrame(t[1:], columns=t[0])
+                    for t in page.extract_tables() if t and len(t) > 1
+                ]
 
-            total_rows = sum(len(df) for df in page_tables)
-            per_row_stamp_duty = stamp_duty / total_rows if total_rows > 0 else 0.0
+                # Phillip Capital fallback
+                if not page_tables and "PHILLIPCAPITAL" in text.upper():
+                    page_tables = parse_phillip_text_format(text)
 
-            for df in page_tables:
-                df["__page__"] = page_num
-                df["__contract_date__"] = contract_date
-                df["__stamp_duty__"] = per_row_stamp_duty
-                df["__broker__"] = broker_name
-                tables.append(df)
-                return {"tables": tables, "broker": broker_name}
+                if not page_tables:
+                    continue
+
+                total_rows = sum(len(df) for df in page_tables)
+                per_row_stamp_duty = stamp_duty / total_rows if total_rows > 0 else 0.0
+
+                for df in page_tables:
+                    df["__page__"] = page_num
+                    df["__contract_date__"] = contract_date
+                    df["__stamp_duty__"] = per_row_stamp_duty
+                    df["__broker__"] = broker_name
+                    tables.append(df)
 
     except Exception as e:
-     if "PDFPasswordIncorrect" in str(e):
-        raise ValueError("PDF is password protected or wrong password provided")
-    raise
-   
+        if "PDFPasswordIncorrect" in str(e):
+            raise ValueError("PDF is password protected or wrong password provided")
+        else:
+            raise e  # explicitly raise the original exception
+
+    return {"tables": tables, "broker": broker_name}
+
 
 
 #This Function is Created For PDF password

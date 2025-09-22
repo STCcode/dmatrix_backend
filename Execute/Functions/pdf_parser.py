@@ -50,17 +50,13 @@ def extract_pdf_content(pdf_path_or_file, password=None):
                     df["__broker__"] = broker_name
                     tables.append(df)
 
-        if not tables:
-            raise ValueError("No tables extracted from PDF")
-
-        return {"tables": tables, "broker": broker_name}
-
     except Exception as e:
-        # Detect password error
         if "PDFPasswordIncorrect" in str(e):
             raise ValueError("PDF is password protected or wrong password provided")
         else:
-            raise ValueError(f"Failed to parse PDF: {str(e)}")
+            raise e  # explicitly raise the original exception
+
+    return {"tables": tables, "broker": broker_name}
 
 
 

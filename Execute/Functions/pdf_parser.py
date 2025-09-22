@@ -321,16 +321,13 @@ def build_json_phillip(tables, category, subcategory):
     return results
 
 
-def process_pdf(pdf_file, category, subcategory):
+def process_pdf(pdf_file, category, subcategory, password=None):
+    """
+    Process PDF and return JSON data. Password is provided from frontend if PDF is protected.
+    """
     try:
-        try:
-           extracted = extract_pdf_content(pdf_file)
-        except Exception as e:
-           if "PDFPasswordIncorrect" in str(e):
-              password = input("Enter PDF password: ")
-              extracted = extract_pdf_content(pdf_file, password=password)
-           else:
-               raise e
+        # Attempt to extract content using provided password
+        extracted = extract_pdf_content(pdf_file, password=password)
 
         broker = extracted["broker"]
 
@@ -343,6 +340,7 @@ def process_pdf(pdf_file, category, subcategory):
             if not df.empty:
                 print(f"DEBUG: Table {i} first row -> {df.iloc[0].to_dict()}")
 
+        # Choose parser based on broker
         if broker == "Motilal Oswal Financial Services Limited":
             json_data = build_json_from_tables(extracted["tables"], category, subcategory)
         elif broker == "Phillip Capital (India) Pvt Ltd":
@@ -354,6 +352,9 @@ def process_pdf(pdf_file, category, subcategory):
         return broker, json_data
 
     except Exception as e:
+        # Handle password-protected PDF without prompting
+        if "PDFPasswordIncorrect" in str(e):
+            raise ValueError("PDF is password protected. Please provide the correct password from frontend.")
         print(f"ERROR: Failed to process PDF: {e}")
         raise
 

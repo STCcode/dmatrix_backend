@@ -3267,10 +3267,11 @@ def upload_and_save():
                     return make_response({"error": f"Invalid JSON in form: {str(e)}"}, 400)
 
             else:  # Case 2️⃣: files only → parse PDF directly
+                password = request.form.get("password", "")
                 all_parsed = []
                 for file in files:
                     file.seek(0)
-                    broker, parsed_json = process_pdf(file, request.form.get("category"), request.form.get("subcategory"))
+                    broker, parsed_json = process_pdf(file, request.form.get("category"), request.form.get("subcategory"), password=password)
                     if parsed_json:
                         all_parsed.extend(parsed_json)
                 json_data = all_parsed

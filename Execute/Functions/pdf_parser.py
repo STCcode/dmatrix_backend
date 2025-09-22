@@ -2,23 +2,25 @@ import pdfplumber
 import pandas as pd
 import re
 import json
+from PyPDF2 import PdfFileReader, PdfFileWriter
 
 
-def extract_pdf_content(pdf_path_or_file):
+def extract_pdf_content(pdf_path_or_file, password=None):
     """
     Extract tables and metadata from PDF (Mutual Fund contract notes)
+    Supports password-protected PDFs.
     """
     tables = []
     broker_name = "Unknown"
 
-    with pdfplumber.open(pdf_path_or_file) as pdf:
+    with pdfplumber.open(pdf_path_or_file, password=password) as pdf:
         for page_num, page in enumerate(pdf.pages, start=1):
             text = page.extract_text() or ""
 
             if broker_name == "Unknown" and text:
                 broker_name = detect_broker_name(text)
 
-            # Extract dates and numbers with improved regex
+            # Extract dates
             contract_date = extract_date_from_text(text)
             
             # Look for stamp duty
@@ -30,11 +32,11 @@ def extract_pdf_content(pdf_path_or_file):
                 pd.DataFrame(t[1:], columns=t[0])
                 for t in page.extract_tables() if t and len(t) > 1
             ]
-            
-            # If no tables found, try to parse the text manually for Phillip Capital
+
+            # If no tables found, try Phillip Capital parser
             if not page_tables and "PHILLIPCAPITAL" in text.upper():
                 page_tables = parse_phillip_text_format(text)
-            
+
             if not page_tables:
                 continue
 
@@ -49,6 +51,23 @@ def extract_pdf_content(pdf_path_or_file):
                 tables.append(df)
 
     return {"tables": tables, "broker": broker_name}
+
+
+#This Function is Created For PDF password
+
+def decrypt_pdf(input_path, output_path, password):
+  with open(input_path, 'rb') as input_file, \
+    open(output_path, 'wb') as output_file:
+    reader = PdfFileReader(input_file)
+    reader.decrypt(password)
+
+    writer = PdfFileWriter()
+
+    for i in range(reader.getNumPages()):
+      writer.addPage(reader.getPage(i))
+
+    writer.write(output_file)
+
 
 
 def parse_phillip_text_format(text):
@@ -303,16 +322,21 @@ def build_json_phillip(tables, category, subcategory):
 
 
 def process_pdf(pdf_file, category, subcategory):
-    """
-    Main function to process PDF and return JSON data
-    """
     try:
-        extracted = extract_pdf_content(pdf_file)
+        try:
+           extracted = extract_pdf_content(pdf_file)
+        except Exception as e:
+           if "PDFPasswordIncorrect" in str(e):
+              password = input("Enter PDF password: ")
+              extracted = extract_pdf_content(pdf_file, password=password)
+           else:
+               raise e
+
         broker = extracted["broker"]
 
         print(f"DEBUG: Detected Broker -> {broker}")
         print(f"DEBUG: Number of tables extracted -> {len(extracted['tables'])}")
-        
+
         for i, df in enumerate(extracted["tables"]):
             print(f"DEBUG: Table {i} columns -> {df.columns.tolist()}")
             print(f"DEBUG: Table {i} shape -> {df.shape}")
@@ -328,10 +352,11 @@ def process_pdf(pdf_file, category, subcategory):
 
         print(f"DEBUG: JSON data length -> {len(json_data)}")
         return broker, json_data
-        
+
     except Exception as e:
         print(f"ERROR: Failed to process PDF: {e}")
         raise
+
 
 
 if __name__ == "__main__":
@@ -388,7 +413,7 @@ if __name__ == "__main__":
             print("Debug data saved to debug_raw_data.json")
             
         else:
-            print("❌ No transactions were extracted from the PDF")
+            print(" No transactions were extracted from the PDF")
             print("This might be why your API shows 'success' but inserts no data!")
             
     except Exception as e:

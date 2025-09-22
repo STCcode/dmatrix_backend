@@ -13,17 +13,17 @@ def extract_pdf_content(pdf_path_or_file, password=None):
     tables = []
     broker_name = "Unknown"
 
-    with pdfplumber.open(pdf_path_or_file, password=password) as pdf:
+    try:
+     with pdfplumber.open(pdf_path_or_file, password=password or "") as pdf:
         for page_num, page in enumerate(pdf.pages, start=1):
             text = page.extract_text() or ""
-
             if broker_name == "Unknown" and text:
                 broker_name = detect_broker_name(text)
-
-            # Extract dates
+            
+            # Extract contract date
             contract_date = extract_date_from_text(text)
             
-            # Look for stamp duty
+            # Stamp duty
             stamp_match = re.search(r"Stamp Duty\s+([\d.,]+)", text, re.IGNORECASE)
             stamp_duty = float(stamp_match.group(1).replace(",", "")) if stamp_match else 0.0
 
@@ -33,7 +33,7 @@ def extract_pdf_content(pdf_path_or_file, password=None):
                 for t in page.extract_tables() if t and len(t) > 1
             ]
 
-            # If no tables found, try Phillip Capital parser
+            # Phillip Capital fallback
             if not page_tables and "PHILLIPCAPITAL" in text.upper():
                 page_tables = parse_phillip_text_format(text)
 
@@ -49,8 +49,13 @@ def extract_pdf_content(pdf_path_or_file, password=None):
                 df["__stamp_duty__"] = per_row_stamp_duty
                 df["__broker__"] = broker_name
                 tables.append(df)
+                return {"tables": tables, "broker": broker_name}
 
-    return {"tables": tables, "broker": broker_name}
+    except Exception as e:
+     if "PDFPasswordIncorrect" in str(e):
+        raise ValueError("PDF is password protected or wrong password provided")
+    raise
+   
 
 
 #This Function is Created For PDF password

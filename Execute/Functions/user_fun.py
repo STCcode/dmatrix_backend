@@ -2226,7 +2226,7 @@ def insertPmsAmcAction():
         if request.method == 'POST':
             formData = request.get_json()
 
-            formlist = (formData['entityid'],formData['security_description'],formData['order_type'],formData['quantity'],formData['trade_price'],formData['net_amount'],
+            formlist = (formData['entityid'],formData['scripname'],formData['scripcode'],formData['order_type'],formData['quantity'],formData['trade_price'],formData['net_amount'],
                 datetime.now()
             )
 

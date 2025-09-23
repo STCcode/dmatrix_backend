@@ -266,7 +266,7 @@ app.add_url_rule('/getEquityActionTable',view_func=user_fun.getEquityActionTable
 
 # ======================================== Get allMfEquityUnderlyingCount Start============================
 app.add_url_rule('/getallMfEquityUnderlyingCount',view_func=user_fun.GetallMfEquityUnderlyingCount,methods=['GET','POST'])
-app.add_url_rule('/getallMfSectorUnderlyingCount',view_func=user_fun.GetallMfSectorUnderlyingCount,methods=['GET','POST'])
+app.add_url_rule('/getallMFEquitySectorCount',view_func=user_fun.GetallMfSectorUnderlyingCount,methods=['GET','POST'])
 # ======================================== Get allMfEquityUnderlyingCount End============================
 
 # ======================================Get All Home Equity======================================

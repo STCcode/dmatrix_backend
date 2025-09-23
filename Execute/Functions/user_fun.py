@@ -238,8 +238,7 @@ def entity_table():
         if request.method == 'POST':
             formData = request.get_json()
 
-            formlist = (formData['scripname'],formData.get('scripcode'),None,formData.get('benchmark'),formData['category'],formData.get('subcategory'),formData.get('nickname'),datetime.now(),formData.get('isin')
-            )
+            formlist = (formData['scripname'],formData.get('scripcode'),None,formData.get('benchmark'),formData['category'],formData.get('subcategory'),formData.get('nickname'),datetime.now(),formData.get('isin'),formData.get('aif_category'),formData.get('aif_class'))
 
             insert_id = queries.entity_table(formlist)
 

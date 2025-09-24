@@ -566,9 +566,12 @@ def ClearUnderlyingdata(entity_id):
 
 
 # SQL function
-def getCamByid(company_name):
+def getCamByid(company_name=None):
     try:
         sql = """
+        WITH input_name AS (
+            SELECT normalize_company_name(%s) AS search_name
+        )
         SELECT DISTINCT ON (company_name)
             CASE
                 WHEN normalize_company_name(issuer_name) IS NOT NULL
@@ -582,20 +585,20 @@ def getCamByid(company_name):
             isin,
             sector_name,
             tag
-        FROM equity_bigsheet_data
-        WHERE normalize_company_name(issuer_name) ILIKE '%' || normalize_company_name(%s) || '%'
-           OR normalize_company_name(name_of_company) ILIKE '%' || normalize_company_name(%s) || '%'
+        FROM equity_bigsheet_data, input_name
+        WHERE normalize_company_name(issuer_name) ILIKE '%' || input_name.search_name || '%'
+           OR normalize_company_name(name_of_company) ILIKE '%' || input_name.search_name || '%'
         ORDER BY company_name;
         """
 
-        # ⚡ Must pass two values because there are 2 %s
-        data = (company_name, company_name)
+        data = (company_name,)
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs
 
     except Exception as e:
-        print("Error in getCamByid query:", e)
+        print("Error in getCamByid query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310')
+
 
 
 

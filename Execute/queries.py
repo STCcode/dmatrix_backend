@@ -583,19 +583,20 @@ def getCamByid(company_name):
             sector_name,
             tag
         FROM equity_bigsheet_data
-        WHERE normalize_company_name(issuer_name) ILIKE '%' || normalize_company_name(:company_name) || '%'
-           OR normalize_company_name(name_of_company) ILIKE '%' || normalize_company_name(:company_name) || '%'
+        WHERE normalize_company_name(issuer_name) ILIKE '%' || normalize_company_name(%s) || '%'
+           OR normalize_company_name(name_of_company) ILIKE '%' || normalize_company_name(%s) || '%'
         ORDER BY company_name;
         """
 
-        # Pass as a dict
-        data = {"company_name": company_name}
+        # ⚡ Must pass two values because there are 2 %s
+        data = (company_name, company_name)
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs
 
     except Exception as e:
         print("Error in getCamByid query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310')
+
 
 
 

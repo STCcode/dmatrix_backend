@@ -565,33 +565,11 @@ def ClearUnderlyingdata(entity_id):
 #         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310') 
 
 
-def getCamByid(company_name=None):
+# SQL function
+def getCamByid(company_name):
     try:
-        sql = """
-        WITH input_name AS (
-            SELECT normalize_company_name(%s) AS search_name
-        )
-        SELECT DISTINCT ON (company_name)
-            CASE
-                WHEN normalize_company_name(issuer_name) IS NOT NULL
-                     AND normalize_company_name(name_of_company) IS NOT NULL
-                     AND normalize_company_name(issuer_name) <> normalize_company_name(name_of_company)
-                THEN issuer_name || ' / ' || name_of_company
-                WHEN normalize_company_name(issuer_name) IS NOT NULL
-                THEN issuer_name
-                ELSE name_of_company
-            END AS company_name,
-            isin,
-            sector_name,
-            tag
-        FROM equity_bigsheet_data, input_name
-        WHERE 
-            normalize_company_name(issuer_name) ILIKE '%' || input_name.search_name || '%'
-            OR normalize_company_name(name_of_company) ILIKE '%' || input_name.search_name || '%'
-        ORDER BY company_name;
-        """
+        sql = "WITH input_name AS (SELECT normalize_company_name(%s) AS search_name)SELECT DISTINCT ON (company_name)CASE WHEN normalize_company_name(issuer_name) IS NOT NULL AND normalize_company_name(name_of_company) IS NOT NULL AND normalize_company_name(issuer_name) <> normalize_company_name(name_of_company) THEN issuer_name || ' / ' || name_of_company WHEN normalize_company_name(issuer_name) IS NOT NULL THEN issuer_name ELSE name_of_company END AS company_name,isin,sector_name,tag FROM equity_bigsheet_data, input_name WHERE normalize_company_name(issuer_name) ILIKE '%' || input_name.search_name || '%'OR normalize_company_name(name_of_company) ILIKE '%' || input_name.search_name || '%'ORDER BY company_name;"
 
-        # ⚡ Pass raw company_name (no %)
         data = (company_name,)
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs
@@ -599,7 +577,6 @@ def getCamByid(company_name=None):
     except Exception as e:
         print("Error in getCamByid query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310')
-
 
 
 # ==============================bigsheet Table End =======================================
@@ -1253,7 +1230,7 @@ def getallMFDetailsEquitySectorCount(entity_id):
 
 def getallMFDetailsEquityMCAPCount(entity_id):
     try:
-        sql = "WITH counts AS (SELECT u.sector,COUNT(*) AS sector_count,(SELECT COUNT(*) FROM tbl_underlying u2 JOIN tbl_entity e2 ON u2.entityid = e2.entityid WHERE e2.category = 'Equity' AND e2.subcategory = 'Mutual Fund') AS total_mf_count FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' GROUP BY u.sector)SELECT DISTINCT u.entityid,u.sector,c.sector_count,c.total_mf_count,(c.sector_count * 100.0 / c.total_mf_count)::numeric(5,2) AS sector_percent FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid JOIN counts c ON u.sector = c.sector WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund'AND u.entityid = %s;"
+        sql = " WITH all_tags AS (SELECT DISTINCT tag FROM tbl_underlying),entity_counts AS (SELECT u.tag,COUNT(*) AS tag_count FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' AND u.entityid = %s GROUP BY u.tag),total AS (SELECT COUNT(*) AS total_mf_count FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityidWHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund')SELECT t.tag,COALESCE(ec.tag_count, 0) AS tag_count,total.total_mf_count,COALESCE((ec.tag_count * 100.0 / total.total_mf_count)::numeric(5,2), 0.00) AS tag_percentFROM all_tags t LEFT JOIN entity_counts ec ON t.tag = ec.tag CROSS JOIN total ORDER BY t.tag;"
         data = (entity_id,)  # tuple, not set
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs

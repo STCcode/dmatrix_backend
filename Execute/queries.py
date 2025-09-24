@@ -567,10 +567,11 @@ def ClearUnderlyingdata(entity_id):
 
 def getCamByid(company_name=None):
     try:
-        # Ensure company_name is a string and not None
-        company_name = str(company_name or '').strip()
+        # Ensure company_name is a string and escape single quotes
+        company_name = str(company_name or '').strip().replace("'", "''")
 
-        sql = """
+        # Simple SQL without placeholders
+        sql = f"""
         SELECT DISTINCT ON (company_name)
             CASE
                 WHEN issuer_name IS NOT NULL
@@ -583,15 +584,12 @@ def getCamByid(company_name=None):
             sector_name,
             tag
         FROM equity_bigsheet_data
-        WHERE normalize_company_name(COALESCE(name_of_company, '')) ILIKE '%' || normalize_company_name(%s) || '%'
-           OR normalize_company_name(COALESCE(issuer_name, '')) ILIKE '%' || normalize_company_name(%s) || '%'
+        WHERE normalize_company_name(COALESCE(name_of_company, '')) ILIKE '%' || normalize_company_name('{company_name}') || '%'
+           OR normalize_company_name(COALESCE(issuer_name, '')) ILIKE '%' || normalize_company_name('{company_name}') || '%'
         ORDER BY company_name;
         """
 
-        # Pass the parameter **twice** because there are two %s placeholders in the query
-        data = (company_name, company_name)
-
-        msgs = executeSql.ExecuteAllNew(sql, data)
+        msgs = executeSql.ExecuteAllNew(sql)
         return msgs
 
     except Exception as e:

@@ -1177,7 +1177,8 @@ def getCamByid_route():
         return make_response(
             middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
             500
-        )    
+        )
+
 
 #========================================bigsheet Table End ======================================================  
 

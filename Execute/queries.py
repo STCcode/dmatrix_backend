@@ -568,9 +568,28 @@ def ClearUnderlyingdata(entity_id):
 # SQL function
 def getCamByid(company_name):
     try:
-        sql = "SELECT DISTINCT ON (company_name)CASE WHEN normalize_company_name(issuer_name) IS NOT NULL AND normalize_company_name(name_of_company) IS NOT NULL AND normalize_company_name(issuer_name) <> normalize_company_name(name_of_company)THEN issuer_name || ' / ' || name_of_company WHEN normalize_company_name(issuer_name) IS NOT NULL THEN issuer_name ELSE name_of_company END AS company_name,isin, sector_name, tag FROM equity_bigsheet_data WHERE normalize_company_name(issuer_name) ILIKE '%' || normalize_company_name(%s) || '%' OR normalize_company_name(name_of_company) ILIKE '%' || normalize_company_name(%s) || '%' ORDER BY company_name;"
+        # Use triple quotes and proper formatting for readability
+        sql = """
+        SELECT DISTINCT ON (company_name)
+            CASE
+                WHEN normalize_company_name(issuer_name) IS NOT NULL
+                     AND normalize_company_name(name_of_company) IS NOT NULL
+                     AND normalize_company_name(issuer_name) <> normalize_company_name(name_of_company)
+                THEN issuer_name || ' / ' || name_of_company
+                WHEN normalize_company_name(issuer_name) IS NOT NULL
+                THEN issuer_name
+                ELSE name_of_company
+            END AS company_name,
+            isin,
+            sector_name,
+            tag
+        FROM equity_bigsheet_data
+        WHERE normalize_company_name(issuer_name) ILIKE '%' || normalize_company_name(%s) || '%'
+           OR normalize_company_name(name_of_company) ILIKE '%' || normalize_company_name(%s) || '%'
+        ORDER BY company_name;
+        """
 
-        # Pass company_name twice because SQL has two %s placeholders
+        # Pass the parameter twice for the two %s placeholders
         data = (company_name, company_name)
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs
@@ -578,6 +597,7 @@ def getCamByid(company_name):
     except Exception as e:
         print("Error in getCamByid query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310')
+
 
 
 

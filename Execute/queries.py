@@ -557,7 +557,7 @@ def getCamByid(company_name=None):
           # sql = "SELECT issuer_name,name_of_company, isin,sector_name,tag FROM equity_bigsheet_data WHERE name_of_company ILIKE %s;"
         #   sql = "SELECT DISTINCT ON (company_name) CASE WHEN issuer_name IS NOT NULL AND name_of_company IS NOT NULL AND normalize_company_name(issuer_name) <> normalize_company_name(name_of_company) THEN issuer_name || ' / ' || name_of_company ELSE COALESCE(issuer_name, name_of_company) END AS company_name,isin,sector_name,tag FROM equity_bigsheet_data WHERE normalize_company_name(COALESCE(name_of_company, issuer_name)) ILIKE normalize_company_name(%s) ORDER BY company_name;"
         sql="WITH input_name AS (SELECT normalize_company_name(%s) AS search_name) SELECT DISTINCT ON (company_name)CASE WHEN normalize_company_name(issuer_name) IS NOT NULL AND normalize_company_name(name_of_company) IS NOT NULL AND normalize_company_name(issuer_name) <> normalize_company_name(name_of_company)THEN issuer_name || ' / ' || name_of_company WHEN normalize_company_name(issuer_name) IS NOT NULL THEN issuer_name ELSE name_of_company END AS company_name,isin,sector_name,tag FROM equity_bigsheet_data, input_name WHERE normalize_company_name(issuer_name) ILIKE '%' || input_name.search_name || '%'OR normalize_company_name(name_of_company) ILIKE '%' || input_name.search_name || '%' ORDER BY company_name;"
-        data = (f"%{company_name}%",)
+        data = (company_name,)
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs
     except Exception as e:
@@ -1192,15 +1192,15 @@ def GetallMfSectorUnderlyingCount():
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
 
-def getallMFDtailEquitySectorCount():
-     try:
-          sql="WITH counts AS (SELECT u.sector,COUNT(*) AS sector_count,(SELECT COUNT(*) FROM tbl_underlying u2 JOIN tbl_entity e2 ON u2.entityid = e2.entityid WHERE e2.category = 'Equity' AND e2.subcategory = 'Mutual Fund') AS total_mf_count FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' GROUP BY u.sector)SELECT u.entityid,u.sector,c.sector_count,c.total_mf_count,(c.sector_count * 100.0 / c.total_mf_count)::numeric(5,2) AS sector_percent FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid JOIN counts c ON u.sector = c.sector WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' ORDER BY sector_percent DESC;"
-          data=''
-          msgs=executeSql.ExecuteAllNew(sql,data)
-          return msgs
-     except Exception as e:
-          print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+# def getallMFDtailEquitySectorCount():
+#      try:
+#           sql="WITH counts AS (SELECT u.sector,COUNT(*) AS sector_count,(SELECT COUNT(*) FROM tbl_underlying u2 JOIN tbl_entity e2 ON u2.entityid = e2.entityid WHERE e2.category = 'Equity' AND e2.subcategory = 'Mutual Fund') AS total_mf_count FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' GROUP BY u.sector)SELECT u.entityid,u.sector,c.sector_count,c.total_mf_count,(c.sector_count * 100.0 / c.total_mf_count)::numeric(5,2) AS sector_percent FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid JOIN counts c ON u.sector = c.sector WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' ORDER BY sector_percent DESC;"
+#           data=''
+#           msgs=executeSql.ExecuteAllNew(sql,data)
+#           return msgs
+#      except Exception as e:
+#           print("Error in getingroleRecord query==========================",e)
+#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
      
 
 def getallMFDetailsEquitySectorCount(entity_id):
@@ -1211,7 +1211,18 @@ def getallMFDetailsEquitySectorCount(entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')      
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310') 
+
+
+def getallMFDetailsEquityMCAPCount(entity_id):
+    try:
+        sql = "WITH counts AS (SELECT u.sector,COUNT(*) AS sector_count,(SELECT COUNT(*) FROM tbl_underlying u2 JOIN tbl_entity e2 ON u2.entityid = e2.entityid WHERE e2.category = 'Equity' AND e2.subcategory = 'Mutual Fund') AS total_mf_count FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' GROUP BY u.sector)SELECT DISTINCT u.entityid,u.sector,c.sector_count,c.total_mf_count,(c.sector_count * 100.0 / c.total_mf_count)::numeric(5,2) AS sector_percent FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid JOIN counts c ON u.sector = c.sector WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund'AND u.entityid = %s;"
+        data = (entity_id,)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')           
                     
      
 # ======================================== Get allMfEquityUnderlyingCount END ============================

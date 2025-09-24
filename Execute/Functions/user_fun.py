@@ -1158,27 +1158,56 @@ def ClearUnderlyingdata():
 #             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)   
 # 
  
-def getCamByid():
+# def getCamByid():
+#     if request.method == 'GET':
+#         try:
+#             company_name = request.args.get('company')  # /get_isin?company=HDFC
+#             data = queries.getCamByid(company_name)
+
+#             if type(data).__name__ != "list":
+#                 if data.json:
+#                     result = data
+#                     status = 500
+#             else:
+#                 result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+#                 status = 200
+
+#             return make_response(result, status)
+#         except Exception as e:
+#             print("Error in getting role data=============================", e)
+#             return make_response(
+#                 middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
+#                 500
+#             )
+
+
+def getCamByid_route():
     if request.method == 'GET':
         try:
-            company_name = request.args.get('company')  # /get_isin?company=HDFC
+            company_name = request.args.get('company', '')  # default to empty string
+            company_name = company_name.strip()
+            
+            # Call SQL function
             data = queries.getCamByid(company_name)
 
-            if type(data).__name__ != "list":
-                if data.json:
-                    result = data
-                    status = 500
-            else:
+            # Check if the result is a list
+            if isinstance(data, list):
                 result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
                 status = 200
+            else:
+                # Likely an error object
+                result = data
+                status = 500
 
             return make_response(result, status)
+
         except Exception as e:
-            print("Error in getting role data=============================", e)
+            print("Error in getting company data:", e)
             return make_response(
                 middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
                 500
             )
+        
 #========================================bigsheet Table End ======================================================  
 
 

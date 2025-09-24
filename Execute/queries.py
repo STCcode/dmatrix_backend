@@ -568,7 +568,6 @@ def ClearUnderlyingdata(entity_id):
 # SQL function
 def getCamByid(company_name):
     try:
-        # Use triple quotes and proper formatting for readability
         sql = """
         SELECT DISTINCT ON (company_name)
             CASE
@@ -584,13 +583,13 @@ def getCamByid(company_name):
             sector_name,
             tag
         FROM equity_bigsheet_data
-        WHERE normalize_company_name(issuer_name) ILIKE '%' || normalize_company_name(%s) || '%'
-           OR normalize_company_name(name_of_company) ILIKE '%' || normalize_company_name(%s) || '%'
+        WHERE normalize_company_name(issuer_name) ILIKE '%' || normalize_company_name(:company_name) || '%'
+           OR normalize_company_name(name_of_company) ILIKE '%' || normalize_company_name(:company_name) || '%'
         ORDER BY company_name;
         """
 
-        # Pass the parameter twice for the two %s placeholders
-        data = (company_name, company_name)
+        # Pass as a dict
+        data = {"company_name": company_name}
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs
 

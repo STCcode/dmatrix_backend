@@ -564,14 +564,13 @@ def ClearUnderlyingdata(entity_id):
 #         print("Error in getCamByid query==========================", e)
 #         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310') 
 
-
 def getCamByid(company_name=None):
     try:
-        # Ensure company_name is a string and escape single quotes to avoid SQL errors
-        company_name = str(company_name or '').strip().replace("'", "''")
+        # Ensure company_name is a string
+        company_name = str(company_name or '').strip()
 
-        # Simple SQL: single query, dynamic company name, no / NA
-        sql = f"""
+        # Simple query with one placeholder
+        sql = """
         SELECT DISTINCT ON (company_name)
             CASE
                 WHEN issuer_name IS NOT NULL
@@ -588,19 +587,20 @@ def getCamByid(company_name=None):
             sector_name,
             tag
         FROM equity_bigsheet_data
-        WHERE normalize_company_name(COALESCE(name_of_company, '')) ILIKE '%' || normalize_company_name('{company_name}') || '%'
-           OR normalize_company_name(COALESCE(issuer_name, '')) ILIKE '%' || normalize_company_name('{company_name}') || '%'
+        WHERE normalize_company_name(COALESCE(name_of_company, '')) ILIKE '%' || normalize_company_name(%s) || '%'
+           OR normalize_company_name(COALESCE(issuer_name, '')) ILIKE '%' || normalize_company_name(%s) || '%'
         ORDER BY company_name;
         """
 
-        # Execute the query: wrapper expects `data` even if empty
-        msgs = executeSql.ExecuteAllNew(sql, ())
+        # Pass the **same parameter twice**, matching the two %s placeholders
+        data = (company_name, company_name)
+
+        msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs
 
     except Exception as e:
         print("Error in getCamByid query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310')
-
 
 # ==============================bigsheet Table End =======================================
 

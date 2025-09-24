@@ -567,18 +567,22 @@ def ClearUnderlyingdata(entity_id):
 
 def getCamByid(company_name=None):
     try:
-        # Ensure company_name is a string and escape single quotes
+        # Ensure company_name is a string and escape single quotes to avoid SQL errors
         company_name = str(company_name or '').strip().replace("'", "''")
 
-        # Simple SQL without placeholders
+        # Simple SQL: single query, dynamic company name, no / NA
         sql = f"""
         SELECT DISTINCT ON (company_name)
             CASE
                 WHEN issuer_name IS NOT NULL
                      AND name_of_company IS NOT NULL
                      AND normalize_company_name(issuer_name) <> normalize_company_name(name_of_company)
+                     AND name_of_company != 'NA'
                 THEN issuer_name || ' / ' || name_of_company
-                ELSE COALESCE(issuer_name, name_of_company)
+                WHEN issuer_name IS NOT NULL
+                     AND issuer_name != 'NA'
+                THEN issuer_name
+                ELSE name_of_company
             END AS company_name,
             isin,
             sector_name,
@@ -589,7 +593,8 @@ def getCamByid(company_name=None):
         ORDER BY company_name;
         """
 
-        msgs = executeSql.ExecuteAllNew(sql)
+        # Execute the query: wrapper expects `data` even if empty
+        msgs = executeSql.ExecuteAllNew(sql, ())
         return msgs
 
     except Exception as e:

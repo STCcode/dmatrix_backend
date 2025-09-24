@@ -1160,7 +1160,10 @@ def ClearUnderlyingdata():
  
 def getCamByid_route():
     try:
+        # Get company name from query string
         company_name = request.args.get('company', '').strip()  # default to empty string
+
+        # Call query
         data = queries.getCamByid(company_name)
 
         if isinstance(data, list):
@@ -1178,8 +1181,6 @@ def getCamByid_route():
             middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
             500
         )
-
-
 #========================================bigsheet Table End ======================================================  
 
 

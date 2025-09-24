@@ -267,6 +267,7 @@ app.add_url_rule('/getEquityActionTable',view_func=user_fun.getEquityActionTable
 # ======================================== Get allMfEquityUnderlyingCount Start============================
 app.add_url_rule('/getallMfEquityUnderlyingCount',view_func=user_fun.GetallMfEquityUnderlyingCount,methods=['GET','POST'])
 app.add_url_rule('/getallMFEquitySectorCount',view_func=user_fun.GetallMfSectorUnderlyingCount,methods=['GET','POST'])
+app.add_url_rule('/getallMFDtailEquitySectorCount',view_func=user_fun.getallMFDtailEquitySectorCount,methods=['GET','POST'])
 # ======================================== Get allMfEquityUnderlyingCount End============================
 
 # ======================================Get All Home Equity======================================
@@ -275,7 +276,12 @@ app.add_url_rule('/getAllHomeData',view_func=user_fun.getAllHomeData,methods=['G
 
 # ======================================Get All Action instrument (MutualFund)======================================
 app.add_url_rule('/getAllActionInstrument',view_func=user_fun.getAllActionInstrument,methods=['GET','POST'])
-# ======================================Get All Action instrument======================================
+# ======================================Get All Action instrument===================================================
+
+# ======================================Get All BenchMark =====================================================
+app.add_url_rule('/getAllEntityBenchMark',view_func=user_fun.getAllEntityBenchMark,methods=['GET','POST'])
+# ======================================Get Get All BenchMark ===================================================
+
 
 
 

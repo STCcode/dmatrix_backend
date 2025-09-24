@@ -1156,6 +1156,19 @@ def getEquityActionTable():
 # ======================================Get All EquityActionTable======================================
 
 
+# ======================================Get All BenchMarks======================================
+def getAllEntityBenchMark():
+     try:
+          sql="SELECT benchmark_name FROM tbl_benchmark ORDER BY category;"
+          data=''
+          msgs=executeSql.ExecuteAllNew(sql,data)
+          return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+# ======================================Get All BenchMarks======================================
+
+
 # ======================================== Get allMfEquityUnderlyingCount Start============================
 
 def GetallMfEquityUnderlyingCount():
@@ -1177,7 +1190,17 @@ def GetallMfSectorUnderlyingCount():
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
-          
+
+def getallMFDtailEquitySectorCount():
+     try:
+          sql="WITH counts AS (SELECT u.sector,COUNT(*) AS sector_count,(SELECT COUNT(*) FROM tbl_underlying u2 JOIN tbl_entity e2 ON u2.entityid = e2.entityid WHERE e2.category = 'Equity' AND e2.subcategory = 'Mutual Fund') AS total_mf_count FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' GROUP BY u.sector)SELECT u.entityid,u.sector,c.sector_count,c.total_mf_count,(c.sector_count * 100.0 / c.total_mf_count)::numeric(5,2) AS sector_percent FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid JOIN counts c ON u.sector = c.sector WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' ORDER BY sector_percent DESC;"
+          data=''
+          msgs=executeSql.ExecuteAllNew(sql,data)
+          return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+                    
      
 # ======================================== Get allMfEquityUnderlyingCount END ============================
 

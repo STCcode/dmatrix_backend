@@ -1230,7 +1230,7 @@ def getallMFDetailsEquitySectorCount(entity_id):
 
 def getallMFDetailsEquityMCAPCount(entity_id):
     try:
-        sql = " WITH all_tags AS (SELECT DISTINCT tag FROM tbl_underlying),entity_counts AS (SELECT u.tag,COUNT(*) AS tag_count FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' AND u.entityid = %s GROUP BY u.tag),total AS (SELECT COUNT(*) AS total_mf_count FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityidWHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund')SELECT t.tag,COALESCE(ec.tag_count, 0) AS tag_count,total.total_mf_count,COALESCE((ec.tag_count * 100.0 / total.total_mf_count)::numeric(5,2), 0.00) AS tag_percentFROM all_tags t LEFT JOIN entity_counts ec ON t.tag = ec.tag CROSS JOIN total ORDER BY t.tag;"
+        sql = " WITH all_tags AS (SELECT DISTINCT tag FROM tbl_underlying),entity_counts AS (SELECT u.tag,COUNT(*) AS tag_count FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' AND u.entityid = %s GROUP BY u.tag),total AS (SELECT COUNT(*) AS total_mf_count FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund')SELECT t.tag,COALESCE(ec.tag_count, 0) AS tag_count,total.total_mf_count,COALESCE((ec.tag_count * 100.0 / total.total_mf_count)::numeric(5,2), 0.00) AS tag_percentFROM all_tags t LEFT JOIN entity_counts ec ON t.tag = ec.tag CROSS JOIN total ORDER BY t.tag;"
         data = (entity_id,)  # tuple, not set
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs

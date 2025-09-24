@@ -151,7 +151,7 @@ app.add_url_rule("/stop", view_func=user_fun.stop_nav_scheduler, methods=["GET"]
 
 #========================================bigsheet Table Start====================================
 
-app.add_url_rule('/getCamByid',view_func=user_fun. getCamByid,methods=['GET','POST'])
+app.add_url_rule('/getCamByid',view_func=user_fun.getCamByid_route,methods=['GET','POST'])
 
 # ======================================Bigsheet Table End========================================    
 

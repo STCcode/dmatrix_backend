@@ -2863,7 +2863,7 @@ def getallMFDtailEquitySectorCount():
             print("Error in getting role data=============================", e)
             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)  
 
-def getallMFDtailsEquitySectorCount():
+def getallMFDetailsEquitySectorCount():
     try:
         entity_id = None
 
@@ -2886,7 +2886,7 @@ def getallMFDtailsEquitySectorCount():
             )
 
         # Query the database
-        data = queries.getallMFDtailsEquitySectorCount(entity_id)
+        data = queries.getallMFDetailsEquitySectorCount(entity_id)
 
         # Return proper response
         if isinstance(data, list):

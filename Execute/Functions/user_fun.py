@@ -1156,14 +1156,11 @@ def ClearUnderlyingdata():
 #         except Exception as e:
 #             print("Error in getting role data=============================", e)
 #             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)   
-# 
+
  
 def getCamByid_route():
     try:
-        # Get company name from query string
-        company_name = request.args.get('company', '').strip()  # default to empty string
-
-        # Call query
+        company_name = request.args.get('company', '').strip()  # e.g. ?company=hdfc
         data = queries.getCamByid(company_name)
 
         if isinstance(data, list):
@@ -1176,11 +1173,13 @@ def getCamByid_route():
         return make_response(result, status)
 
     except Exception as e:
-        print("Error in getCamByid route:", e)
+        print("Error in getCamByid route ===========================", e)
         return make_response(
             middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
             500
         )
+
+
 #========================================bigsheet Table End ======================================================  
 
 

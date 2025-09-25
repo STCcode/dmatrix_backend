@@ -346,7 +346,7 @@ def update_entity_table():
            
             formlist = (formData.get('scripname'),
                         formData.get('scripcode'),
-                        formData.get('benchmark'),
+                        formData.get('benchmark_name'),
                         formData.get('category'),
                         formData.get('subcategory'),
                         formData.get('nickname'),

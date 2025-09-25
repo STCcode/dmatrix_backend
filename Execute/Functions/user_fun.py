@@ -2782,24 +2782,54 @@ def getEquityActionTable():
 
 # ======================================Get All BenchMarks======================================
 
+# def getAllEntityBenchMark():
+#      if request.method == 'GET':
+#         try:
+#             data=queries.getAllEntityBenchMark()
+
+
+#             if not isinstance(data, list):
+#                  result = data
+#                  status = 500
+#             else:
+#                 data = serialize_dates(data)
+#                 result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+#                 status = 200
+                        
+#             return make_response(result,status)
+#         except Exception as e:
+#             print("Error in getting role data=============================", e)
+            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500) 
+        
+
 def getAllEntityBenchMark():
-     if request.method == 'GET':
+    if request.method == 'GET':
         try:
-            data=queries.getAllEntityBenchMark()
+            category = request.args.get("category")  # get category from frontend query param
+            if not category:
+                return make_response(
+                    middleware.exe_msgs("Category parameter is required", "Missing category", "1023201"),
+                    400
+                )
 
+            data = queries.getAllEntityBenchMark(category)
 
+            # check if result is empty
             if not isinstance(data, list):
-                 result = data
-                 status = 500
+                result = data
+                status = 500
+            elif len(data) == 0:
+                result = middleware.exe_msgs(f"No benchmarks found for category: {category}", "Not Found", "1023202")
+                status = 404
             else:
                 data = serialize_dates(data)
                 result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
                 status = 200
-                        
-            return make_response(result,status)
+
+            return make_response(result, status)
         except Exception as e:
-            print("Error in getting role data=============================", e)
-            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500) 
+            print("Error in getAllEntityBenchMark=============================", e)
+            return make_response(middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'), 500)        
         
 # ======================================Get All BenchMarks======================================
 

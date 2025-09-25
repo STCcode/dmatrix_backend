@@ -1193,15 +1193,29 @@ def getEquityActionTable():
 
 
 # ======================================Get All BenchMarks======================================
-def getAllEntityBenchMark():
-     try:
-          sql="SELECT benchmark_name FROM tbl_benchmark ORDER BY category;"
-          data=''
-          msgs=executeSql.ExecuteAllNew(sql,data)
-          return msgs
-     except Exception as e:
-          print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+# def getAllEntityBenchMark():
+#      try:
+#           sql="SELECT benchmark_name FROM tbl_benchmark ORDER BY category;"
+#           data=''
+#           msgs=executeSql.ExecuteAllNew(sql,data)
+#           return msgs
+#      except Exception as e:
+#           print("Error in getingroleRecord query==========================",e)
+#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+
+
+def getAllEntityBenchMark(category):
+    try:
+        sql = "SELECT benchmark_name FROM tbl_benchmark WHERE category = %s ORDER BY benchmark_name;"
+        data = (category,)   # pass category as parameter
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getAllEntityBenchMark query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310')
+
+
+
 # ======================================Get All BenchMarks======================================
 
 

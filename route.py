@@ -280,7 +280,7 @@ app.add_url_rule('/getAllActionInstrument',view_func=user_fun.getAllActionInstru
 # ======================================Get All Action instrument===================================================
 
 # ======================================Get All BenchMark =====================================================
-app.add_url_rule('/getAllEntityBenchMark',view_func=user_fun.getAllEntityBenchMark,methods=['GET','POST'])
+app.add_url_rule('/getBenchmarksByCategory',view_func=user_fun.getAllEntityBenchMark,methods=['GET','POST'])
 # ======================================Get Get All BenchMark ===================================================
 
 

@@ -2808,8 +2808,8 @@ def getAllEntityBenchMark():
             category = request.args.get("category")  # get category from frontend query param
             if not category:
                 return make_response(
-                    middleware.exe_msgs("Category parameter is required", "Missing category", "1023201"),
-                    400
+                     middleware.exs_msgs([], "No category provided, returning empty data", "1023201"),
+                    200
                 )
 
             data = queries.getAllEntityBenchMark(category)
@@ -2818,9 +2818,6 @@ def getAllEntityBenchMark():
             if not isinstance(data, list):
                 result = data
                 status = 500
-            elif len(data) == 0:
-                result = middleware.exe_msgs(f"No benchmarks found for category: {category}", "Not Found", "1023202")
-                status = 404
             else:
                 data = serialize_dates(data)
                 result = middleware.exs_msgs(data, responses.getAll_200, '1023200')

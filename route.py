@@ -115,7 +115,7 @@ app.add_url_rule('/action_table' ,view_func=user_fun.action_table,methods=['GET'
 app.add_url_rule('/getAllAction',view_func=user_fun.getAllAction,methods=['GET','POST'])
 app.add_url_rule('/getActionByentId',view_func=user_fun.getActionByentId,methods=['GET','POST'])
 
-app.add_url_rule('/getMfByentId',view_func=user_fun.getMfByentId,methods=['GET','POST'])
+app.add_url_rule('/getAllActionTableOfMfEquity',view_func=user_fun.getMfByentId,methods=['GET','POST'])
 
 app.add_url_rule('/insertMutualFundNavData',view_func=user_fun.insertMFNavData,methods=['GET','POST'])
 app.add_url_rule('/getMutualFundbyIsinId',view_func=user_fun.getAllMutualFundNav,methods=['GET','POST'])
@@ -269,6 +269,8 @@ app.add_url_rule('/getallMfEquityUnderlyingCount',view_func=user_fun.GetallMfEqu
 app.add_url_rule('/getallMFEquitySectorCount',view_func=user_fun.GetallMfSectorUnderlyingCount,methods=['GET','POST'])
 app.add_url_rule('/getallMFDetailsEquitySectorCount',view_func=user_fun.getallMFDetailsEquitySectorCount,methods=['GET','POST'])
 app.add_url_rule('/getallMFDetailsEquityMCAPCount',view_func=user_fun.getallMFDetailsEquityMCAPCount,methods=['GET','POST'])
+app.add_url_rule('/getallAIFDetailsEquityMCAPCount',view_func=user_fun.getallAIFDetailsEquityMCAPCount,methods=['GET','POST'])
+app.add_url_rule('/getallAIFDetailsEquitySectorCount',view_func=user_fun.getallAIFDetailsEquitySectorCount,methods=['GET','POST'])
 # ======================================== Get allMfEquityUnderlyingCount End============================
 
 # ======================================Get All Home Equity======================================

@@ -165,6 +165,7 @@ app.add_url_rule('/getAifActionTablebyId',view_func=user_fun.getAifActionTableby
 app.add_url_rule('/getAifEntity',view_func=user_fun.getAifEntity,methods=['GET','POST'])
 
 app.add_url_rule('/insertNavData' ,view_func=user_fun.insertNavData,methods=['GET','POST'])
+app.add_url_rule('/getAIFEquityDetailsById',view_func=user_fun.getAIFEquityDetailsById,methods=['GET','POST'])
 
 # ======================================AIF Table End======================================
 

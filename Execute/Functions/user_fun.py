@@ -351,6 +351,8 @@ def update_entity_table():
                         formData.get('subcategory'),
                         formData.get('nickname'),
                         formData.get('isin'),
+                        formData.get('aif_category'),
+                        formData.get('aif_class'),
                         datetime.now(),
                         formData.get('id')
             )

@@ -1285,7 +1285,7 @@ def getallMFDetailsEquityMCAPCount(entity_id):
 
 
 
-def getallAIFDetailsEquityMCAPCount(entity_id):
+def getAIFDetailsEquityMCAPCount(entity_id):
     try:
         sql="WITH all_tags AS (SELECT DISTINCT tag FROM tbl_underlying WHERE tag IS NOT NULL),entity_weights AS (SELECT u.tag, COUNT(*) AS tag_count,SUM(u.weightage::numeric) AS tag_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Alternative Investment Funds' AND u.entityid = %s AND u.tag IS NOT NULL GROUP BY u.tag),total AS (SELECT COUNT(*) AS total_tag_count,SUM(u.weightage::numeric) AS total_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Alternative Investment Funds' AND u.entityid = %s AND u.tag IS NOT NULL) SELECT t.tag,COALESCE(ew.tag_count, 0) AS tag_count,total.total_tag_count,COALESCE(ew.tag_weight, 0) AS tag_weight,total.total_weight,COALESCE((ew.tag_weight * 100.0 / total.total_weight)::numeric(7,2), 0.00) AS tag_percent FROM all_tags t LEFT JOIN entity_weights ew ON t.tag = ew.tag CROSS JOIN total ORDER BY t.tag;"
 
@@ -1297,7 +1297,7 @@ def getallAIFDetailsEquityMCAPCount(entity_id):
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310') 
 
     
-def getallAIFDetailsEquitySectorCount(entity_id):
+def getAIFDetailsEquitySectorCount(entity_id):
     try:
         sql="WITH entity_weights AS (SELECT u.sector,COUNT(*) AS sector_count,SUM(u.weightage::numeric) AS sector_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Alternative Investment Funds' AND u.entityid = %s AND u.sector IS NOT NULL GROUP BY u.sector),total AS (SELECT COUNT(*) AS total_sector_count,SUM(u.weightage::numeric) AS total_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Alternative Investment Funds' AND u.entityid = %s AND u.sector IS NOT NULL)  SELECT ew.sector,ew.sector_count,total.total_sector_count,ew.sector_weight,total.total_weight,(ew.sector_weight * 100.0 / total.total_weight)::numeric(7,2) AS sector_percent FROM entity_weights ew CROSS JOIN total ORDER BY ew.sector;"
 

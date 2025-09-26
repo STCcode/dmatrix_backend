@@ -2977,7 +2977,7 @@ def getallMFDetailsEquityMCAPCount():
             500
         )
 
-def getallAIFDetailsEquityMCAPCount():
+def getAIFDetailsEquityMCAPCount():
     try:
         entity_id = None
 
@@ -3000,7 +3000,7 @@ def getallAIFDetailsEquityMCAPCount():
             )
 
         # Query the database
-        data = queries.getallAIFDetailsEquityMCAPCount(entity_id)
+        data = queries.getAIFDetailsEquityMCAPCount(entity_id)
 
         # Return proper response
         if isinstance(data, list):
@@ -3021,7 +3021,7 @@ def getallAIFDetailsEquityMCAPCount():
         )
 
 
-def getallAIFDetailsEquitySectorCount():
+def getAIFDetailsEquitySectorCount():
     try:
         entity_id = None
 
@@ -3044,7 +3044,7 @@ def getallAIFDetailsEquitySectorCount():
             )
 
         # Query the database
-        data = queries.getallAIFDetailsEquitySectorCount(entity_id)
+        data = queries.getAIFDetailsEquitySectorCount(entity_id)
 
         # Return proper response
         if isinstance(data, list):

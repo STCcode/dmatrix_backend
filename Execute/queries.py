@@ -156,7 +156,7 @@ def getMutualFundDataById(entity_id):
 
 def update_entity_table(data):
     try:
-        sql = "UPDATE tbl_entity SET scripname = %s,scripcode = %s,benchmark_name = %s,category = %s,subcategory = %s,nickname = %s,isin =%s,updated_at = %s WHERE id = %s"
+        sql = "UPDATE tbl_entity SET scripname = %s,scripcode = %s,benchmark_name = %s,category = %s,subcategory = %s,nickname = %s,isin =%s,aif_category =%s, aif_class =%s,updated_at = %s WHERE id = %s"
         msg = executeSql.ExecuteReturnId(sql, data)
         return msg
     except Exception as e:

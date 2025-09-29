@@ -528,6 +528,7 @@ def updateMFDetailActionTableRow():
                         formData.get('stamp_duty'),
                         formData.get('cess_value'),
                         formData.get('net_amount'),
+                        formData.get('entityid'),
                         formData.get('purchase_value'),
                         formData.get('order_date'),
                         formData.get('sett_no'),

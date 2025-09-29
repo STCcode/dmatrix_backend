@@ -239,7 +239,7 @@ def getAllAction():
 
 def updateMFDetailActionTableRow(data):
     try:
-        sql = "UPDATE tbl_action_table SET scrip_code = %s,mode = %s,order_type = %s,scrip_name = %s,isin = %s,order_number = %s,folio_number =%s,nav =%s,stt =%s,unit=%s,redeem_amount=%s,purchase_amount=%s,cgst=%s,sgst=%s,ugst=%s,stamp_duty=%s,cess_value=%s,net_amount=%s,purchase_value=%s,order_date=%s,sett_no=%s,updated_at = %s WHERE id = %s"
+        sql = "UPDATE tbl_action_table SET scrip_code = %s,mode = %s,order_type = %s,scrip_name = %s,isin = %s,order_number = %s,folio_number =%s,nav =%s,stt =%s,unit=%s,redeem_amount=%s,purchase_amount=%s,cgst=%s,sgst=%s,ugst=%s,stamp_duty=%s,cess_value=%s,net_amount=%s,entityid=%s,purchase_value=%s,order_date=%s,sett_no=%s,updated_at = %s WHERE id = %s"
         msg = executeSql.ExecuteReturnId(sql, data)
         return msg
     except Exception as e:

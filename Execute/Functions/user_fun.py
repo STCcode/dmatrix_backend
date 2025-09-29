@@ -499,7 +499,108 @@ def getAllAction():
             return make_response(result,status)
         except Exception as e:
             print("Error in getting role data=============================", e)
-            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)  
+            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500) 
+
+
+
+def updateMFDetailActionTableRow():
+    try:
+        if request.method == 'PUT': 
+            formData = request.get_json()
+
+           
+            formlist = (formData.get('scrip_code'),
+                        formData.get('mode'),
+                        formData.get('order_type'),
+                        formData.get('scrip_name'),
+                        formData.get('isin'),
+                        formData.get('order_number'),
+                        formData.get('folio_number'),
+                        formData.get('nav'),
+                        formData.get('stt'),
+                        formData.get('unit'),
+                        formData.get('redeem_amount'),
+                        formData.get('purchase_amount'),
+                        formData.get('cgst'),
+                        formData.get('sgst'),
+                        formData.get('igst'),
+                        formData.get('ugst'),
+                        formData.get('stamp_duty'),
+                        formData.get('cess_value'),
+                        formData.get('net_amount'),
+                        formData.get('purchase_value'),
+                        formData.get('order_date'),
+                        formData.get('sett_no'),
+                        datetime.now(),
+                        formData.get('id')
+            )
+
+            updated_rows = queries.updateMFDetailActionTableRow(formlist)
+
+            if type(updated_rows).__name__ != "int":
+                return make_response(updated_rows, 500)
+
+            if updated_rows == 0:
+                return make_response(
+                    middleware.exe_msgs(responses.update_404, "No record found to update", '1020404'),
+                    404
+                )
+
+            result = middleware.exs_msgs(updated_rows, responses.update_200, '1020400')
+            return make_response(result, 200)
+
+    except Exception as e:
+        print("Error in update_entity_table:", e)
+        return make_response(
+            middleware.exe_msgs(responses.update_501, str(e.args), '1020501'),
+            500
+        )
+    
+def deleteMFDetailActionTableRow():
+    try:
+        entity_id = None
+
+        # If DELETE → get from query parameters
+        if request.method == 'DELETE':
+            entity_id = request.args.get('id')
+
+        # If POST → get from form-data or JSON
+        elif request.method == 'POST':
+            if request.is_json:
+                entity_id = request.json.get('id')
+            else:
+                entity_id = request.form.get('id')
+
+        # Validate input
+        if not entity_id:
+            return make_response(
+                middleware.exe_msgs(responses.delete_501, "Missing id parameter", '1024501'),
+                400
+            )
+
+        # Perform deletion
+        deleted_rows = queries.deleteMFDetailActionTableRow(entity_id)
+
+        if isinstance(deleted_rows, int):
+            if deleted_rows > 0:
+                result = middleware.exs_msgs(deleted_rows, responses.delete_200, '1024200')
+                status = 200
+            else:
+                result = middleware.exe_msgs(responses.delete_404, "No record found to delete", '1024504')
+                status = 404
+        else:
+            # Query returned error message object
+            result = deleted_rows
+            status = 500
+
+        return make_response(result, status)
+
+    except Exception as e:
+        print("Error in delete_entity:", e)
+        return make_response(
+            middleware.exe_msgs(responses.delete_501, str(e.args), '1024500'),
+            500
+        )
 
 # def getActionByentId():
 #     if request.method == 'GET':

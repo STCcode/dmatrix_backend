@@ -236,6 +236,28 @@ def getAllAction():
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
      
+
+def updateMFDetailActionTableRow(data):
+    try:
+        sql = "UPDATE tbl_action_table SET scrip_code = %s,mode = %s,order_type = %s,scrip_name = %s,isin = %s,order_number = %s,folio_number =%s,nav =%s,stt =%s,unit=%s,redeem_amount=%s,purchase_amount=%s,cgst=%s,sgst=%s,ugst=%s,stamp_duty=%s,cess_value=%s,net_amount=%s,purchase_value=%s,order_date=%s,sett_no=%s,updated_at = %s WHERE id = %s"
+        msg = executeSql.ExecuteReturnId(sql, data)
+        return msg
+    except Exception as e:
+        print("Error in update_entity_table query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020311')
+
+def deleteMFDetailActionTableRow(entity_id):
+    try:
+        entity_id = int(entity_id)
+        sql = "DELETE FROM tbl_action_table WHERE id = %s RETURNING id"
+        data = (entity_id,) 
+        deleted_count = executeSql.ExecuteReturnId(sql, data) 
+        return deleted_count
+    except Exception as e:
+        print("Error in DeleteEntityByid query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')    
+
+     
 def getActionByentId(entity_id):
     try:
         sql = "SELECT * FROM tbl_action_table WHERE entityid = %s;"

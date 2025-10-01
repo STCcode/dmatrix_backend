@@ -261,7 +261,7 @@ def deleteMFDetailActionTableRow(entity_id):
 def getActionByentId(entity_id):
     try:
         # sql = "SELECT * FROM tbl_action_table WHERE entityid = %s;"
-        sql ="SELECT COALESCE(redeem_amount::text, '-') AS redeem_amount,COALESCE(purchase_amount::text, '-') AS purchase_amount,COALESCE(purchase_value::text, '-') AS purchase_value FROM tbl_action_table WHERE entityid = ENT-0537;"
+        sql ="SELECT COALESCE(redeem_amount::text, '-') AS redeem_amount,COALESCE(purchase_amount::text, '-') AS purchase_amount,COALESCE(purchase_value::text, '-') AS purchase_value FROM tbl_action_table WHERE entityid = %s;"
         data = (entity_id,)  # tuple, not set
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs

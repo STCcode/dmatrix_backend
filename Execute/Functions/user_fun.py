@@ -503,37 +503,99 @@ def getAllAction():
 
 
 
-def updateMFDetailActionTableRow():
-    try:
-        if request.method == 'PUT': 
-            formData = request.get_json()
+# def updateMFDetailActionTableRow():
+#     try:
+#         if request.method == 'PUT': 
+#             formData = request.get_json()
 
            
-            formlist = (formData.get('scrip_code'),
-                        formData.get('mode'),
-                        formData.get('order_type'),
-                        formData.get('scrip_name'),
-                        formData.get('isin'),
-                        formData.get('order_number'),
-                        formData.get('folio_number'),
-                        formData.get('nav'),
-                        formData.get('stt'),
-                        formData.get('unit'),
-                        formData.get('redeem_amount'),
-                        formData.get('purchase_amount'),
-                        formData.get('cgst'),
-                        formData.get('sgst'),
-                        formData.get('igst'),
-                        formData.get('ugst'),
-                        formData.get('stamp_duty'),
-                        formData.get('cess_value'),
-                        formData.get('net_amount'),
-                        formData.get('entityid'),
-                        formData.get('purchase_value'),
-                        formData.get('order_date'),
-                        formData.get('sett_no'),
-                        datetime.now(),
-                        formData.get('id')
+#             formlist = (formData.get('scrip_code'),
+#                         formData.get('mode'),
+#                         formData.get('order_type'),
+#                         formData.get('scrip_name'),
+#                         formData.get('isin'),
+#                         formData.get('order_number'),
+#                         formData.get('folio_number'),
+#                         formData.get('nav'),
+#                         formData.get('stt'),
+#                         formData.get('unit'),
+#                         formData.get('redeem_amount'),
+#                         formData.get('purchase_amount'),
+#                         formData.get('cgst'),
+#                         formData.get('sgst'),
+#                         formData.get('igst'),
+#                         formData.get('ugst'),
+#                         formData.get('stamp_duty'),
+#                         formData.get('cess_value'),
+#                         formData.get('net_amount'),
+#                         formData.get('entityid'),
+#                         formData.get('purchase_value'),
+#                         formData.get('order_date'),
+#                         formData.get('sett_no'),
+#                         datetime.now(),
+#                         formData.get('id')
+#             )
+
+#             updated_rows = queries.updateMFDetailActionTableRow(formlist)
+
+#             if type(updated_rows).__name__ != "int":
+#                 return make_response(updated_rows, 500)
+
+#             if updated_rows == 0:
+#                 return make_response(
+#                     middleware.exe_msgs(responses.update_404, "No record found to update", '1020404'),
+#                     404
+#                 )
+
+#             result = middleware.exs_msgs(updated_rows, responses.update_200, '1020400')
+#             return make_response(result, 200)
+
+#     except Exception as e:
+#         print("Error in update_entity_table:", e)
+#         return make_response(
+#             middleware.exe_msgs(responses.update_501, str(e.args), '1020501'),
+#             500
+#         )
+    
+def updateMFDetailActionTableRow():
+    try:
+        if request.method == 'POST':   # changed from PUT → POST
+            formData = request.get_json()
+
+            # Get ID from params instead of body
+            record_id = request.args.get("id")   # Example: /updateMFAction?id=241
+            if not record_id:
+                return make_response(
+                    middleware.exe_msgs(responses.update_404, "ID parameter is required", '1020405'),
+                    400
+                )
+
+            formlist = (
+                formData.get('scrip_code'),
+                formData.get('mode'),
+                formData.get('order_type'),
+                formData.get('scrip_name'),
+                formData.get('isin'),
+                formData.get('order_number'),
+                formData.get('folio_number'),
+                formData.get('nav'),
+                formData.get('stt'),
+                formData.get('unit'),
+                formData.get('redeem_amount'),
+                formData.get('purchase_amount'),
+                formData.get('cgst'),
+                formData.get('sgst'),
+                formData.get('igst'),
+                formData.get('ugst'),
+                formData.get('stamp_duty'),
+                formData.get('cess_value'),
+                formData.get('net_amount'),
+                formData.get('entityid'),
+                formData.get('purchase_value'),
+                formData.get('order_date'),
+                formData.get('sett_no'),
+                datetime.now(),
+                record_id   # use param id, not from JSON
             )
 
             updated_rows = queries.updateMFDetailActionTableRow(formlist)
@@ -556,7 +618,7 @@ def updateMFDetailActionTableRow():
             middleware.exe_msgs(responses.update_501, str(e.args), '1020501'),
             500
         )
-    
+
 def deleteMFDetailActionTableRow():
     try:
         entity_id = None

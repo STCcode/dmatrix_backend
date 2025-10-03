@@ -294,7 +294,7 @@ def insert_MF_NavData(data):
 def getAll_Mutual_Fund_Nav(isin):
      try:
         #   sql="SELECT * FROM tbl_mutual_fund_nav"
-          sql="SELECT * FROM tbl_mutual_fund_nav where isin= %s;"
+          sql="SELECT * FROM tbl_mutual_fund_nav where isin= %s order by nav_date ASC;"
           data=(isin,)
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs

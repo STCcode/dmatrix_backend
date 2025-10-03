@@ -123,6 +123,10 @@ app.add_url_rule('/getAllActionTableOfMFEquity',view_func=user_fun.getMfByentId,
 app.add_url_rule('/insertMutualFundNavData',view_func=user_fun.insertMFNavData,methods=['GET','POST'])
 app.add_url_rule('/getMutualFundbyIsinId',view_func=user_fun.getAllMutualFundNav,methods=['GET','POST'])
 
+app.add_url_rule('/getAllMFEquitytotalValue',view_func=user_fun.getAllMFEquitytotalValue,methods=['GET','POST'])
+
+
+
 # ====================================== Mutual Fund Action Table End======================================
 
 #=======================================mcap Table Start======================================

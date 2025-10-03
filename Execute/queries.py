@@ -300,7 +300,19 @@ def getAll_Mutual_Fund_Nav(isin):
           return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')             
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')    
+
+
+def getAllMFEquitytotalValue(entity_id):
+    try:
+       
+        sql="WITH latest_nav AS (SELECT DISTINCT ON (isin) isin, nav FROM tbl_mutual_fund_nav ORDER BY isin, nav_date DESC),entity_values AS (SELECT a.entityid, SUM(a.unit * nav.nav) AS entity_total_value FROM tbl_action_table a JOIN latest_nav nav ON a.isin = nav.isin JOIN tbl_entity e ON a.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' GROUP BY a.entityid),total_value AS ( SELECT SUM(entity_total_value) AS total_all_entities FROM entity_values), entity_mf_percent AS ( SELECT ev.entityid,ev.entity_total_value, (ev.entity_total_value / tv.total_all_entities) AS mf_weight_fraction,ROUND((ev.entity_total_value / tv.total_all_entities) * 100, 2) AS mf_weight_percent FROM entity_values ev CROSS JOIN total_value tv), entity_weights AS ( SELECT u.entityid, u.tag, COUNT(*) AS tag_count, SUM(u.weightage::numeric) AS tag_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' AND u.tag IS NOT NULL GROUP BY u.entityid, u.tag), entity_totals AS ( SELECT entityid, SUM(tag_weight) AS total_tag_weight FROM entity_weights GROUP BY entityid ), entity_tag_breakdown AS ( SELECT ew.entityid, ew.tag, ew.tag_count, ew.tag_weight, et.total_tag_weight, ev.entity_total_value,emp.mf_weight_percent, (ew.tag_weight / et.total_tag_weight) * emp.mf_weight_fraction AS tag_fraction, ROUND((ew.tag_weight / et.total_tag_weight) * emp.mf_weight_percent, 2) AS total_tag_percent FROM entity_weights ew JOIN entity_totals et ON ew.entityid = et.entityid JOIN entity_values ev ON ew.entityid = ev.entityid JOIN entity_mf_percent emp ON ew.entityid = emp.entityid), tag_totals AS ( SELECT tag, ROUND(SUM(tag_fraction) * 100, 2) AS overall_tag_percent FROM entity_tag_breakdown GROUP BY tag) SELECT etb.entityid, etb.tag, etb.tag_count, etb.tag_weight, etb.total_tag_weight, etb.entity_total_value, etb.mf_weight_percent, etb.total_tag_percent, CASE  WHEN ROW_NUMBER() OVER (PARTITION BY etb.tag ORDER BY etb.entityid) = 1 THEN tt.overall_tag_percent END AS overall_tag_percent FROM entity_tag_breakdown etb JOIN tag_totals tt ON etb.tag = tt.tag ORDER BY etb.tag, etb.entityid;"
+        data = (entity_id,)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')                
 
 
 

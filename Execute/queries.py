@@ -1903,11 +1903,11 @@ def compare_entity_weights(entity1, entity2):
         df2 = df[df['entityid'] == entity2].copy()
 
         # Prepare all holdings data for response
-        entity1_holdings = df1[['isin', 'weight']].to_dict(orient='records')
-        entity2_holdings = df2[['isin', 'weight']].to_dict(orient='records')
+        entity1_holdings = df1[['isin_code', 'weight']].to_dict(orient='records')
+        entity2_holdings = df2[['isin_code', 'weight']].to_dict(orient='records')
 
         # Merge to find overlaps
-        merged = pd.merge(df1, df2, on='isin', suffixes=('_mf1', '_mf2'))
+        merged = pd.merge(df1, df2, on='isin_code', suffixes=('_mf1', '_mf2'))
         merged['overlap_weight'] = merged[['weight_mf1', 'weight_mf2']].min(axis=1)
 
         total_overlap = merged['overlap_weight'].sum()

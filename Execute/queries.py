@@ -1894,7 +1894,7 @@ def compare_entity_weights(entity1, entity2):
     try:
         # Fetch holdings along with scrip_name
         sql = """
-            SELECT u.entityid, e.scrip_name, u.isin_code, u.weightage::numeric AS weight
+            SELECT u.entityid, e.scripname, u.isin_code, u.weightage::numeric AS weight
             FROM tbl_underlying u
             JOIN tbl_entity e ON u.entityid = e.entityid
             WHERE u.entityid IN (%s, %s)
@@ -1903,12 +1903,12 @@ def compare_entity_weights(entity1, entity2):
         df = pd.DataFrame(rows)
 
         # Separate holdings for each entity
-        df1 = df[df['entityid'] == entity1].copy() if not df.empty else pd.DataFrame(columns=['isin_code', 'weight', 'scrip_name'])
-        df2 = df[df['entityid'] == entity2].copy() if not df.empty else pd.DataFrame(columns=['isin_code', 'weight', 'scrip_name'])
+        df1 = df[df['entityid'] == entity1].copy() if not df.empty else pd.DataFrame(columns=['isin_code', 'weight', 'scripname'])
+        df2 = df[df['entityid'] == entity2].copy() if not df.empty else pd.DataFrame(columns=['isin_code', 'weight', 'scripname'])
 
         # Extract scrip_name (fallback to entityid if missing)
-        entity1_name = df1['scrip_name'].iloc[0] if not df1.empty else entity1
-        entity2_name = df2['scrip_name'].iloc[0] if not df2.empty else entity2
+        entity1_name = df1['scripname'].iloc[0] if not df1.empty else entity1
+        entity2_name = df2['scripname'].iloc[0] if not df2.empty else entity2
 
         # Prepare holdings data
         entity1_holdings = df1[['isin_code','weight']].rename(columns={'isin_code':'isin'}).to_dict(orient='records')

@@ -37,13 +37,6 @@ def stop_nav_scheduler():
 
 # =======================End auto services fro mutual fund NAV========================
 
-
-
-
-
-
-
-
 # def getallrole():
 #      if request.method == 'POST':
 #         try:
@@ -3713,7 +3706,7 @@ def upload_and_save():
         files = request.files.getlist("files") if "files" in request.files else []
         json_data = None
 
-        # Case 1️⃣: multipart/form-data (files + optional jsonData)
+        # Case 1️: multipart/form-data (files + optional jsonData)
         if files:
             json_raw = request.form.get("jsonData")
 
@@ -3723,7 +3716,7 @@ def upload_and_save():
                 except Exception as e:
                     return make_response({"error": f"Invalid JSON in form: {str(e)}"}, 400)
 
-            else:  # Case 2️⃣: files only → parse PDF directly
+            else:  # Case 2️: files only → parse PDF directly
                 password = request.form.get("password", "")
                 all_parsed = []
                 for file in files:
@@ -3748,7 +3741,7 @@ def upload_and_save():
 
                 json_data = all_parsed
 
-        # Case 3️⃣: application/json (raw JSON, no files)
+        # Case 3️: application/json (raw JSON, no files)
         else:
             if request.is_json:
                 json_data = request.get_json()
@@ -3761,14 +3754,14 @@ def upload_and_save():
         if not json_data:
             return make_response({"error": "No data to process"}, 400)
 
-        # 🔄 Loop through parsed items
+        #  Loop through parsed items
         for item in json_data:
             entity_info = item.get("entityTable", {})
             actions = item.get("actionTable", [])
             if isinstance(actions, dict):
                 actions = [actions]
 
-            # ✅ Step 1: Check for duplicates before creating entity
+            #  Step 1: Check for duplicates before creating entity
             duplicate_found = False
             for action in actions:
                 if queries.order_exists(action.get("order_number")):
@@ -3782,7 +3775,7 @@ def upload_and_save():
             if duplicate_found:
                 continue  # skip entity creation
 
-            # ✅ Step 2: Create entity
+            #  Step 2: Create entity
             entityid = queries.create_entity(
                 entity_info.get("scripname"),
                 entity_info.get("scripcode"),
@@ -3796,7 +3789,7 @@ def upload_and_save():
             if not entityid:
                 continue
 
-            # ✅ Step 3: Save PDF if uploaded
+            #  Step 3: Save PDF if uploaded
             if files:
                 for file in files:
                     filename = secure_filename(file.filename)
@@ -3804,7 +3797,7 @@ def upload_and_save():
                     file.seek(0)
                     queries.insert_pdf_file(entityid, filename, file_bytes, now)
 
-            # ✅ Step 4: Insert actions
+            #  Step 4: Insert actions
             for action in actions:
                 inserted = queries.auto_action_table((
                     action.get("scrip_code"),
@@ -3848,7 +3841,7 @@ def upload_and_save():
                         "status": "skipped (duplicate at DB-level)"
                     })
 
-        # ✅ Summary response
+        #  Summary response
         summary = {
             "inserted_count": len(inserted_records),
             "skipped_count": len(skipped_records),
@@ -3868,6 +3861,47 @@ def upload_and_save():
 
 
 # ============================= Auto PDF Read and Insert Into DB =========================
+
+
+# =======================# new compare weight API Start========================
+def compareEntityWeights():
+    if request.method == 'GET':
+        try:
+            entity1 = request.args.get('entity1')
+            entity2 = request.args.get('entity2')
+
+            if not entity1 or not entity2:
+                return make_response(
+                    middleware.exe_msgs(
+                        responses.getAll_404,
+                        "Please provide both entity1 and entity2 parameters",
+                        "1023400"
+                    ), 
+                    400
+                )
+
+            # Call query function
+            data = queries.compare_entity_weights(entity1, entity2)
+
+            # If no data returned
+            if not data:
+                result = middleware.exe_msgs(responses.getAll_404, "No data found", "1023401")
+                status = 404
+            else:
+                result = middleware.exs_msgs(data, responses.getAll_200, "1023200")
+                status = 200
+
+            return make_response(result, status)
+
+        except Exception as e:
+            print("Error in compareEntityWeights =============================", e)
+            return make_response(
+                middleware.exe_msgs(responses.getAll_501, str(e.args), "1023500"),
+                500
+            )
+    
+
+# =======================# new compare weight API End========================
 
 
 

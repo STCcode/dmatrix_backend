@@ -2,6 +2,7 @@ from datetime import datetime
 from Execute import executeSql,responses,middleware
 import platform
 import psycopg2
+import pandas as pd
 from flask import jsonify, request
 import numpy as np
 import json  
@@ -1881,8 +1882,45 @@ def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):
 
 # ============================= Auto PDF Read and Insert Into DB  END queries=========================
 
+# =======================# new compare weight API Start========================
+def compare_entity_weights(entity1, entity2):
+    try:
+        sql = "SELECT entityid, isin, weightage::numeric AS weight FROM tbl_underlying WHERE entityid IN (%s, %s)"
+        df = executeSql.ExecuteOne(sql, (entity1, entity2))
 
+        df = pd.DataFrame(df)
+        if df.empty:
+            return None
 
+        df1 = df[df['entityid'] == entity1]
+        df2 = df[df['entityid'] == entity2]
+
+        merged = pd.merge(df1, df2, on='isin', suffixes=('_mf1', '_mf2'))
+        merged['overlap_weight'] = merged[['weight_mf1', 'weight_mf2']].min(axis=1)
+
+        total_overlap = merged['overlap_weight'].sum()
+        overlap_count = len(merged)
+        total_mf1_weight = df1['weight'].sum()
+        total_mf2_weight = df2['weight'].sum()
+
+        result = {
+            "entity1": entity1,
+            "entity2": entity2,
+            "total_overlap_weight": round(float(total_overlap), 2),
+            "overlap_count": int(overlap_count),
+            "total_holdings_mf1": int(len(df1)),
+            "total_holdings_mf2": int(len(df2)),
+            "overlap_percentage_of_mf1": round((total_overlap / total_mf1_weight) * 100, 2) if total_mf1_weight else 0,
+            "overlap_percentage_of_mf2": round((total_overlap / total_mf2_weight) * 100, 2) if total_mf2_weight else 0,
+            "overlap_details": merged[['isin', 'weight_mf1', 'weight_mf2', 'overlap_weight']].to_dict(orient='records')
+        }
+
+        return result
+
+    except Exception as e:
+        print("Error in compare_entity_weights:", e)
+        return None
+# =======================# new compare weight API End========================
 
 # //////////////////////////TESTING///////////////////////////////////
 

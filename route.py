@@ -155,6 +155,14 @@ app.add_url_rule("/stop", view_func=user_fun.stop_nav_scheduler, methods=["GET"]
 # =======================end auto services fro mutual fund NAV========================
 
 
+# =======================# new compare weight API Start========================
+
+app.add_url_rule('/compare_weight', view_func=user_fun.compareEntityWeights, methods=['GET'])
+
+# =======================# new compare weight API End========================
+
+
+
 
 #========================================bigsheet Table Start====================================
 

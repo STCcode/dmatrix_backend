@@ -1885,50 +1885,57 @@ def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):
 # =======================# new compare weight API Start========================
 def compare_entity_weights(entity1, entity2):
     """
-    Return a full comparison of two entities:
-    - All holdings of each entity
-    - Overlap details
-    - Overlap totals and percentages
-    Handles missing data gracefully.
+    Compare two entities (mutual funds or portfolios) by holdings and weights.
+    - Returns all holdings of each entity
+    - Overlap details, counts, and percentages
+    - Uses scrip_name as keys
+    - Handles missing data gracefully
     """
     try:
+        # Fetch holdings along with scrip_name
         sql = """
-            SELECT entityid, isin_code, weightage::numeric AS weight
-            FROM tbl_underlying
-            WHERE entityid IN (%s, %s)
+            SELECT u.entityid, e.scrip_name, u.isin_code, u.weightage::numeric AS weight
+            FROM tbl_underlying u
+            JOIN tbl_entity e ON u.entityid = e.entityid
+            WHERE u.entityid IN (%s, %s)
         """
         rows = executeSql.ExecuteAllWithHeaders(sql, (entity1, entity2))
         df = pd.DataFrame(rows)
 
-        # Separate holdings, handle missing entity data
-        df1 = df[df['entityid'] == entity1].copy() if not df.empty else pd.DataFrame(columns=['isin_code', 'weight'])
-        df2 = df[df['entityid'] == entity2].copy() if not df.empty else pd.DataFrame(columns=['isin_code', 'weight'])
+        # Separate holdings for each entity
+        df1 = df[df['entityid'] == entity1].copy() if not df.empty else pd.DataFrame(columns=['isin_code', 'weight', 'scrip_name'])
+        df2 = df[df['entityid'] == entity2].copy() if not df.empty else pd.DataFrame(columns=['isin_code', 'weight', 'scrip_name'])
 
-        # Prepare all holdings data
-        entity1_holdings = df1[['isin_code', 'weight']].rename(columns={'isin_code':'isin'}).to_dict(orient='records')
-        entity2_holdings = df2[['isin_code', 'weight']].rename(columns={'isin_code':'isin'}).to_dict(orient='records')
+        # Extract scrip_name (fallback to entityid if missing)
+        entity1_name = df1['scrip_name'].iloc[0] if not df1.empty else entity1
+        entity2_name = df2['scrip_name'].iloc[0] if not df2.empty else entity2
 
-        # Merge to find overlaps (only if both have data)
+        # Prepare holdings data
+        entity1_holdings = df1[['isin_code','weight']].rename(columns={'isin_code':'isin'}).to_dict(orient='records')
+        entity2_holdings = df2[['isin_code','weight']].rename(columns={'isin_code':'isin'}).to_dict(orient='records')
+
+        # Merge to find overlaps
         if not df1.empty and not df2.empty:
-            merged = pd.merge(df1, df2, left_on='isin_code', right_on='isin_code', suffixes=('_mf1', '_mf2'))
-            merged['overlap_weight'] = merged[['weight_mf1', 'weight_mf2']].min(axis=1)
+            merged = pd.merge(df1, df2, on='isin_code', suffixes=('_mf1','_mf2'))
+            merged['overlap_weight'] = merged[['weight_mf1','weight_mf2']].min(axis=1)
         else:
             merged = pd.DataFrame(columns=['isin_code','weight_mf1','weight_mf2','overlap_weight'])
 
+        # Calculate totals
         total_overlap = merged['overlap_weight'].sum() if not merged.empty else 0
         overlap_count = len(merged)
         total_mf1_weight = df1['weight'].sum() if not df1.empty else 0
         total_mf2_weight = df2['weight'].sum() if not df2.empty else 0
 
-        # Final structured response
+        # Prepare final response using scrip_name as keys
         result = {
-            "entity1": {
+            entity1_name: {
                 "id": entity1,
                 "total_holdings": len(df1),
                 "total_weight": round(float(total_mf1_weight), 2),
                 "holdings": entity1_holdings
             },
-            "entity2": {
+            entity2_name: {
                 "id": entity2,
                 "total_holdings": len(df2),
                 "total_weight": round(float(total_mf2_weight), 2),
@@ -1936,10 +1943,11 @@ def compare_entity_weights(entity1, entity2):
             },
             "overlap": {
                 "count": overlap_count,
-                "total_overlap_weight": round(float(total_overlap), 2),
-                "overlap_percentage_of_mf1": round((total_overlap / total_mf1_weight) * 100, 2) if total_mf1_weight else 0,
-                "overlap_percentage_of_mf2": round((total_overlap / total_mf2_weight) * 100, 2) if total_mf2_weight else 0,
-                "details": merged[['isin_code','weight_mf1','weight_mf2','overlap_weight']].rename(columns={'isin_code':'isin'}).to_dict(orient='records') if not merged.empty else []
+                "total_overlap_weight": round(float(total_overlap),2),
+                "overlap_percentage_of_mf1": round((total_overlap / total_mf1_weight) * 100,2) if total_mf1_weight else 0,
+                "overlap_percentage_of_mf2": round((total_overlap / total_mf2_weight) * 100,2) if total_mf2_weight else 0,
+                "details": merged[['isin_code','weight_mf1','weight_mf2','overlap_weight']]
+                            .rename(columns={'isin_code':'isin'}).to_dict(orient='records') if not merged.empty else []
             }
         }
 
@@ -1948,6 +1956,7 @@ def compare_entity_weights(entity1, entity2):
     except Exception as e:
         print("Error in compare_entity_weights:", e)
         return None
+
 
 
 # =======================# new compare weight API End========================

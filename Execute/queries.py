@@ -1892,7 +1892,7 @@ def compare_entity_weights(entity1, entity2):
     """
     try:
         sql = "SELECT entityid, isin_code, weightage::numeric AS weight FROM tbl_underlying WHERE entityid IN (%s, %s)"
-        df = executeSql.ExecuteOne(sql, (entity1, entity2))
+        df = executeSql.ExecuteAllWithHeaders(sql, (entity1, entity2))
         df = pd.DataFrame(df)
 
         if df.empty:

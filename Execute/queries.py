@@ -1891,11 +1891,7 @@ def compare_entity_weights(entity1, entity2):
     - Overlap totals and percentages
     """
     try:
-        sql = """
-            SELECT entityid, isin, weightage::numeric AS weight
-            FROM tbl_underlying
-            WHERE entityid IN (%s, %s)
-        """
+        sql = "SELECT entityid, isin_code, weightage::numeric AS weight FROM tbl_underlying WHERE entityid IN (%s, %s)"
         df = executeSql.ExecuteOne(sql, (entity1, entity2))
         df = pd.DataFrame(df)
 

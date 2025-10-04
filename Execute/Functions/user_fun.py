@@ -3872,26 +3872,22 @@ def compareEntityWeights():
 
             if not entity1 or not entity2:
                 return make_response(
-                    middleware.exe_msgs(
-                        responses.getAll_404,
-                        "Please provide both entity1 and entity2 parameters",
-                        "1023400"
-                    ), 
+                    middleware.exe_msgs("No data found", "No data found", "1023401"),
                     400
                 )
 
-            # Call query function
             data = queries.compare_entity_weights(entity1, entity2)
 
-            # If no data returned
             if not data:
-                result = middleware.exe_msgs(responses.getAll_404, "No data found", "1023401")
-                status = 404
-            else:
-                result = middleware.exs_msgs(data, responses.getAll_200, "1023200")
-                status = 200
+                return make_response(
+                    middleware.exe_msgs("No data found", "No data found", "1023401"),
+                    404
+                )
 
-            return make_response(result, status)
+            return make_response(
+                middleware.exs_msgs(data, responses.getAll_200, "1023200"),
+                200
+            )
 
         except Exception as e:
             print("Error in compareEntityWeights =============================", e)
@@ -3899,6 +3895,7 @@ def compareEntityWeights():
                 middleware.exe_msgs(responses.getAll_501, str(e.args), "1023500"),
                 500
             )
+
     
 
 # =======================# new compare weight API End========================

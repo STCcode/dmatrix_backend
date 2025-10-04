@@ -1884,17 +1884,33 @@ def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):
 
 # =======================# new compare weight API Start========================
 def compare_entity_weights(entity1, entity2):
+    """
+    Return a full comparison of two entities:
+    - All holdings of each entity
+    - Overlap details
+    - Overlap totals and percentages
+    """
     try:
-        sql = "SELECT entityid, isin, weightage::numeric AS weight FROM tbl_underlying WHERE entityid IN (%s, %s)"
-        df = executeSql.ExecuteOne(sql, (entity1, entity2))
-
+        sql = """
+            SELECT entityid, isin, weightage::numeric AS weight
+            FROM tbl_underlying
+            WHERE entityid IN (%s, %s)
+        """
+        df = executeSql.executeReturnData(sql, (entity1, entity2))
         df = pd.DataFrame(df)
+
         if df.empty:
             return None
 
-        df1 = df[df['entityid'] == entity1]
-        df2 = df[df['entityid'] == entity2]
+        # Separate holdings
+        df1 = df[df['entityid'] == entity1].copy()
+        df2 = df[df['entityid'] == entity2].copy()
 
+        # Prepare all holdings data for response
+        entity1_holdings = df1[['isin', 'weight']].to_dict(orient='records')
+        entity2_holdings = df2[['isin', 'weight']].to_dict(orient='records')
+
+        # Merge to find overlaps
         merged = pd.merge(df1, df2, on='isin', suffixes=('_mf1', '_mf2'))
         merged['overlap_weight'] = merged[['weight_mf1', 'weight_mf2']].min(axis=1)
 
@@ -1903,16 +1919,27 @@ def compare_entity_weights(entity1, entity2):
         total_mf1_weight = df1['weight'].sum()
         total_mf2_weight = df2['weight'].sum()
 
+        # Final response
         result = {
-            "entity1": entity1,
-            "entity2": entity2,
-            "total_overlap_weight": round(float(total_overlap), 2),
-            "overlap_count": int(overlap_count),
-            "total_holdings_mf1": int(len(df1)),
-            "total_holdings_mf2": int(len(df2)),
-            "overlap_percentage_of_mf1": round((total_overlap / total_mf1_weight) * 100, 2) if total_mf1_weight else 0,
-            "overlap_percentage_of_mf2": round((total_overlap / total_mf2_weight) * 100, 2) if total_mf2_weight else 0,
-            "overlap_details": merged[['isin', 'weight_mf1', 'weight_mf2', 'overlap_weight']].to_dict(orient='records')
+            "entity1": {
+                "id": entity1,
+                "total_holdings": len(df1),
+                "total_weight": round(float(total_mf1_weight),2),
+                "holdings": entity1_holdings
+            },
+            "entity2": {
+                "id": entity2,
+                "total_holdings": len(df2),
+                "total_weight": round(float(total_mf2_weight),2),
+                "holdings": entity2_holdings
+            },
+            "overlap": {
+                "count": overlap_count,
+                "total_overlap_weight": round(float(total_overlap),2),
+                "overlap_percentage_of_mf1": round((total_overlap / total_mf1_weight) * 100, 2) if total_mf1_weight else 0,
+                "overlap_percentage_of_mf2": round((total_overlap / total_mf2_weight) * 100, 2) if total_mf2_weight else 0,
+                "details": merged[['isin', 'weight_mf1', 'weight_mf2', 'overlap_weight']].to_dict(orient='records')
+            }
         }
 
         return result

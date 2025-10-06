@@ -783,14 +783,28 @@ def insertMFNavData():
         if request.method == 'POST':
             formData = request.get_json()
 
-            # Convert types safely
-            nav_value = float(formData['nav'])
-            nav_date = datetime.strptime(formData['nav_date'], "%Y-%m-%d").date()
+            # Validate and convert types
+            try:
+                nav_value = float(formData['nav'])
+            except ValueError:
+                return make_response(
+                    middleware.exe_msgs("Insert Failed", "NAV must be numeric", '1020500'),
+                    400
+                )
 
-            # Flat tuple for ExecuteOne
+            try:
+                nav_date = datetime.strptime(formData['nav_date'], "%Y-%m-%d").date()
+            except ValueError:
+                return make_response(
+                    middleware.exe_msgs("Insert Failed", "Invalid date format, should be YYYY-MM-DD", '1020500'),
+                    400
+                )
+
+            # Prepare data tuple for ExecuteOne
             formlist = (nav_value, nav_date, datetime.now(), formData['isin'])
             print("DEBUG NAV INSERT:", formlist)
 
+            # Insert/update in DB
             success = queries.insert_MF_NavData(formlist)
 
             if success:
@@ -810,8 +824,6 @@ def insertMFNavData():
             middleware.exe_msgs("Insert Failed", str(e.args), '1020500'),
             500
         )
-
-
    
 
 def  getAllMutualFundNav():

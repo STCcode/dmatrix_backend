@@ -285,7 +285,7 @@ def getMfByentId():
 def insert_MF_NavData(data):
     """
     Inserts or updates NAV data in tbl_mutual_fund_nav.
-    Returns True if successful, False if any error occurs.
+    Returns True if operation succeeds, False if a DB error occurs.
     """
     try:
         sql = """
@@ -294,11 +294,15 @@ def insert_MF_NavData(data):
         ON CONFLICT (isin, nav_date)
         DO UPDATE SET nav = EXCLUDED.nav, created_at = EXCLUDED.created_at
         """
-        executeSql.ExecuteOne(sql, data)
-        return True  # success
+        success = executeSql.ExecuteOne(sql, data)
+        if success:
+            return True
+        else:
+            return False
     except Exception as e:
-        print("Error inserting NAV:", e)
-        return False  # failure
+        print("Error in insert_MF_NavData:", e)
+        return False
+
 
 
 

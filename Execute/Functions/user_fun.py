@@ -801,7 +801,9 @@ def insertMFNavData():
                 )
 
             # Prepare data tuple for ExecuteOne
-            formlist = (nav_value, nav_date, datetime.now(), formData['isin'])
+            formlist = (formData.get("scheme_code", ""),formData["isin"],formData.get("scheme_name", ""),float(formData["nav"]),datetime.strptime(formData["nav_date"], "%Y-%m-%d").date(),datetime.now())
+
+
             print("DEBUG NAV INSERT:", formlist)
 
             # Insert/update in DB

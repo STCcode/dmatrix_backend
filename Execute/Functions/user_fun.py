@@ -782,11 +782,17 @@ def insertMFNavData():
     try:
         if request.method == 'POST':
             formData = request.get_json()
+             # Convert types properly
+            nav_value = float(formData['nav'])
+            nav_date = datetime.strptime(formData['nav_date'], "%Y-%m-%d").date()
 
-            formlist = (formData['nav'],formData['nav_date'], datetime.now(),formData['isin']
+            formlist = ((nav_value),(nav_date), datetime.now(),formData['isin']
             )
+            print("DEBUG NAV INSERT:", formlist)
 
             insert_msg = queries.insert_MF_NavData(formlist)
+
+            print("DEBUG RESULT:", insert_msg)
 
             
             return make_response(

@@ -783,7 +783,7 @@ def insertMFNavData():
         if request.method == 'POST':
             formData = request.get_json()
 
-            formlist = (formData['entityid'],formData['nav'],formData['nav_date'], datetime.now(),formData['isin']
+            formlist = (formData['nav'],formData['nav_date'], datetime.now(),formData['isin']
             )
 
             insert_msg = queries.insert_MF_NavData(formlist)

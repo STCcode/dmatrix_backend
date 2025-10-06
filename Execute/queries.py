@@ -284,7 +284,7 @@ def getMfByentId():
      
 def insert_MF_NavData(data):
     try:
-        sql = " INSERT INTO tbl_mutual_fund_nav (entityid, nav, nav_date, created_at, isin) VALUES (%s, %s, %s, %s, %s)"
+        sql = " INSERT INTO tbl_mutual_fund_nav ( nav, nav_date, created_at, isin) VALUES ( %s, %s, %s, %s)"
         msg = executeSql.ExecuteOne(sql, data)
         return msg
     except Exception as e:

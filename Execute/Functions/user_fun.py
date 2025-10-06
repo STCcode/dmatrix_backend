@@ -1384,7 +1384,7 @@ def InsertAifData():
             #         400
             #     )
 
-            formlist = (formData['entityid'],formData['trans_date'],formData['trans_type'],formData['contribution_amount'],formData['setup_expense'],formData['stamp_duty'],formData['amount_invested'],formData['post_tax_nav'],formData['num_units'],formData['balance_units'],formData['strategy_name'],formData['amc_name'], datetime.now()
+            formlist = (formData['entityid'],formData['trans_date'],formData['trans_type'],formData['contribution_amount'],formData['setup_expense'],formData['stamp_duty'],formData['amount_invested'],formData['post_tax_nav'],formData['num_units'],formData['balance_units'],formData['strategy_name'],formData['amc_name'], datetime.now(),formData['isin']
             )
 
             insert_msg = queries.InsertAifData(formlist)
@@ -1417,7 +1417,7 @@ def insertNavData():
             #         400
             #     )
 
-            formlist = (formData['entityid'],formData['pre_tax_nav'],formData['post_tax_nav'],formData['nav_date'], datetime.now()
+            formlist = (formData['entityid'],formData['pre_tax_nav'],formData['post_tax_nav'],formData['nav_date'], datetime.now(),formData['isin']
             )
 
             insert_msg = queries.insertNavData(formlist)

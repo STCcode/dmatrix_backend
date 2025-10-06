@@ -1480,9 +1480,6 @@ def getAllActionInstrument():
 
 #     return cashflows, dates
 
-from Execute import executeSql
-from datetime import datetime
-
 def get_cashflows_action(entityid):
     """
     Fetch cashflows from tbl_action_table for a given entityid.

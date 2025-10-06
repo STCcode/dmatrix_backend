@@ -783,7 +783,7 @@ def insertMFNavData():
         if request.method == 'POST':
             formData = request.get_json()
 
-            formlist = (formData['entityid'],formData['nav'],formData['nav_date'], datetime.now()
+            formlist = (formData['entityid'],formData['nav'],formData['nav_date'], datetime.now(),formData['isin']
             )
 
             insert_msg = queries.insert_MF_NavData(formlist)
@@ -3314,42 +3314,81 @@ def getAllActionInstrument():
 # -------------------- Core IRR Calculation --------------------
 # import numpy as np
 
+# def calculate_xirr(cashflows, dates, guess=0.1):
+#     """
+#     Calculate XIRR (annualized IRR) that can be positive or negative.
+#     cashflows: list of amounts (negative for investments, positive for redemptions)
+#     dates: list of datetime objects corresponding to cashflows
+#     """
+#     if not cashflows or not dates or len(cashflows) != len(dates):
+#         return None
+
+#     # Convert dates to year fractions relative to first date
+#     days = np.array([(d - dates[0]).days for d in dates], dtype=float)
+#     years = days / 365.0
+#     amounts = np.array(cashflows, dtype=float)
+
+#     # Define NPV and derivative
+#     def npv(rate):
+#         return np.sum(amounts / (1 + rate) ** years)
+
+#     def d_npv(rate):
+#         return np.sum(-years * amounts / (1 + rate) ** (years + 1))
+
+#     # Newton-Raphson iteration
+#     rate = guess
+#     for _ in range(100):
+#         f_value = npv(rate)
+#         f_derivative = d_npv(rate)
+
+#         if abs(f_value) < 1e-6:  # converged
+#             return round(rate * 100, 2)
+
+#         if f_derivative == 0:
+#             break
+
+#         rate -= f_value / f_derivative
+
+#     # Fallback: numpy.irr (may be deprecated in new numpy versions)
+#     try:
+#         irr = np.irr(amounts)
+#         if irr is not None:
+#             return round(irr * 100, 2)
+#     except Exception:
+#         pass
+
+#     return None
+
+
 def calculate_xirr(cashflows, dates, guess=0.1):
     """
-    Calculate XIRR (annualized IRR) that can be positive or negative.
-    cashflows: list of amounts (negative for investments, positive for redemptions)
-    dates: list of datetime objects corresponding to cashflows
+    Calculate XIRR (annualized IRR), positive or negative
     """
     if not cashflows or not dates or len(cashflows) != len(dates):
         return None
 
-    # Convert dates to year fractions relative to first date
     days = np.array([(d - dates[0]).days for d in dates], dtype=float)
     years = days / 365.0
     amounts = np.array(cashflows, dtype=float)
 
-    # Define NPV and derivative
     def npv(rate):
         return np.sum(amounts / (1 + rate) ** years)
 
     def d_npv(rate):
         return np.sum(-years * amounts / (1 + rate) ** (years + 1))
 
-    # Newton-Raphson iteration
     rate = guess
     for _ in range(100):
-        f_value = npv(rate)
-        f_derivative = d_npv(rate)
+        f_val = npv(rate)
+        f_deriv = d_npv(rate)
 
-        if abs(f_value) < 1e-6:  # converged
+        if abs(f_val) < 1e-6:
             return round(rate * 100, 2)
-
-        if f_derivative == 0:
+        if f_deriv == 0:
             break
+        rate -= f_val / f_deriv
 
-        rate -= f_value / f_derivative
-
-    # Fallback: numpy.irr (may be deprecated in new numpy versions)
+    # fallback
     try:
         irr = np.irr(amounts)
         if irr is not None:
@@ -3386,19 +3425,85 @@ def format_irr_response(cashflows, dates):
         "total_redemption": round(total_redemption, 2)
     }
 
-# -------------------- Endpoints --------------------
+
+
+# -------------------- Response Formatter --------------------
+def format_irr_response(cashflows, dates, isin_list):
+    """
+    Returns actual IRR, estimated IRR using NAV, simple return, and holding period
+    """
+    if not cashflows or not dates:
+        return {
+            "annualized_irr_percent": 0.0,
+            "estimated_annualized_irr_percent": 0.0,
+            "simple_return_percent": 0.0,
+            "total_invested": 0.0,
+            "total_redemption": 0.0,
+            "holding_period_days": 0
+        }
+
+    # Actual IRR (using sold amounts)
+    actual_irr = calculate_xirr(cashflows, dates)
+
+    # Estimated IRR (for purchases with no sell, use latest NAV)
+    est_cashflows = cashflows.copy()
+    est_dates = dates.copy()
+    for i, cf in enumerate(cashflows):
+        if cf < 0:  # purchase
+            nav = queries.get_latest_nav(isin_list[i])
+            if nav > 0:
+                est_cashflows.append(nav)
+                est_dates.append(datetime.now().date())
+
+    est_irr = calculate_xirr(est_cashflows, est_dates)
+
+    total_invested = -sum(cf for cf in cashflows if cf < 0)
+    total_redemption = sum(cf for cf in cashflows if cf > 0)
+    simple_return = ((total_redemption - total_invested) / total_invested * 100) if total_invested > 0 else 0.0
+    holding_period_days = (max(dates) - min(dates)).days if dates else 0
+
+    return {
+        "annualized_irr_percent": actual_irr if actual_irr is not None else 0.0,
+        "estimated_annualized_irr_percent": est_irr if est_irr is not None else 0.0,
+        "simple_return_percent": round(simple_return, 2),
+        "total_invested": round(total_invested, 2),
+        "total_redemption": round(total_redemption, 2),
+        "holding_period_days": holding_period_days
+    }
+
+
+# -------------------- Endpoint --------------------
 def getActionIRR():
     entityid = request.args.get("entityid", "").strip()
     if not entityid:
         return make_response({"error": "entityid is required"}, 400)
 
-    cashflows, dates = queries.get_cashflows_action(entityid)
+    cashflows, dates, isin_list = queries.get_cashflows_action(entityid)
     if not cashflows:
         return make_response({"error": f"No rows found for entityid={entityid} in tbl_action_table"}, 404)
 
-    response = format_irr_response(cashflows, dates)
+    response = format_irr_response(cashflows, dates, isin_list)
     response["entityid"] = entityid
-    return make_response({"code": "1023200", **response, "successmsgs": "Fetching Successfully"}, 200)
+
+    return make_response({
+        "code": "1023200",
+        **response,
+        "successmsgs": "Fetching Successfully"
+    }, 200)
+
+# -------------------- Endpoints old --------------------
+# def getActionIRR():
+#     entityid = request.args.get("entityid", "").strip()
+#     if not entityid:
+#         return make_response({"error": "entityid is required"}, 400)
+
+#     cashflows, dates = queries.get_cashflows_action(entityid)
+#     if not cashflows:
+#         return make_response({"error": f"No rows found for entityid={entityid} in tbl_action_table"}, 404)
+
+#     response = format_irr_response(cashflows, dates)
+#     response["entityid"] = entityid
+#     return make_response({"code": "1023200", **response, "successmsgs": "Fetching Successfully"}, 200)
 
 
 def getDirectEquityIRR():

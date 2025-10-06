@@ -284,7 +284,7 @@ def getMfByentId():
      
 def insert_MF_NavData(data):
     try:
-        sql = " INSERT INTO tbl_mutual_fund_nav (entityid, nav, nav_date, created_at) VALUES (%s, %s, %s, %s)"
+        sql = " INSERT INTO tbl_mutual_fund_nav (entityid, nav, nav_date, created_at, isin) VALUES (%s, %s, %s, %s, %s)"
         msg = executeSql.ExecuteOne(sql, data)
         return msg
     except Exception as e:
@@ -1480,31 +1480,88 @@ def getAllActionInstrument():
 
 #     return cashflows, dates
 
-def get_cashflows_action(entityid):
-    sql = "SELECT order_date::date, TRIM(LOWER(order_type)) AS order_type,purchase_amount, redeem_amount FROM tbl_action_table WHERE TRIM(entityid) ILIKE %s ORDER BY order_date;"
-    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
+from Execute import executeSql
+from datetime import datetime
 
-    cashflows, dates = [], []
+def get_cashflows_action(entityid):
+    """
+    Fetch cashflows from tbl_action_table for a given entityid.
+    Returns: cashflows (list), dates (list), isin_list (list)
+    """
+    sql = """
+        SELECT order_date::date, TRIM(LOWER(order_type)) AS order_type,
+               purchase_amount, redeem_amount, isin
+        FROM tbl_action_table
+        WHERE TRIM(entityid) ILIKE %s
+        ORDER BY order_date;
+    """
+    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
+    cashflows, dates, isin_list = [], [], []
+
     for r in rows:
         order_type = (r.get("order_type") or "").strip().lower()
-
         if order_type in ("purchase", "buy"):
             amt = float(r.get("purchase_amount") or 0)
             if amt > 0:
                 cashflows.append(-amt)
                 dates.append(r["order_date"])
-
+                isin_list.append(r.get("isin"))
         elif order_type in ("sell", "redeem", "redemption"):
-            # first try redeem_amount, but if it's 0 and purchase_amount > 0, use that
             amt = float(r.get("redeem_amount") or 0)
             if amt <= 0:
                 amt = float(r.get("purchase_amount") or 0)
             if amt > 0:
                 cashflows.append(amt)
                 dates.append(r["order_date"])
+                isin_list.append(r.get("isin"))
 
-    return cashflows, dates
+    return cashflows, dates, isin_list
 
+
+def get_latest_nav(isin):
+    """
+    Fetch latest NAV for a given ISIN from tbl_mutual_fund_nav
+    """
+    sql = """
+        SELECT nav
+        FROM tbl_mutual_fund_nav
+        WHERE isin = %s
+        ORDER BY nav_date DESC
+        LIMIT 1;
+    """
+    row = executeSql.ExecuteAllWithHeaders(sql, (isin,))
+    if row:
+        return float(row[0].get("nav") or 0)
+    return 0.0
+
+
+
+# old
+# def get_cashflows_action(entityid):
+#     sql = "SELECT order_date::date, TRIM(LOWER(order_type)) AS order_type,purchase_amount, redeem_amount FROM tbl_action_table WHERE TRIM(entityid) ILIKE %s ORDER BY order_date;"
+#     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
+
+#     cashflows, dates = [], []
+#     for r in rows:
+#         order_type = (r.get("order_type") or "").strip().lower()
+
+#         if order_type in ("purchase", "buy"):
+#             amt = float(r.get("purchase_amount") or 0)
+#             if amt > 0:
+#                 cashflows.append(-amt)
+#                 dates.append(r["order_date"])
+
+#         elif order_type in ("sell", "redeem", "redemption"):
+#             # first try redeem_amount, but if it's 0 and purchase_amount > 0, use that
+#             amt = float(r.get("redeem_amount") or 0)
+#             if amt <= 0:
+#                 amt = float(r.get("purchase_amount") or 0)
+#             if amt > 0:
+#                 cashflows.append(amt)
+#                 dates.append(r["order_date"])
+
+#     return cashflows, dates
+# old
 # def get_cashflows_direct_equity(entityid):
 #     sql = "SELECT trade_date::date, order_type, net_total, net_amount_receivable FROM tbl_direct_equity WHERE TRIM(entityid) ILIKE %s ORDER BY trade_date;"
 #     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid.strip(),))

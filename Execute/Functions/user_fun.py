@@ -787,7 +787,7 @@ def insertMFNavData():
             nav_value = float(formData['nav'])
             nav_date = datetime.strptime(formData['nav_date'], "%Y-%m-%d").date()
 
-            # Flat tuple
+            # Flat tuple for ExecuteOne
             formlist = (nav_value, nav_date, datetime.now(), formData['isin'])
             print("DEBUG NAV INSERT:", formlist)
 
@@ -810,6 +810,7 @@ def insertMFNavData():
             middleware.exe_msgs("Insert Failed", str(e.args), '1020500'),
             500
         )
+
 
    
 

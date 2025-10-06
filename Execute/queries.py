@@ -283,16 +283,23 @@ def getMfByentId():
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')      
      
 def insert_MF_NavData(data):
+    """
+    Inserts or updates NAV data in tbl_mutual_fund_nav.
+    Returns True if successful, False if any error occurs.
+    """
     try:
         sql = """
-            INSERT INTO tbl_mutual_fund_nav (nav, nav_date, created_at, isin)
-            VALUES (%s, %s, %s, %s)
+        INSERT INTO tbl_mutual_fund_nav (nav, nav_date, created_at, isin)
+        VALUES (%s, %s, %s, %s)
+        ON CONFLICT (isin, nav_date)
+        DO UPDATE SET nav = EXCLUDED.nav, created_at = EXCLUDED.created_at
         """
-        executeSql.ExecuteOne(sql, data)  # execute without returning row count
+        executeSql.ExecuteOne(sql, data)
         return True  # success
     except Exception as e:
         print("Error inserting NAV:", e)
         return False  # failure
+
 
 
 

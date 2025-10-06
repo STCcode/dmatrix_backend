@@ -288,11 +288,12 @@ def insert_MF_NavData(data):
             INSERT INTO tbl_mutual_fund_nav (nav, nav_date, created_at, isin)
             VALUES (%s, %s, %s, %s)
         """
-        msg = executeSql.ExecuteOne(sql, data)
-        return msg
+        executeSql.ExecuteOne(sql, data)  # execute without returning row count
+        return True  # success
     except Exception as e:
         print("Error inserting NAV:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
+        return False  # failure
+
 
 
 

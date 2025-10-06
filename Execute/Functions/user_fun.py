@@ -783,7 +783,7 @@ def insertMFNavData():
         if request.method == 'POST':
             formData = request.get_json()
 
-            # Convert types
+            # Convert types safely
             nav_value = float(formData['nav'])
             nav_date = datetime.strptime(formData['nav_date'], "%Y-%m-%d").date()
 
@@ -791,18 +791,23 @@ def insertMFNavData():
             formlist = (nav_value, nav_date, datetime.now(), formData['isin'])
             print("DEBUG NAV INSERT:", formlist)
 
-            insert_msg = queries.insert_MF_NavData(formlist)
-            print("DEBUG RESULT:", insert_msg)
+            success = queries.insert_MF_NavData(formlist)
 
-            return make_response(
-                middleware.exs_msgs(insert_msg, responses.insert_200, '1020200'),
-                200
-            )
+            if success:
+                return make_response(
+                    middleware.exs_msgs("Inserted Successfully", responses.insert_200, '1020200'),
+                    200
+                )
+            else:
+                return make_response(
+                    middleware.exe_msgs("Insert Failed", "Database error", '1020500'),
+                    500
+                )
 
     except Exception as e:
         print("Error in insertMFNavData:", e)
         return make_response(
-            middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
+            middleware.exe_msgs("Insert Failed", str(e.args), '1020500'),
             500
         )
 

@@ -782,29 +782,30 @@ def insertMFNavData():
     try:
         if request.method == 'POST':
             formData = request.get_json()
-             # Convert types properly
+
+            # Convert types
             nav_value = float(formData['nav'])
             nav_date = datetime.strptime(formData['nav_date'], "%Y-%m-%d").date()
 
-            formlist = ((nav_value),(nav_date), datetime.now(),formData['isin']
-            )
+            # Flat tuple
+            formlist = (nav_value, nav_date, datetime.now(), formData['isin'])
             print("DEBUG NAV INSERT:", formlist)
 
             insert_msg = queries.insert_MF_NavData(formlist)
-
             print("DEBUG RESULT:", insert_msg)
 
-            
             return make_response(
                 middleware.exs_msgs(insert_msg, responses.insert_200, '1020200'),
-                200 )
+                200
+            )
 
     except Exception as e:
-        print("Error in insertNavData:", e)
+        print("Error in insertMFNavData:", e)
         return make_response(
             middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
             500
         )
+
    
 
 def  getAllMutualFundNav():

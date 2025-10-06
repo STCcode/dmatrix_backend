@@ -288,7 +288,7 @@ def insert_MF_NavData(data):
     Returns True if operation succeeds, False if a DB error occurs.
     """
     try:
-        sql = "INSERT INTO tbl_mutual_fund_nav (scheme_code, isin, scheme_name, nav, nav_date, created_at) VALUES (%s, %s, %s, %s, %s, %s) ON CONFLICT (isin, nav_date) DO UPDATE SET nav = EXCLUDED.nav, created_at = EXCLUDED.created_at;"
+        sql = "INSERT INTO tbl_mutual_fund_nav (scheme_code, isin, scheme_name, nav, nav_date, created_at) VALUES (%s, %s, %s, %s, %s, %s) ON CONFLICT (scheme_code, nav_date) DO UPDATE SET nav = EXCLUDED.nav, created_at = EXCLUDED.created_at;"
 
         success = executeSql.ExecuteOne(sql, data)
         if success:

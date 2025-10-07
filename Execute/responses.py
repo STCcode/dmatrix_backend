@@ -2,6 +2,8 @@ insert_501 = "Internal Server Error while Inserting Data."
 insert_200 = "Inserted Successfully"
 update_501 = "Internal Server Error while Updating Data."
 update_200 = "Updated Successfully"
+update_404 = "No record found to update"
+
 getAll_501 = "Internal Server Error while Fetching All Data."
 getAll_200 = "Fetching Successfully"
 getAll_404 = "No data found"

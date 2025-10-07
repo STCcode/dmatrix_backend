@@ -550,19 +550,22 @@ def getAllAction():
 #             500
 #         )
     
+
+
 def updateMFDetailActionTableRow():
     try:
-        if request.method == 'POST':   # changed from PUT → POST
+        if request.method == 'POST':   # Using POST for updates
             formData = request.get_json()
 
-            # Get ID from params instead of body
-            record_id = request.args.get("id")   # Example: /updateMFAction?id=241
+            # ✅ Get ID from URL params like /updateMFAction?id=241
+            record_id = request.args.get("id")
             if not record_id:
                 return make_response(
                     middleware.exe_msgs(responses.update_404, "ID parameter is required", '1020405'),
                     400
                 )
 
+            # ✅ Collect data from form
             formlist = (
                 formData.get('scrip_code'),
                 formData.get('mode'),
@@ -587,26 +590,30 @@ def updateMFDetailActionTableRow():
                 formData.get('purchase_value'),
                 formData.get('order_date'),
                 formData.get('sett_no'),
-                datetime.now(),
-                record_id   # use param id, not from JSON
+                datetime.now(),   # updated_at timestamp
+                record_id         # WHERE id = record_id
             )
 
+            # ✅ Run query
             updated_rows = queries.updateMFDetailActionTableRow(formlist)
 
+            # If query returns error
             if type(updated_rows).__name__ != "int":
                 return make_response(updated_rows, 500)
 
+            # If no record updated
             if updated_rows == 0:
                 return make_response(
                     middleware.exe_msgs(responses.update_404, "No record found to update", '1020404'),
                     404
                 )
 
+            # ✅ Success
             result = middleware.exs_msgs(updated_rows, responses.update_200, '1020400')
             return make_response(result, 200)
 
     except Exception as e:
-        print("Error in update_entity_table:", e)
+        print("Error in updateMFDetailActionTableRow:", e)
         return make_response(
             middleware.exe_msgs(responses.update_501, str(e.args), '1020501'),
             500

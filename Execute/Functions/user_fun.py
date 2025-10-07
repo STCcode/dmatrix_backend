@@ -558,10 +558,10 @@ def updateMFDetailActionTableRow():
         record_id = request.args.get("id")
         if not record_id:
             return make_response(
-                middleware.exe_msgs(responses.update_404, "ID parameter is required", '1020405'),
-                400
-            )
-        record_id = int(record_id)  # Ensure ID is int
+        middleware.exe_msgs(responses.update_404, "ID parameter is required", '1020405'),
+        400
+    )
+        record_id = int(record_id)  # ensure proper type for SQL
 
         # Get JSON body
         formData = request.get_json()

@@ -554,63 +554,61 @@ def getAllAction():
 
 def updateMFDetailActionTableRow():
     try:
-        if request.method == 'POST':   # Using POST for updates
-            formData = request.get_json()
+        # Get ID from URL param
+        record_id = request.args.get("id")
+        if not record_id:
+            return make_response(
+                middleware.exe_msgs(responses.update_404, "ID parameter is required", '1020405'),
+                400
+            )
+        record_id = int(record_id)  # Ensure ID is int
 
-            # ✅ Get ID from URL params like /updateMFAction?id=241
-            record_id = request.args.get("id")
-            if not record_id:
-                return make_response(
-                    middleware.exe_msgs(responses.update_404, "ID parameter is required", '1020405'),
-                    400
-                )
+        # Get JSON body
+        formData = request.get_json()
 
-            # ✅ Collect data from form
-            formlist = (
-                formData.get('scrip_code'),
-                formData.get('mode'),
-                formData.get('order_type'),
-                formData.get('scrip_name'),
-                formData.get('isin'),
-                formData.get('order_number'),
-                formData.get('folio_number'),
-                formData.get('nav'),
-                formData.get('stt'),
-                formData.get('unit'),
-                formData.get('redeem_amount'),
-                formData.get('purchase_amount'),
-                formData.get('cgst'),
-                formData.get('sgst'),
-                formData.get('igst'),
-                formData.get('ugst'),
-                formData.get('stamp_duty'),
-                formData.get('cess_value'),
-                formData.get('net_amount'),
-                formData.get('entityid'),
-                formData.get('purchase_value'),
-                formData.get('order_date'),
-                formData.get('sett_no'),
-                datetime.now(),   # updated_at timestamp
-                record_id         # WHERE id = record_id
+        # Collect data from JSON (exclude updated_at and id)
+        form_list = [
+            formData.get('scrip_code'),
+            formData.get('mode'),
+            formData.get('order_type'),
+            formData.get('scrip_name'),
+            formData.get('isin'),
+            formData.get('order_number'),
+            formData.get('folio_number'),
+            formData.get('nav'),
+            formData.get('stt'),
+            formData.get('unit'),
+            formData.get('redeem_amount'),
+            formData.get('purchase_amount'),
+            formData.get('cgst'),
+            formData.get('sgst'),
+            formData.get('igst'),
+            formData.get('ugst'),
+            formData.get('stamp_duty'),
+            formData.get('cess_value'),
+            formData.get('net_amount'),
+            formData.get('entityid'),
+            formData.get('purchase_value'),
+            formData.get('order_date'),
+            formData.get('sett_no')
+        ]
+
+        # Call query function with form data + record ID
+        updated_rows = queries.updateMFDetailActionTableRow(form_list, record_id)
+
+        # Check if update succeeded
+        if type(updated_rows).__name__ != "int":
+            return make_response(updated_rows, 500)
+
+        if updated_rows == 0:
+            return make_response(
+                middleware.exe_msgs(responses.update_404, "No record found to update", '1020404'),
+                404
             )
 
-            # ✅ Run query
-            updated_rows = queries.updateMFDetailActionTableRow(formlist,record_id)
-
-            # If query returns error
-            if type(updated_rows).__name__ != "int":
-                return make_response(updated_rows, 500)
-
-            # If no record updated
-            if updated_rows == 0:
-                return make_response(
-                    middleware.exe_msgs(responses.update_404, "No record found to update", '1020404'),
-                    404
-                )
-
-            # ✅ Success
-            result = middleware.exs_msgs(updated_rows, responses.update_200, '1020400')
-            return make_response(result, 200)
+        # Success
+        result = middleware.exs_msgs(updated_rows, responses.update_200, '1020400')
+        return make_response(result, 200)
 
     except Exception as e:
         print("Error in updateMFDetailActionTableRow:", e)
@@ -618,7 +616,7 @@ def updateMFDetailActionTableRow():
             middleware.exe_msgs(responses.update_501, str(e.args), '1020501'),
             500
         )
-
+query.py
 def deleteMFDetailActionTableRow():
     try:
         entity_id = None

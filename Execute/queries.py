@@ -240,18 +240,28 @@ def getAllAction():
 
 def updateMFDetailActionTableRow(data, record_id):
     try:
-        sql = "UPDATE tbl_action_table SET scrip_code = %s, mode = %s, order_type = %s, scrip_name = %s, isin = %s, order_number = %s, folio_number = %s, nav = %s, stt = %s, unit = %s,redeem_amount = %s, purchase_amount = %s,cgst = %s,sgst = %s,igst = %s,ugst = %s,stamp_duty = %s,cess_value = %s,net_amount = %s,entityid = %s,purchase_value = %s,order_date = %s,sett_no = %s,updated_at = %s WHERE id = %s"
+        sql = """
+        UPDATE tbl_action_table
+        SET 
+            scrip_code=%s, mode=%s, order_type=%s, scrip_name=%s, isin=%s,
+            order_number=%s, folio_number=%s, nav=%s, stt=%s, unit=%s,
+            redeem_amount=%s, purchase_amount=%s, cgst=%s, sgst=%s, igst=%s,
+            ugst=%s, stamp_duty=%s, cess_value=%s, net_amount=%s,
+            entityid=%s, purchase_value=%s, order_date=%s, sett_no=%s,
+            updated_at=%s
+        WHERE id=%s
+        """
 
+        # Append updated_at and record_id to data
         final_data = list(data) + [datetime.now(), record_id]
 
-        # ✅ Execute and return affected rows
-        updated_rows = executeSql.ExecuteReturnId(sql, final_data)
-
-        return updated_rows  # should be int (number of rows updated)
+        # Execute SQL
+        rows_affected = executeSql.ExecuteReturnId(sql, final_data)
+        return rows_affected
 
     except Exception as e:
         print("Error in updateMFDetailActionTableRow query ==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020311')
+        return exe_msgs(responses.update_501, str(e.args), '1020501')
 
 
 def deleteMFDetailActionTableRow(entity_id):

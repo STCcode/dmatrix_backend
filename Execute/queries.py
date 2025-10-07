@@ -1493,42 +1493,63 @@ def getAllActionInstrument():
 
 def get_cashflows_action(entityid):
     """
-    Fetch cashflows from tbl_action_table for a given entityid.
-    Returns: cashflows (list), dates (list), isin_list (list)
+    Fetch cashflows and units from tbl_action_table
+    Returns:
+        cashflows: list of amounts (negative for buys, positive for sells)
+        dates: list of datetime.date objects
+        isin_list: list of ISINs corresponding to each cashflow
+        units_list: list of units for each cashflow (needed for NAV estimate)
     """
     sql = """
         SELECT order_date::date, TRIM(LOWER(order_type)) AS order_type,
-               purchase_amount, redeem_amount, isin
+               purchase_amount, redeem_amount, isin, unit
         FROM tbl_action_table
         WHERE TRIM(entityid) ILIKE %s
         ORDER BY order_date;
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
-    cashflows, dates, isin_list = [], [], []
+    
+    cashflows, dates, isin_list, units_list = [], [], [], []
+    purchase_units_tracker = {}  # track unsold units per ISIN
 
     for r in rows:
         order_type = (r.get("order_type") or "").strip().lower()
-        if order_type in ("purchase", "buy"):
-            amt = float(r.get("purchase_amount") or 0)
-            if amt > 0:
-                cashflows.append(-amt)
-                dates.append(r["order_date"])
-                isin_list.append(r.get("isin"))
-        elif order_type in ("sell", "redeem", "redemption"):
-            amt = float(r.get("redeem_amount") or 0)
-            if amt <= 0:
-                amt = float(r.get("purchase_amount") or 0)
-            if amt > 0:
-                cashflows.append(amt)
-                dates.append(r["order_date"])
-                isin_list.append(r.get("isin"))
+        isin = r.get("isin")
+        units = float(r.get("unit") or 0)
+        purchase_amount = float(r.get("purchase_amount") or 0)
+        redeem_amount = float(r.get("redeem_amount") or 0)
 
-    return cashflows, dates, isin_list
+        if order_type in ("purchase", "buy"):
+            if purchase_amount > 0:
+                cashflows.append(-purchase_amount)
+                dates.append(r["order_date"])
+                isin_list.append(isin)
+                units_list.append(units)
+                # Track remaining units for this purchase
+                if isin not in purchase_units_tracker:
+                    purchase_units_tracker[isin] = 0
+                purchase_units_tracker[isin] += units
+
+        elif order_type in ("sell", "redeem", "redemption"):
+            if redeem_amount <= 0 and purchase_amount > 0:
+                redeem_amount = purchase_amount
+            if redeem_amount > 0:
+                cashflows.append(redeem_amount)
+                dates.append(r["order_date"])
+                isin_list.append(isin)
+                units_list.append(units)
+                # Reduce remaining units
+                if isin in purchase_units_tracker:
+                    purchase_units_tracker[isin] -= units
+                    if purchase_units_tracker[isin] < 0:
+                        purchase_units_tracker[isin] = 0
+
+    return cashflows, dates, isin_list, units_list, purchase_units_tracker
 
 
 def get_latest_nav(isin):
     """
-    Fetch latest NAV for a given ISIN from tbl_mutual_fund_nav
+    Fetch latest NAV from tbl_mutual_fund_nav
     """
     sql = """
         SELECT nav
@@ -1541,8 +1562,6 @@ def get_latest_nav(isin):
     if row:
         return float(row[0].get("nav") or 0)
     return 0.0
-
-
 
 # old
 # def get_cashflows_action(entityid):

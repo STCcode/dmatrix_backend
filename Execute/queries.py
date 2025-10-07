@@ -284,20 +284,19 @@ def getMfByentId():
      
 def insert_MF_NavData(data):
     """
-    Inserts or updates NAV data in tbl_mutual_fund_nav.
-    Returns True if operation succeeds, False if a DB error occurs.
+    Always insert a new NAV entry for an ISIN — no conflict handling.
     """
     try:
-        sql = "INSERT INTO tbl_mutual_fund_nav (scheme_code, isin, scheme_name, nav, nav_date, created_at) VALUES (%s, %s, %s, %s, %s, %s) ON CONFLICT (scheme_code, nav_date) DO UPDATE SET nav = EXCLUDED.nav, created_at = EXCLUDED.created_at;"
-
+        sql = """
+            INSERT INTO tbl_mutual_fund_nav (isin, nav, nav_date)
+            VALUES (%s, %s, %s)
+        """
         success = executeSql.ExecuteOne(sql, data)
-        if success:
-            return True
-        else:
-            return False
+        return success > 0
     except Exception as e:
         print("Error in insert_MF_NavData:", e)
         return False
+
 
 
 

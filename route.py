@@ -177,6 +177,9 @@ app.add_url_rule('/InsertAifData' ,view_func=user_fun.InsertAifData,methods=['GE
 app.add_url_rule('/getAllAif',view_func=user_fun.getAllAif,methods=['GET','POST'])
 app.add_url_rule('/getAifActionTablebyId',view_func=user_fun.getAifActionTablebyId,methods=['GET','POST'])
 
+app.add_url_rule('/updateAIFDetailActionTableRow',view_func=user_fun.updateAIFDetailActionTableRow,methods=['POST'])
+app.add_url_rule('/deleteAIFDetailActionTableRow',view_func=user_fun.deleteAIFDetailActionTableRow,methods=['DELETE','POST'])
+
 app.add_url_rule('/getAifEntity',view_func=user_fun.getAifEntity,methods=['GET','POST'])
 
 app.add_url_rule('/insertNavData' ,view_func=user_fun.insertNavData,methods=['GET','POST'])

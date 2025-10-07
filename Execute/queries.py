@@ -672,7 +672,28 @@ def insertNavData(data):
         return msg
     except Exception as e:
         print("Error in save_user query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')    
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')  
+
+
+def updateAIFDetailActionTableRow(data):
+    try:
+        sql = "UPDATE tbl_aif SET trans_date = %s,trans_type = %s,contribution_amount = %s,setup_expense = %s,stamp_duty = %s,amount_invested = %s,post_tax_nav =%s,num_units =%s,balance_units =%s,strategy_name=%s,amc_name=%s,isin=%s,updated_at = %s WHERE aif_id = %s"
+        msg = executeSql.ExecuteReturnId(sql, data)
+        return msg
+    except Exception as e:
+        print("Error in update_entity_table query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020311')
+
+def deleteAIFDetailActionTableRow(entity_id):
+    try:
+        entity_id = int(entity_id)
+        sql = "DELETE FROM tbl_aif WHERE aif_id = %s RETURNING id"
+        data = (entity_id,) 
+        deleted_count = executeSql.ExecuteReturnId(sql, data) 
+        return deleted_count
+    except Exception as e:
+        print("Error in DeleteEntityByid query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')       
     
 
 def getAllAif():

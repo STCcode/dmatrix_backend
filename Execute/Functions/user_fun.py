@@ -1445,6 +1445,103 @@ def insertNavData():
             middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
             500
         )
+    
+def updateAIFDetailActionTableRow():
+    try:
+        if request.method == 'POST':   # changed from PUT → POST
+            formData = request.get_json()
+
+            # Get ID from params instead of body
+            record_id = request.args.get("id")   # Example: /updateMFAction?id=241
+            if not record_id:
+                return make_response(
+                    middleware.exe_msgs(responses.update_404, "ID parameter is required", '1020405'),
+                    400
+                )
+
+            formlist = (
+                formData.get('trans_date'),
+                formData.get('trans_type'),
+                formData.get('contribution_amount'),
+                formData.get('setup_expense'),
+                formData.get('stamp_duty'),
+                formData.get('amount_invested'),
+                formData.get('post_tax_nav'),
+                formData.get('num_units'),
+                formData.get('balance_units'),
+                formData.get('strategy_name'),
+                formData.get('amc_name'),
+                formData.get('isin'),
+                datetime.now(),
+                record_id   # use param id, not from JSON
+            )
+
+            updated_rows = queries.updateAIFDetailActionTableRow(formlist)
+
+            if type(updated_rows).__name__ != "int":
+                return make_response(updated_rows, 500)
+
+            if updated_rows == 0:
+                return make_response(
+                    middleware.exe_msgs(responses.update_404, "No record found to update", '1020404'),
+                    404
+                )
+
+            result = middleware.exs_msgs(updated_rows, responses.update_200, '1020400')
+            return make_response(result, 200)
+
+    except Exception as e:
+        print("Error in update_entity_table:", e)
+        return make_response(
+            middleware.exe_msgs(responses.update_501, str(e.args), '1020501'),
+            500
+        )
+
+def deleteAIFDetailActionTableRow():
+    try:
+        entity_id = None
+
+        # If DELETE → get from query parameters
+        if request.method == 'DELETE':
+            entity_id = request.args.get('id')
+
+        # If POST → get from form-data or JSON
+        elif request.method == 'POST':
+            if request.is_json:
+                entity_id = request.json.get('id')
+            else:
+                entity_id = request.form.get('id')
+
+        # Validate input
+        if not entity_id:
+            return make_response(
+                middleware.exe_msgs(responses.delete_501, "Missing id parameter", '1024501'),
+                400
+            )
+
+        # Perform deletion
+        deleted_rows = queries.deleteAIFDetailActionTableRow(entity_id)
+
+        if isinstance(deleted_rows, int):
+            if deleted_rows > 0:
+                result = middleware.exs_msgs(deleted_rows, responses.delete_200, '1024200')
+                status = 200
+            else:
+                result = middleware.exe_msgs(responses.delete_404, "No record found to delete", '1024504')
+                status = 404
+        else:
+            # Query returned error message object
+            result = deleted_rows
+            status = 500
+
+        return make_response(result, status)
+
+    except Exception as e:
+        print("Error in delete_entity:", e)
+        return make_response(
+            middleware.exe_msgs(responses.delete_501, str(e.args), '1024500'),
+            500
+        )
    
 
 

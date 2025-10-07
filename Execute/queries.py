@@ -6,7 +6,6 @@ import pandas as pd
 from flask import jsonify, request
 import numpy as np
 import json  
-from middleware import exe_msgs
 #getting all user data
 def getAllUserData():
      try:
@@ -266,7 +265,7 @@ def updateMFDetailActionTableRow(data, record_id):
 
     except Exception as e:
         print("Error in updateMFDetailActionTableRow query ==========================", e)
-        return exe_msgs(responses.update_501, str(e.args), '1020501')
+        return(responses.update_501, str(e.args), '1020501')
 
 def deleteMFDetailActionTableRow(entity_id):
     try:

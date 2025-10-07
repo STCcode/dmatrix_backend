@@ -616,7 +616,7 @@ def updateMFDetailActionTableRow():
             middleware.exe_msgs(responses.update_501, str(e.args), '1020501'),
             500
         )
-query.py
+
 def deleteMFDetailActionTableRow():
     try:
         entity_id = None

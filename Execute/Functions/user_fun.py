@@ -561,13 +561,18 @@ def updateMFDetailActionTableRow():
                 middleware.exe_msgs(responses.update_404, "ID parameter is required", '1020405'),
                 400
             )
-        record_id = int(record_id)  # ensure proper type for SQL
+        record_id = int(record_id)
 
         # Get JSON body
         formData = request.get_json()
+        if not formData:
+            return make_response(
+                middleware.exe_msgs(responses.update_501, "No JSON body provided", '1020502'),
+                400
+            )
 
         # Collect data from JSON (exclude updated_at and id)
-        formlist = [
+        form_list = [
             formData.get('scrip_code'),
             formData.get('mode'),
             formData.get('order_type'),
@@ -593,21 +598,17 @@ def updateMFDetailActionTableRow():
             formData.get('sett_no')
         ]
 
-        # Call query function with form data + record ID
-        updated_rows = queries.updateMFDetailActionTableRow(formlist, record_id)
+        # Call query function
+        updated_row_id = queries.updateMFDetailActionTableRow(form_list, record_id)
 
-        # Check if update succeeded
-        if type(updated_rows).__name__ != "int":
-            return make_response(updated_rows, 500)
-
-        if updated_rows == 0:
+        if not updated_row_id:
             return make_response(
                 middleware.exe_msgs(responses.update_404, "No record found to update", '1020404'),
                 404
             )
 
         # Success
-        result = middleware.exs_msgs(updated_rows, responses.update_200, '1020400')
+        result = middleware.exs_msgs(updated_row_id, responses.update_200, '1020400')
         return make_response(result, 200)
 
     except Exception as e:
@@ -616,6 +617,7 @@ def updateMFDetailActionTableRow():
             middleware.exe_msgs(responses.update_501, str(e.args), '1020501'),
             500
         )
+
 
 def deleteMFDetailActionTableRow():
     try:

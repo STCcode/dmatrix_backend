@@ -115,7 +115,7 @@ app.add_url_rule('/action_table' ,view_func=user_fun.action_table,methods=['GET'
 app.add_url_rule('/getAllAction',view_func=user_fun.getAllAction,methods=['GET','POST'])
 app.add_url_rule('/getActionByentId',view_func=user_fun.getActionByentId,methods=['GET','POST'])
 
-app.add_url_rule('/updateMFDetailActionTableRow',view_func=user_fun.updateMFDetailActionTableRow,methods=['POST'])
+app.add_url_rule('/updateMFDetailActionTableRow',view_func=user_fun.updateMFDetailActionTableRow,methods=['PUT'])
 app.add_url_rule('/deleteMFDetailActionTableRow',view_func=user_fun.deleteMFDetailActionTableRow,methods=['DELETE','POST'])
 
 app.add_url_rule('/getAllActionTableOfMFEquity',view_func=user_fun.getMfByentId,methods=['GET','POST'])

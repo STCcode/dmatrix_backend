@@ -595,7 +595,7 @@ def updateMFDetailActionTableRow():
             )
 
             # ✅ Run query
-            updated_rows = queries.updateMFDetailActionTableRow(formlist)
+            updated_rows = queries.updateMFDetailActionTableRow(formlist,record_id)
 
             # If query returns error
             if type(updated_rows).__name__ != "int":

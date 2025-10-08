@@ -3573,7 +3573,7 @@ def getActionIRR():
     if not entityid:
         return make_response({"error": "entityid is required"}, 400)
 
-    cashflows, dates, isin_list, units_list, remaining_units_tracker = get_cashflows_action(entityid)
+    cashflows, dates, isin_list, units_list, remaining_units_tracker =queries.get_cashflows_action(entityid)
     if not cashflows:
         return make_response({"error": f"No rows found for entityid={entityid}"}, 404)
 

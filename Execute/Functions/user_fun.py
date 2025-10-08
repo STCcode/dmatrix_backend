@@ -3472,31 +3472,19 @@ def calculate_xirr(cashflows, dates, guess=0.1):
     years = days / 365.0
     amounts = np.array(cashflows, dtype=float)
 
-    # Newton-Raphson
     def npv(rate):
         return np.sum(amounts / (1 + rate) ** years)
 
-    def d_npv(rate):
-        return np.sum(-years * amounts / (1 + rate) ** (years + 1))
-
-    rate = guess
-    for _ in range(100):
-        f_value = npv(rate)
-        f_derivative = d_npv(rate)
-        if abs(f_value) < 1e-6:
-            return round(rate * 100, 2)
-        if f_derivative == 0:
-            break
-        rate -= f_value / f_derivative
-
     try:
-        irr = np.irr(amounts)
-        if irr is not None:
-            return round(irr * 100, 2)
+        irr = newton(npv, guess, maxiter=100)
+        return round(irr * 100, 2)
     except Exception:
-        pass
-
-    return None
+        try:
+            irr = np.irr(amounts)
+            if irr is not None:
+                return round(irr * 100, 2)
+        except Exception:
+            pass
 
 # -------------------- Prepare Cashflows from Table Rows --------------------
 def prepare_cashflows_for_entity(rows):

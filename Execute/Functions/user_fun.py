@@ -3467,10 +3467,12 @@ def calculate_xirr(cashflows, dates, guess=0.1):
     if not cashflows or not dates or len(cashflows) != len(dates):
         return None
 
+    # Convert dates to years from first date
     days = np.array([(d - dates[0]).days for d in dates], dtype=float)
     years = days / 365.0
     amounts = np.array(cashflows, dtype=float)
 
+    # Newton-Raphson
     def npv(rate):
         return np.sum(amounts / (1 + rate) ** years)
 
@@ -3498,31 +3500,47 @@ def calculate_xirr(cashflows, dates, guess=0.1):
 
 # -------------------- Prepare Cashflows from Table Rows --------------------
 def prepare_cashflows_for_entity(rows):
-    cashflows = []
-    dates = []
-    isin_list = []
-    units_list = []
-    remaining_units_tracker = {}
+    cashflows, dates, isin_list, units_list, remaining_units_tracker = [], [], [], [], {}
 
     for row in sorted(rows, key=lambda x: x['order_date']):
-        order_type = row['order_type'].lower()
-        if order_type == 'purchase':
-            cashflows.append(-float(row['purchase_amount']))
-            dates.append(row['order_date'])
-            isin_list.append(row['isin'])
-            units_list.append(row['unit'])
-            remaining_units_tracker[row['isin']] = remaining_units_tracker.get(row['isin'], 0) + row['unit']
-        elif order_type == 'sell':
-            cashflows.append(float(row['redeem_amount']))
-            dates.append(row['order_date'])
-            isin_list.append(row['isin'])
-            units_list.append(row['unit'])
-            remaining_units_tracker[row['isin']] = remaining_units_tracker.get(row['isin'], 0) - row['unit']
+        order_type = (row.get('order_type') or "").strip().lower()
+        order_date = row.get('order_date')
+        if isinstance(order_date, str):
+            order_date = datetime.strptime(order_date, "%Y-%m-%d").date()
+
+        isin = row.get('isin')
+        units = float(row.get('unit') or 0)
+        purchase_amount = float(row.get('purchase_amount') or 0)
+        redeem_amount = float(row.get('redeem_amount') or 0)
+
+        # Purchases
+        if order_type in ("purchase", "buy") and purchase_amount > 0:
+            cashflows.append(-purchase_amount)
+            dates.append(order_date)
+            isin_list.append(isin)
+            units_list.append(units)
+            remaining_units_tracker[isin] = remaining_units_tracker.get(isin, 0) + units
+
+        # Sells / Redemptions
+        elif order_type in ("sell", "redeem", "redemption"):
+            if redeem_amount <= 0 and purchase_amount > 0:
+                redeem_amount = purchase_amount
+            if redeem_amount > 0:
+                cashflows.append(redeem_amount)
+                dates.append(order_date)
+                isin_list.append(isin)
+                units_list.append(units)
+                # Deduct remaining units
+                if isin in remaining_units_tracker:
+                    remaining_units_tracker[isin] -= units
+                    remaining_units_tracker[isin] = max(remaining_units_tracker[isin], 0)
 
     return cashflows, dates, isin_list, units_list, remaining_units_tracker
 
 # -------------------- IRR Response Formatter --------------------
-def format_irr_response(cashflows, dates, isin_list, units_list, remaining_units_tracker):
+def format_irr_response(rows):
+    cashflows, dates, isin_list, units_list, remaining_units_tracker = prepare_cashflows_for_entity(rows)
+
     if not cashflows or not dates:
         return {
             "annualized_irr_percent": 0.0,
@@ -3536,11 +3554,11 @@ def format_irr_response(cashflows, dates, isin_list, units_list, remaining_units
     # Actual IRR
     actual_irr = calculate_xirr(cashflows, dates)
 
-    # Estimated IRR (unsold units × latest NAV)
+    # Estimated IRR for unsold units
     est_cashflows = cashflows.copy()
     est_dates = dates.copy()
     for i, cf in enumerate(cashflows):
-        if cf < 0:  # purchases
+        if cf < 0:
             isin = isin_list[i]
             remaining_units = remaining_units_tracker.get(isin, 0)
             if remaining_units > 0:
@@ -3571,11 +3589,12 @@ def getActionIRR():
     if not entityid:
         return make_response({"error": "entityid is required"}, 400)
 
-    cashflows, dates, isin_list, units_list, remaining_units_tracker =queries.get_cashflows_action(entityid)
-    if not cashflows:
+    # Fetch all rows for this entity
+    rows = queries.get_cashflows_action(entityid)
+    if not rows:
         return make_response({"error": f"No rows found for entityid={entityid}"}, 404)
 
-    response = format_irr_response(cashflows, dates, isin_list, units_list, remaining_units_tracker)
+    response = format_irr_response(rows)
     response["entityid"] = entityid
 
     return make_response({
@@ -3583,7 +3602,6 @@ def getActionIRR():
         **response,
         "successmsgs": "Fetching Successfully"
     }, 200)
-
 # -------------------- Endpoints old --------------------
 # def getActionIRR():
 #     entityid = request.args.get("entityid", "").strip()

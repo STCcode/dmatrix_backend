@@ -1527,37 +1527,7 @@ def get_cashflows_action(entityid):
         ORDER BY order_date;
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
-
-    cashflows, dates, isin_list, units_list = [], [], [], []
-    remaining_units_tracker = {}
-
-    for r in rows:
-        order_type = (r.get("order_type") or "").strip().lower()
-        isin = r.get("isin")
-        units = float(r.get("unit") or 0)
-        purchase_amount = float(r.get("purchase_amount") or 0)
-        redeem_amount = float(r.get("redeem_amount") or 0)
-        order_date = r.get("order_date")
-
-        if order_type in ("purchase", "buy"):
-            if purchase_amount > 0:
-                cashflows.append(-purchase_amount)
-                dates.append(order_date)
-                isin_list.append(isin)
-                units_list.append(units)
-                remaining_units_tracker[isin] = remaining_units_tracker.get(isin, 0) + units
-        elif order_type in ("sell", "redeem", "redemption"):
-            if redeem_amount <= 0 and purchase_amount > 0:
-                redeem_amount = purchase_amount
-            if redeem_amount > 0:
-                cashflows.append(redeem_amount)
-                dates.append(order_date)
-                isin_list.append(isin)
-                units_list.append(units)
-                remaining_units_tracker[isin] = max(remaining_units_tracker.get(isin, 0) - units, 0)
-
-    return cashflows, dates, isin_list, units_list, remaining_units_tracker
-
+    return rows  # return the raw rows to function.py
 
 
 
@@ -1569,10 +1539,11 @@ def get_latest_nav(isin):
         ORDER BY nav_date DESC
         LIMIT 1;
     """
-    rows = executeSql.ExecuteAllWithHeaders(sql, (isin,))
-    if rows and rows[0].get("nav") is not None:
-        return float(rows[0]["nav"])
+    row = executeSql.ExecuteAllWithHeaders(sql, (isin,))
+    if row:
+        return float(row[0].get("nav") or 0)
     return 0.0
+
 
 # old
 # def get_cashflows_action(entityid):

@@ -3486,6 +3486,8 @@ def calculate_xirr(cashflows, dates, guess=0.1):
         except Exception:
             pass
 
+    return None
+
 # -------------------- Prepare Cashflows from Table Rows --------------------
 def prepare_cashflows_for_entity(rows):
     cashflows, dates, isin_list, units_list, remaining_units_tracker = [], [], [], [], {}
@@ -3510,18 +3512,14 @@ def prepare_cashflows_for_entity(rows):
             remaining_units_tracker[isin] = remaining_units_tracker.get(isin, 0) + units
 
         # Sells / Redemptions
-        elif order_type in ("sell", "redeem", "redemption"):
-            if redeem_amount <= 0 and purchase_amount > 0:
-                redeem_amount = purchase_amount
-            if redeem_amount > 0:
-                cashflows.append(redeem_amount)
-                dates.append(order_date)
-                isin_list.append(isin)
-                units_list.append(units)
-                # Deduct remaining units
-                if isin in remaining_units_tracker:
-                    remaining_units_tracker[isin] -= units
-                    remaining_units_tracker[isin] = max(remaining_units_tracker[isin], 0)
+        elif order_type in ("sell", "redeem", "redemption") and redeem_amount > 0:
+            cashflows.append(redeem_amount)
+            dates.append(order_date)
+            isin_list.append(isin)
+            units_list.append(units)
+            if isin in remaining_units_tracker:
+                remaining_units_tracker[isin] -= units
+                remaining_units_tracker[isin] = max(remaining_units_tracker[isin], 0)
 
     return cashflows, dates, isin_list, units_list, remaining_units_tracker
 

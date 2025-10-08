@@ -3573,9 +3573,9 @@ def getActionIRR():
     if not entityid:
         return make_response({"error": "entityid is required"}, 400)
 
-    cashflows, dates, isin_list, units_list, remaining_units_tracker = queries.get_cashflows_action(entityid)
+    cashflows, dates, isin_list, units_list, remaining_units_tracker = get_cashflows_action(entityid)
     if not cashflows:
-        return make_response({"error": f"No rows found for entityid={entityid} in tbl_action_table"}, 404)
+        return make_response({"error": f"No rows found for entityid={entityid}"}, 404)
 
     response = format_irr_response(cashflows, dates, isin_list, units_list, remaining_units_tracker)
     response["entityid"] = entityid
@@ -3585,6 +3585,7 @@ def getActionIRR():
         **response,
         "successmsgs": "Fetching Successfully"
     }, 200)
+
 # -------------------- Endpoints old --------------------
 # def getActionIRR():
 #     entityid = request.args.get("entityid", "").strip()

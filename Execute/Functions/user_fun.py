@@ -1461,29 +1461,14 @@ def updateAIFDetailActionTableRow():
             formData = request.get_json()
 
             # Get ID from params instead of body
-            record_id = request.args.get("id")   # Example: /updateMFAction?id=241
+            record_id = request.args.get("aif_id")   # Example: /updateMFAction?id=241
             if not record_id:
                 return make_response(
                     middleware.exe_msgs(responses.update_404, "ID parameter is required", '1020405'),
                     400
                 )
 
-            formlist = (
-                formData.get('trans_date'),
-                formData.get('trans_type'),
-                formData.get('contribution_amount'),
-                formData.get('setup_expense'),
-                formData.get('stamp_duty'),
-                formData.get('amount_invested'),
-                formData.get('post_tax_nav'),
-                formData.get('num_units'),
-                formData.get('balance_units'),
-                formData.get('strategy_name'),
-                formData.get('amc_name'),
-                formData.get('isin'),
-                datetime.now(),
-                record_id   # use param id, not from JSON
-            )
+            formlist = (formData.get('trans_date'),formData.get('trans_type'),formData.get('contribution_amount'),formData.get('setup_expense'),formData.get('stamp_duty'),formData.get('amount_invested'),formData.get('post_tax_nav'),formData.get('num_units'),formData.get('balance_units'),formData.get('strategy_name'),formData.get('amc_name'),formData.get('isin'),datetime.now(),record_id)
 
             updated_rows = queries.updateAIFDetailActionTableRow(formlist)
 

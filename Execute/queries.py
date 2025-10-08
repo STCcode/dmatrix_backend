@@ -1518,7 +1518,7 @@ def getAllActionInstrument():
 
 #     return cashflows, dates
 
-def get_cashflows_action(entityid):
+def get_action_rows(entityid):
     sql = """
         SELECT order_date::date, TRIM(LOWER(order_type)) AS order_type,
                purchase_amount, redeem_amount, isin, unit
@@ -1526,8 +1526,8 @@ def get_cashflows_action(entityid):
         WHERE TRIM(entityid) ILIKE %s
         ORDER BY order_date;
     """
-    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
-    return rows  # return the raw rows to function.py
+    return executeSql.ExecuteAllWithHeaders(sql, (entityid,))
+
 
 
 

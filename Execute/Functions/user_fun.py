@@ -3463,69 +3463,53 @@ def getAllActionInstrument():
 
 
 # -------------------- XIRR Calculation --------------------
-def calculate_xirr(cashflows, dates, guess=0.1):
-    if not cashflows or not dates or len(cashflows) != len(dates):
-        return None
+def safe_xirr(cashflows, dates):
+    """
+    Compute XIRR safely — avoids overflow and invalid results.
+    Returns 0.0 if invalid.
+    """
+    if not cashflows or len(cashflows) != len(dates):
+        return 0.0
 
-    # Convert dates to years from first date
-    days = np.array([(d - dates[0]).days for d in dates], dtype=float)
+    # Sort by date
+    combined = sorted(zip(dates, cashflows), key=lambda x: x[0])
+    dates, cashflows = zip(*combined)
+
+    # Must have at least one positive and one negative flow
+    if not (any(x < 0 for x in cashflows) and any(x > 0 for x in cashflows)):
+        return 0.0
+
+    # Convert dates to years
+    days = np.array([(d - dates[0]).days for d in dates])
     years = days / 365.0
-    amounts = np.array(cashflows, dtype=float)
 
-    def npv(rate):
-        return np.sum(amounts / (1 + rate) ** years)
-
-    try:
-        irr = newton(npv, guess, maxiter=100)
-        return round(irr * 100, 2)
-    except Exception:
+    def xnpv(rate):
         try:
-            irr = np.irr(amounts)
-            if irr is not None:
-                return round(irr * 100, 2)
-        except Exception:
-            pass
+            return np.sum(cashflows / (1 + rate) ** years)
+        except (OverflowError, FloatingPointError):
+            return np.inf
 
-    return None
+    # Try numpy’s built-in IRR first
+    try:
+        irr = np.irr(cashflows)
+        if irr is not None and not np.isnan(irr) and not np.isinf(irr):
+            return float(irr)
+    except Exception:
+        pass
 
-# -------------------- Prepare Cashflows from Table Rows --------------------
-def prepare_cashflows_for_entity(rows):
-    cashflows, dates, isin_list, units_list, remaining_units_tracker = [], [], [], [], {}
+    # Fallback: brute-force search between -99% and 500%
+    try:
+        rates = np.linspace(-0.99, 5, 2000)
+        npv_values = [xnpv(r) for r in rates]
+        best_rate = rates[np.argmin(np.abs(npv_values))]
+        return float(best_rate)
+    except Exception:
+        return 0.0
 
-    for row in sorted(rows, key=lambda x: x['order_date']):
-        order_type = (row.get('order_type') or "").strip().lower()
-        order_date = row.get('order_date')
-        if isinstance(order_date, str):
-            order_date = datetime.strptime(order_date, "%Y-%m-%d").date()
 
-        isin = row.get('isin')
-        units = float(row.get('unit') or 0)
-        purchase_amount = float(row.get('purchase_amount') or 0)
-        redeem_amount = float(row.get('redeem_amount') or 0)
-
-        # Purchases
-        if order_type in ("purchase", "buy") and purchase_amount > 0:
-            cashflows.append(-purchase_amount)
-            dates.append(order_date)
-            isin_list.append(isin)
-            units_list.append(units)
-            remaining_units_tracker[isin] = remaining_units_tracker.get(isin, 0) + units
-
-        # Sells / Redemptions
-        elif order_type in ("sell", "redeem", "redemption") and redeem_amount > 0:
-            cashflows.append(redeem_amount)
-            dates.append(order_date)
-            isin_list.append(isin)
-            units_list.append(units)
-            if isin in remaining_units_tracker:
-                remaining_units_tracker[isin] -= units
-                remaining_units_tracker[isin] = max(remaining_units_tracker[isin], 0)
-
-    return cashflows, dates, isin_list, units_list, remaining_units_tracker
-
-# -------------------- IRR Response Formatter --------------------
-def format_irr_response(rows):
-    cashflows, dates, isin_list, units_list, remaining_units_tracker = prepare_cashflows_for_entity(rows)
+# -------------------- FORMAT IRR RESPONSE --------------------
+def format_irr_response(entityid, rows):
+    cashflows, dates, isin_list, units_list, remaining_units_tracker = queries.get_cashflows_action(entityid)
 
     if not cashflows or not dates:
         return {
@@ -3534,60 +3518,71 @@ def format_irr_response(rows):
             "simple_return_percent": 0.0,
             "total_invested": 0.0,
             "total_redemption": 0.0,
-            "holding_period_days": 0
+            "holding_period_days": 0,
         }
 
-    # Actual IRR
-    actual_irr = calculate_xirr(cashflows, dates)
+    # --- Actual IRR ---
+    actual_irr = safe_xirr(cashflows, dates)
+    annualized_irr_percent = round(actual_irr * 100, 2)
 
-    # Estimated IRR for unsold units
-    est_cashflows = cashflows.copy()
-    est_dates = dates.copy()
-    for i, cf in enumerate(cashflows):
-        if cf < 0:
-            isin = isin_list[i]
-            remaining_units = remaining_units_tracker.get(isin, 0)
-            if remaining_units > 0:
-                nav = queries.get_latest_nav(isin)
-                if nav > 0:
-                    est_cashflows.append(remaining_units * nav)
-                    est_dates.append(datetime.now().date())
+    # --- Estimated IRR (unsold units × latest NAV) ---
+    est_cashflows = list(cashflows)
+    est_dates = list(dates)
 
-    est_irr = calculate_xirr(est_cashflows, est_dates)
+    for isin, remaining_units in remaining_units_tracker.items():
+        if remaining_units > 0:
+            nav = queries.get_latest_nav(isin)
+            if nav > 0:
+                est_cashflows.append(remaining_units * nav)
+                est_dates.append(datetime.now().date())
 
+    est_irr = safe_xirr(est_cashflows, est_dates)
+    estimated_annualized_irr_percent = round(est_irr * 100, 2)
+
+    # --- Other Calculations ---
     total_invested = -sum(cf for cf in cashflows if cf < 0)
     total_redemption = sum(cf for cf in cashflows if cf > 0)
-    simple_return = ((total_redemption - total_invested) / total_invested * 100) if total_invested > 0 else 0.0
+    simple_return_percent = (
+        ((total_redemption - total_invested) / total_invested * 100) if total_invested > 0 else 0.0
+    )
     holding_period_days = (max(dates) - min(dates)).days if dates else 0
 
     return {
-        "annualized_irr_percent": actual_irr if actual_irr is not None else 0.0,
-        "estimated_annualized_irr_percent": est_irr if est_irr is not None else 0.0,
-        "simple_return_percent": round(simple_return, 2),
+        "annualized_irr_percent": annualized_irr_percent,
+        "estimated_annualized_irr_percent": estimated_annualized_irr_percent,
+        "simple_return_percent": round(simple_return_percent, 2),
         "total_invested": round(total_invested, 2),
         "total_redemption": round(total_redemption, 2),
-        "holding_period_days": holding_period_days
+        "holding_period_days": holding_period_days,
     }
 
-# -------------------- Endpoint --------------------
+
+# -------------------- FLASK ENDPOINT --------------------
 def getActionIRR():
-    entityid = request.args.get("entityid", "").strip()
-    if not entityid:
-        return make_response({"error": "entityid is required"}, 400)
+    try:
+        entityid = request.args.get("entityid", "").strip()
+        if not entityid:
+            return make_response({"error": "entityid is required"}, 400)
 
-    # Fetch all rows for this entity
-    rows = queries.get_cashflows_action(entityid)
-    if not rows:
-        return make_response({"error": f"No rows found for entityid={entityid}"}, 404)
+        rows = queries.get_action_rows(entityid)
+        if not rows:
+            return make_response({"error": f"No rows found for entityid={entityid}"}, 404)
 
-    response = format_irr_response(rows)
-    response["entityid"] = entityid
+        response = format_irr_response(entityid, rows)
+        response["entityid"] = entityid
 
-    return make_response({
-        "code": "1023200",
-        **response,
-        "successmsgs": "Fetching Successfully"
-    }, 200)
+        return make_response(
+            {
+                "code": "1023200",
+                **response,
+                "successmsgs": "Fetching Successfully",
+            },
+            200,
+        )
+
+    except Exception as e:
+        return make_response({"error": str(e)}, 500)
+    
 # -------------------- Endpoints old --------------------
 # def getActionIRR():
 #     entityid = request.args.get("entityid", "").strip()

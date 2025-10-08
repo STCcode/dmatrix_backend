@@ -557,67 +557,69 @@ def updateMFDetailActionTableRow():
         # Get ID from URL param
         record_id = request.args.get("id")
         if not record_id:
-            return make_response(
-                middleware.exe_msgs(responses.update_404, "ID parameter is required", '1020405'),
-                400
-            )
+            return jsonify({
+                "errmsgs": "ID parameter is required",
+                "error": "ID parameter is required",
+                "code": "1020405"
+            }), 400
+
         record_id = int(record_id)
 
         # Get JSON body
         formData = request.get_json()
         if not formData:
-            return make_response(
-                middleware.exe_msgs(responses.update_501, "No JSON body provided", '1020502'),
-                400
-            )
+            return jsonify({
+                "errmsgs": "No JSON body provided",
+                "error": "No JSON body provided",
+                "code": "1020502"
+            }), 400
 
-        # Collect data from JSON (exclude updated_at and id)
-        form_list = [
-            formData.get('scrip_code'),
-            formData.get('mode'),
-            formData.get('order_type'),
-            formData.get('scrip_name'),
-            formData.get('isin'),
-            formData.get('order_number'),
-            formData.get('folio_number'),
-            formData.get('nav'),
-            formData.get('stt'),
-            formData.get('unit'),
-            formData.get('redeem_amount'),
-            formData.get('purchase_amount'),
-            formData.get('cgst'),
-            formData.get('sgst'),
-            formData.get('igst'),
-            formData.get('ugst'),
-            formData.get('stamp_duty'),
-            formData.get('cess_value'),
-            formData.get('net_amount'),
-            formData.get('entityid'),
-            formData.get('purchase_value'),
-            formData.get('order_date'),
-            formData.get('sett_no')
+        # List of numeric fields
+        numeric_fields = [
+            "nav", "stt", "unit", "redeem_amount",
+            "purchase_amount", "purchase_value",
+            "cgst", "sgst", "ugst", "igst",
+            "stamp_duty", "cess_value", "net_amount"
         ]
 
+        # Sanitize numeric fields: convert '-' or empty strings to None
+        for field in numeric_fields:
+            value = formData.get(field)
+            if value in ("-", "", None):
+                formData[field] = None
+            else:
+                try:
+                    formData[field] = float(value)
+                except:
+                    formData[field] = None
+
+
+        form_list = [formData.get('scrip_code'),formData.get('mode'),formData.get('order_type'),formData.get('scrip_name'),formData.get('isin'),formData.get('order_number'),formData.get('folio_number'),formData.get('nav'),formData.get('stt'),formData.get('unit'),formData.get('redeem_amount'),formData.get('purchase_amount'),formData.get('cgst'),formData.get('sgst'),formData.get('igst'),formData.get('ugst'),formData.get('stamp_duty'),formData.get('cess_value'),formData.get('net_amount'),formData.get('entityid'),formData.get('purchase_value'),formData.get('order_date'),formData.get('sett_no')]
+
         # Call query function
-        updated_row_id = queries.updateMFDetailActionTableRow(form_list, record_id)
+        updated_rows = queries.updateMFDetailActionTableRow(form_list, record_id)
 
-        if not updated_row_id:
-            return make_response(
-                middleware.exe_msgs(responses.update_404, "No record found to update", '1020404'),
-                404
-            )
+        if updated_rows == 0:
+            return jsonify({
+                "errmsgs": "No record found to update",
+                "error": "No record found to update",
+                "code": "1020404"
+            }), 404
 
-        # Success
-        result = middleware.exs_msgs(updated_row_id, responses.update_200, '1020400')
-        return make_response(result, 200)
+        # Success response
+        return jsonify({
+            "data": updated_rows,
+            "successmsgs": "Updated Successfully",
+            "code": "1020400"
+        }), 200
 
     except Exception as e:
         print("Error in updateMFDetailActionTableRow:", e)
-        return make_response(
-            middleware.exe_msgs(responses.update_501, str(e.args), '1020501'),
-            500
-        )
-
+        return jsonify({
+            "errmsgs": "Internal Server Error while Updating Data",
+            "error": str(e),
+            "code": "1020501"
+        }), 500
 
 def deleteMFDetailActionTableRow():
     try:

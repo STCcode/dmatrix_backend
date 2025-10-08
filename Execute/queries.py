@@ -5,7 +5,7 @@ import psycopg2
 import pandas as pd
 from flask import jsonify, request
 import numpy as np
-import json  
+import json
 #getting all user data
 def getAllUserData():
      try:
@@ -38,7 +38,7 @@ def save_user(data):
         return msg
     except Exception as e:
         print("Error in save_user query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')   
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
 # Check Username
 
 def checkusername(id):
@@ -61,7 +61,7 @@ def getAlluser():
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
-     
+
 #getting area data by id
 def getAllUserById(id):
      try:
@@ -72,7 +72,7 @@ def getAllUserById(id):
      except Exception as e:
           print("Error in geeting area by id query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1022310')
-     
+
 #update user data
 def updateuser(data):
      try:
@@ -121,8 +121,8 @@ def entity_table(data):
     except Exception as e:
         print("Error in save_user query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
-    
-    
+
+
 def getAllentity():
      try:
           sql="SELECT * FROM tbl_entity"
@@ -132,7 +132,7 @@ def getAllentity():
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
-     
+
 
 
 def getAllMutualFund():
@@ -144,7 +144,7 @@ def getAllMutualFund():
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
-     
+
 def getMutualFundDataById(entity_id):
     try:
         sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
@@ -163,13 +163,13 @@ def update_entity_table(data):
     except Exception as e:
         print("Error in update_entity_table query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020311')
-    
+
 # def DeleteEntityByid(entity_id):
 #     try:
 #         entity_id = int(entity_id)
 #         sql = "DELETE FROM tbl_entity WHERE id = %s"
-#         data = (entity_id,) 
-#         deleted_count = executeSql.ExecuteReturnId(sql, data) 
+#         data = (entity_id,)
+#         deleted_count = executeSql.ExecuteReturnId(sql, data)
 #         return deleted_count
 #     except Exception as e:
 #         print("Error in DeleteEntityByid query:", e)
@@ -179,14 +179,14 @@ def DeleteEntityByid(entity_id):
     try:
         entity_id = int(entity_id)
         sql = "DELETE FROM tbl_entity WHERE id = %s RETURNING id"
-        data = (entity_id,) 
-        deleted_count = executeSql.ExecuteReturnId(sql, data) 
+        data = (entity_id,)
+        deleted_count = executeSql.ExecuteReturnId(sql, data)
         return deleted_count
     except Exception as e:
         print("Error in DeleteEntityByid query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')
 
-  
+
 
 def getCountOfAllEntity():
      try:
@@ -209,7 +209,7 @@ def getCountOfAllEntity():
 #     except Exception as e:
 #         print("Error in save_user query==========================", e)
 #         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
-    
+
 
 
 # ==============================entity Table End=======================================
@@ -225,7 +225,7 @@ def action_table(data):
     except Exception as e:
         print("Error in save_user query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
-    
+
 
 def getAllAction():
      try:
@@ -235,15 +235,17 @@ def getAllAction():
           return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
-     
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 
 def updateMFDetailActionTableRow(data, record_id):
     try:
-        sql = "UPDATE tbl_action_table SET scrip_code = %s, mode = %s, order_type = %s, scrip_name = %s, isin = %s, order_number = %s, folio_number = %s,nav = NULLIF(%s, '-')::numeric,stt = NULLIF(%s, '-')::numeric,unit = NULLIF(%s, '-')::numeric,redeem_amount = NULLIF(%s, '-')::numeric,purchase_amount = NULLIF(%s, '-')::numeric,cgst = NULLIF(%s, '-')::numeric,sgst = NULLIF(%s, '-')::numeric,igst = NULLIF(%s, '-')::numeric,ugst = NULLIF(%s, '-')::numeric,stamp_duty = NULLIF(%s, '-')::numeric,cess_value = NULLIF(%s, '-')::numeric,net_amount = NULLIF(%s, '-')::numeric,entityid = %s,purchase_value = NULLIF(%s, '-')::numeric,order_date = %s,sett_no = %s,updated_at = NOW() WHERE id = %s"
+        sql = "UPDATE tbl_action_table SET scrip_code = %s, mode = %s, order_type = %s, scrip_name = %s, isin = %s, order_number = %s, folio_number = %s, nav = %s, stt = %s, unit = %s, redeem_amount = %s, purchase_amount = %s, cgst = %s, sgst = %s,igst = %s,ugst = %s,stamp_duty = %s,cess_value = %s,net_amount = %s,entityid = %s,purchase_value = %s,order_date = %s,sett_no = %s,updated_at = NOW() WHERE id = %s"
 
-        final_data = [data.get('scrip_code'),data.get('mode'),data.get('order_type'),data.get('scrip_name'),data.get('isin'),data.get('order_number'),data.get('folio_number'),data.get('nav'),data.get('stt'),data.get('unit'),data.get('redeem_amount'),data.get('purchase_amount'),data.get('cgst'),data.get('sgst'),data.get('igst'),data.get('ugst'),data.get('stamp_duty'),data.get('cess_value'),data.get('net_amount'),data.get('entityid'),data.get('purchase_value'),data.get('order_date'),data.get('sett_no'),record_id]
+        # Append record_id at the end
+        final_data = list(data) + [record_id]
 
+        # Execute SQL
         rows_affected = executeSql.ExecuteReturnId(sql, final_data)
         return rows_affected
 
@@ -255,14 +257,14 @@ def deleteMFDetailActionTableRow(entity_id):
     try:
         entity_id = int(entity_id)
         sql = "DELETE FROM tbl_action_table WHERE id = %s RETURNING id"
-        data = (entity_id,) 
-        deleted_count = executeSql.ExecuteReturnId(sql, data) 
+        data = (entity_id,)
+        deleted_count = executeSql.ExecuteReturnId(sql, data)
         return deleted_count
     except Exception as e:
         print("Error in DeleteEntityByid query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')    
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')
 
-     
+
 def getActionByentId(entity_id):
     try:
         # sql = "SELECT * FROM tbl_action_table WHERE entityid = %s;"
@@ -273,7 +275,7 @@ def getActionByentId(entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
 def getMfByentId():
@@ -284,8 +286,8 @@ def getMfByentId():
           return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')      
-     
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 def insert_MF_NavData(data):
     """
     Always insert a new NAV entry for an ISIN — no conflict handling.
@@ -316,12 +318,12 @@ def getAll_Mutual_Fund_Nav(isin):
           return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')    
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
 
 def getAllMFEquitytotalValue():
     try:
-       
+
         sql="WITH latest_nav AS (SELECT DISTINCT ON (isin) isin, nav FROM tbl_mutual_fund_nav ORDER BY isin, nav_date DESC),entity_values AS (SELECT a.entityid, SUM(a.unit * nav.nav) AS entity_total_value FROM tbl_action_table a JOIN latest_nav nav ON a.isin = nav.isin JOIN tbl_entity e ON a.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' GROUP BY a.entityid),total_value AS ( SELECT SUM(entity_total_value) AS total_all_entities FROM entity_values), entity_mf_percent AS ( SELECT ev.entityid,ev.entity_total_value, (ev.entity_total_value / tv.total_all_entities) AS mf_weight_fraction,ROUND((ev.entity_total_value / tv.total_all_entities) * 100, 2) AS mf_weight_percent FROM entity_values ev CROSS JOIN total_value tv), entity_weights AS ( SELECT u.entityid, u.tag, COUNT(*) AS tag_count, SUM(u.weightage::numeric) AS tag_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' AND u.tag IS NOT NULL GROUP BY u.entityid, u.tag), entity_totals AS ( SELECT entityid, SUM(tag_weight) AS total_tag_weight FROM entity_weights GROUP BY entityid ), entity_tag_breakdown AS ( SELECT ew.entityid, ew.tag, ew.tag_count, ew.tag_weight, et.total_tag_weight, ev.entity_total_value,emp.mf_weight_percent, (ew.tag_weight / et.total_tag_weight) * emp.mf_weight_fraction AS tag_fraction, ROUND((ew.tag_weight / et.total_tag_weight) * emp.mf_weight_percent, 2) AS total_tag_percent FROM entity_weights ew JOIN entity_totals et ON ew.entityid = et.entityid JOIN entity_values ev ON ew.entityid = ev.entityid JOIN entity_mf_percent emp ON ew.entityid = emp.entityid), tag_totals AS ( SELECT tag, ROUND(SUM(tag_fraction) * 100, 2) AS overall_tag_percent FROM entity_tag_breakdown GROUP BY tag) SELECT etb.entityid, etb.tag, etb.tag_count, etb.tag_weight, etb.total_tag_weight, etb.entity_total_value, etb.mf_weight_percent, etb.total_tag_percent, CASE  WHEN ROW_NUMBER() OVER (PARTITION BY etb.tag ORDER BY etb.entityid) = 1 THEN tt.overall_tag_percent END AS overall_tag_percent FROM entity_tag_breakdown etb JOIN tag_totals tt ON etb.tag = tt.tag ORDER BY etb.tag, etb.entityid;"
         # data = (entity_id,)  # tuple, not set
         data = ''
@@ -329,7 +331,7 @@ def getAllMFEquitytotalValue():
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')                
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
 
@@ -371,8 +373,8 @@ def underlying_table(data):
         print("Error in underlying_table query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
 
-    
-    
+
+
 def getAllUnderlying():
      try:
           sql="SELECT * FROM tbl_underlying"
@@ -382,7 +384,7 @@ def getAllUnderlying():
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
-     
+
 
 # def getUnderlyingById(entity_id):
 #      try:
@@ -392,8 +394,8 @@ def getAllUnderlying():
 #           return msgs
 #      except Exception as e:
 #           print("Error in geeting area by id query==========================",e)
-#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1022310')     
-    
+#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1022310')
+
 
 def getUnderlyingById(entity_id):
     try:
@@ -404,7 +406,7 @@ def getUnderlyingById(entity_id):
     except Exception as e:
         print("Error in getting underlying by id query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
-    
+
 def getUnderlyingByMf():
      try:
           sql="SELECT e.*, a.*, u.* FROM tbl_entity e JOIN tbl_action_table a ON e.entityid = a.entityid JOIN tbl_underlying u ON e.entityid = u.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund';"
@@ -413,8 +415,8 @@ def getUnderlyingByMf():
           return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')  
-     
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 
 # def ClearUnderlyingdata(entity_id):
 #     try:
@@ -524,16 +526,16 @@ def ClearUnderlyingdata(entity_id):
 
 #             if entity_exists:
 #                 insert_sql = """
-#                     INSERT INTO tbl_underlying 
+#                     INSERT INTO tbl_underlying
 #                         (company_name, scripcode, weightage, sector, isin_code, created_at, entityid)
-#                     SELECT 
-#                         scripname,       
-#                         scripcode,       
-#                         weightage,       
-#                         sector,          
-#                         isin,            
-#                         NOW(),           
-#                         entityid         
+#                     SELECT
+#                         scripname,
+#                         scripcode,
+#                         weightage,
+#                         sector,
+#                         isin,
+#                         NOW(),
+#                         entityid
 #                     FROM tbl_entity
 #                     WHERE entityid = %s
 #                 """
@@ -599,10 +601,10 @@ def ClearUnderlyingdata(entity_id):
 
 # ==============================Underlying Table End =======================================
 
-     
 
-# ==============================bigsheet Table Start =======================================   
-    
+
+# ==============================bigsheet Table Start =======================================
+
 
 # def getCamByid(company_name=None):
 #     try:
@@ -615,7 +617,7 @@ def ClearUnderlyingdata(entity_id):
 #         return msgs
 #     except Exception as e:
 #         print("Error in getCamByid query==========================", e)
-#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310') 
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310')
 
 def getCamByid(company_name=None):
     try:
@@ -666,7 +668,7 @@ def InsertAifData(data):
     except Exception as e:
         print("Error in save_user query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
-    
+
 
 
 def insertNavData(data):
@@ -676,7 +678,7 @@ def insertNavData(data):
         return msg
     except Exception as e:
         print("Error in save_user query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')  
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
 
 
 def updateAIFDetailActionTableRow(data):
@@ -692,13 +694,13 @@ def deleteAIFDetailActionTableRow(entity_id):
     try:
         entity_id = int(entity_id)
         sql = "DELETE FROM tbl_aif WHERE aif_id = %s RETURNING id"
-        data = (entity_id,) 
-        deleted_count = executeSql.ExecuteReturnId(sql, data) 
+        data = (entity_id,)
+        deleted_count = executeSql.ExecuteReturnId(sql, data)
         return deleted_count
     except Exception as e:
         print("Error in DeleteEntityByid query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')       
-    
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')
+
 
 def getAllAif():
      try:
@@ -710,8 +712,8 @@ def getAllAif():
           return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
-     
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 def getAifActionTablebyId (entity_id):
     try:
         sql = "SELECT * FROM tbl_aif WHERE entityid = %s;"
@@ -720,7 +722,7 @@ def getAifActionTablebyId (entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
 def getAifEntity():
@@ -733,7 +735,7 @@ def getAifEntity():
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')  
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
 
 def getAIFEquityDetailsById(entity_id):
@@ -744,7 +746,7 @@ def getAIFEquityDetailsById(entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')         
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
 
@@ -761,7 +763,7 @@ def InsertEtfData(data):
     except Exception as e:
         print("Error in save_user query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
-    
+
 
 def getAllEtf():
      try:
@@ -773,8 +775,8 @@ def getAllEtf():
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
-     
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 def getEtfActionTablebyId (entity_id):
     try:
         sql = "SELECT * FROM tbl_etf_action WHERE entityid = %s;"
@@ -783,7 +785,7 @@ def getEtfActionTablebyId (entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
 def getEtfEntity():
@@ -796,7 +798,7 @@ def getEtfEntity():
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
 def getETFDetailsById(entity_id):
     try:
@@ -806,7 +808,7 @@ def getETFDetailsById(entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')       
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
 # ==================================== Commodities ETF Table End====================================
@@ -821,8 +823,8 @@ def getAllETFEquity():
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
-     
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 
 def getAllActionTableOfETFEquity():
      try:
@@ -832,8 +834,8 @@ def getAllActionTableOfETFEquity():
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')      
-     
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 def getETFDetailsEquityById (entity_id):
     try:
         sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
@@ -842,7 +844,7 @@ def getETFDetailsEquityById (entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 def getETFEquityDetailActionTable(entity_id):
     try:
@@ -852,7 +854,7 @@ def getETFEquityDetailActionTable(entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')   
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
 
@@ -864,7 +866,7 @@ def getETFEquityDetailUnderlyingTable(entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')       
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 # ==================================== Equity Fund ETF Table End====================================
 
@@ -879,8 +881,8 @@ def getAllFixIncomeETF():
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
-     
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 
 def getAllActionTableOfFixIncomeETF():
      try:
@@ -891,8 +893,8 @@ def getAllActionTableOfFixIncomeETF():
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')      
-     
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 def getFixIncomeDetailsETFById (entity_id):
     try:
         sql = "SELECT * FROM tbl_entity WHERE entityid = %s;"
@@ -901,7 +903,7 @@ def getFixIncomeDetailsETFById (entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 def getFixIncomeETFDetailActionTable(entity_id):
     try:
@@ -911,7 +913,7 @@ def getFixIncomeETFDetailActionTable(entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')   
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
 
@@ -923,7 +925,7 @@ def getFixIncomeETFDetailUnderlyingTable(entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')       
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 # ==================================== Fix Income Fund ETF Table End====================================
 
@@ -940,18 +942,18 @@ def Insert_CommoditiesDirect(data):
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
 
 
-    
+
 def getAllDirectEquityCommodities():
      try:
         sql="SELECT * FROM tbl_entity WHERE category ILIKE 'Commodities' AND subcategory ILIKE 'Direct Equity';"
-       
+
         data=''
         msgs=executeSql.ExecuteAllNew(sql,data)
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
-     
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 def getCommoditiesActionTablebyId (entity_id):
     try:
         sql = "SELECT * FROM  tbl_commodities_direct WHERE entityid = %s;"
@@ -960,8 +962,8 @@ def getCommoditiesActionTablebyId (entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310') 
-    
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
+
 
 def getDEDetailCommoditiesEntityById(entity_id):
     try:
@@ -971,8 +973,8 @@ def getDEDetailCommoditiesEntityById(entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
-            
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
+
 
 
 def getCommoditiesEntity():
@@ -984,7 +986,7 @@ def getCommoditiesEntity():
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')   
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
 
 
@@ -998,7 +1000,7 @@ def getCountOfAllCommodities():
           return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')  
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
 
 
@@ -1021,7 +1023,7 @@ def getAllCommoditiesInstrument():
 
     except Exception as e:
         print("Error in getAllCommoditiesInstrument==============================", e)
-        return {"action_data": [], "aif_data": [], "direct_equity_data": []}           
+        return {"action_data": [], "aif_data": [], "direct_equity_data": []}
 
 
 
@@ -1038,7 +1040,7 @@ def insertClientAction(data):
     except Exception as e:
         print("Error in save_user query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
-    
+
 
 def getAllPmsClientActionTable():
      try:
@@ -1050,8 +1052,8 @@ def getAllPmsClientActionTable():
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
-     
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 def  getPmsClientActionById (entity_id):
     try:
         sql = "SELECT * FROM tbl_pms_client_action WHERE entityid = %s;"
@@ -1060,7 +1062,7 @@ def  getPmsClientActionById (entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
 def getPmsClientEntity():
@@ -1071,18 +1073,18 @@ def getPmsClientEntity():
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')   
-     
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 def getPmsEquityDetailbyId(entity_id):
      try:
         sql=" SELECT * FROM tbl_entity WHERE entityid = %s;"
-        data = (entity_id,) 
+        data = (entity_id,)
         msgs=executeSql.ExecuteAllNew(sql,data)
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')        
-     
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 
 ##############-> Amc Action #################3
 def insertPmsAmcAction(data):
@@ -1093,7 +1095,7 @@ def insertPmsAmcAction(data):
     except Exception as e:
         print("Error in save_user query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
-    
+
 
 def getAllPmsAmcActionTable():
      try:
@@ -1105,8 +1107,8 @@ def getAllPmsAmcActionTable():
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
-     
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 def  getPmsAmcActionById (entity_id):
     try:
         sql = "SELECT * FROM tbl_pms_Amc_action WHERE entityid = %s;"
@@ -1115,7 +1117,7 @@ def  getPmsAmcActionById (entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')     
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
 def getPmsAmcEntity():
@@ -1126,7 +1128,7 @@ def getPmsAmcEntity():
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')   
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
 
 
@@ -1146,7 +1148,7 @@ def getPmsAmcEntity():
 #     except Exception as e:
 #         print("Error in save_user query==========================", e)
 #         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
-    
+
 def Insert_directData(data):
     try:
         sql = "INSERT INTO tbl_direct_equity (entityid, contract_note_number, trade_date, client_code, client_name, order_number, order_time, trade_number, description, order_type,qty, trade_price, brokerage_per_unit, net_rate_per_unit, gst, stt, security_transaction_tax, exchange_transaction_charges, sebi_turnover_fees,stamp_duty, ipft, net_total, net_amount_receivable, created_at) VALUES (%s, %s, %s::date, %s, %s, %s, %s::time, %s, %s, %s,%s::int, %s::numeric, %s::numeric, %s::numeric, %s::numeric, %s::numeric, %s::numeric, %s::numeric, %s::numeric,%s::numeric, %s::numeric, %s::numeric, %s::numeric, %s)"
@@ -1165,8 +1167,8 @@ def getallDirectdata():
           return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
-     
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 # def getdirectByentId(entity_id):
 #     try:
 #         sql = "SELECT * FROM tbl_direct_equity WHERE entityid = %s;"
@@ -1175,7 +1177,7 @@ def getallDirectdata():
 #         return msgs
 #     except Exception as e:
 #         print("Error in getting underlying by id query:", e)
-#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310') 
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 def getdirectByentId(entity_id):
     try:
@@ -1185,7 +1187,7 @@ def getdirectByentId(entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310') 
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
 def getAllActionTableOfDirectEquity():
@@ -1196,8 +1198,8 @@ def getAllActionTableOfDirectEquity():
           return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
-     
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 def getDirectEquityByid(entity_id):
     try:
         sql = "SELECT * FROM tbl_entity WHERE entityid = %s;"
@@ -1206,7 +1208,7 @@ def getDirectEquityByid(entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310') 
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 def getDEDetailActionTable(entity_id):
     try:
@@ -1216,7 +1218,7 @@ def getDEDetailActionTable(entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')           
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 # ====================================Direct table end============================
 
@@ -1246,8 +1248,8 @@ def delete_entity_data(entity_id):
     except Exception as e:
         print("Error in DeleteEntityByid query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')
-    
-# ======================================Delete Etity data From Underlying,Action Table======================================    
+
+# ======================================Delete Etity data From Underlying,Action Table======================================
 
 
 # ======================================Get All Equity======================================
@@ -1259,8 +1261,8 @@ def getAllEquity():
           return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
-# ======================================Get All Equity======================================  
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+# ======================================Get All Equity======================================
 
 
 
@@ -1273,7 +1275,7 @@ def getEquityActionTable():
           return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 # ======================================Get All EquityActionTable======================================
 
 
@@ -1286,7 +1288,7 @@ def getEquityActionTable():
 #           return msgs
 #      except Exception as e:
 #           print("Error in getingroleRecord query==========================",e)
-#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
 
 def getAllEntityBenchMark(category):
@@ -1319,8 +1321,8 @@ def GetallMfEquityUnderlyingCount():
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
-     
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 def GetallMfSectorUnderlyingCount():
      try:
         #   sql="WITH counts AS (SELECT u.sector,COUNT(*) AS sector_count,(SELECT COUNT(*) FROM tbl_underlying u2 JOIN tbl_entity e2 ON u2.entityid = e2.entityid WHERE e2.category = 'Equity' AND e2.subcategory = 'Mutual Fund') AS total_mf_count FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' GROUP BY u.sector) SELECT sector ,sector_count,total_mf_count,(sector_count * 100.0 / total_mf_count)::numeric(5,2) AS sector_percent FROM counts ORDER BY sector_percent DESC;"
@@ -1331,7 +1333,7 @@ def GetallMfSectorUnderlyingCount():
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
 # def getallMFDtailEquitySectorCount():
 #      try:
@@ -1341,8 +1343,8 @@ def GetallMfSectorUnderlyingCount():
 #           return msgs
 #      except Exception as e:
 #           print("Error in getingroleRecord query==========================",e)
-#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
-     
+#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
 
 def getallMFDetailsEquitySectorCount(entity_id):
     try:
@@ -1357,7 +1359,7 @@ def getallMFDetailsEquitySectorCount(entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310') 
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
 def getallMFDetailsEquityMCAPCount(entity_id):
@@ -1370,7 +1372,7 @@ def getallMFDetailsEquityMCAPCount(entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')  
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
 
@@ -1384,9 +1386,9 @@ def getAIFDetailsEquityMCAPCount(entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310') 
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
-    
+
 def getAIFDetailsEquitySectorCount(entity_id):
     try:
         sql="WITH entity_weights AS (SELECT u.sector,COUNT(*) AS sector_count,SUM(u.weightage::numeric) AS sector_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Alternative Investment Funds' AND u.entityid = %s AND u.sector IS NOT NULL GROUP BY u.sector),total AS (SELECT COUNT(*) AS total_sector_count,SUM(u.weightage::numeric) AS total_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Alternative Investment Funds' AND u.entityid = %s AND u.sector IS NOT NULL)  SELECT ew.sector,ew.sector_count,total.total_sector_count,ew.sector_weight,total.total_weight,(ew.sector_weight * 100.0 / total.total_weight)::numeric(7,2) AS sector_percent FROM entity_weights ew CROSS JOIN total ORDER BY ew.sector;"
@@ -1396,9 +1398,9 @@ def getAIFDetailsEquitySectorCount(entity_id):
         return msgs
     except Exception as e:
         print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')                       
-                    
-     
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
+
+
 # ======================================== Get allMfEquityUnderlyingCount END ============================
 
 
@@ -1412,7 +1414,7 @@ def getAllHomeData():
           return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310') 
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 # ======================================Get All Home instrument_counts of Equity======================================
 
 
@@ -1533,7 +1535,7 @@ def get_cashflows_action(entityid):
         ORDER BY order_date;
     """
     rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
-    
+
     cashflows, dates, isin_list, units_list = [], [], [], []
     purchase_units_tracker = {}  # track unsold units per ISIN
 
@@ -1669,8 +1671,8 @@ def get_cashflows_direct_equity(entityid):
 
 def get_cashflows_aif(entityid):
     sql = """
-        SELECT trans_date::date, trans_type, 
-               contribution_amount, amount_invested, 
+        SELECT trans_date::date, trans_type,
+               contribution_amount, amount_invested,
                setup_expense, stamp_duty
         FROM tbl_aif
         WHERE TRIM(entityid) ILIKE %s
@@ -1930,8 +1932,8 @@ def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):
 # =================== AIF ===================
 # def auto_InsertAifData(data):
 #     try:
-#         sql = """INSERT INTO tbl_aif 
-#                  (entityid, trans_date, trans_type, contribution_amount, setup_expense, stamp_duty, 
+#         sql = """INSERT INTO tbl_aif
+#                  (entityid, trans_date, trans_type, contribution_amount, setup_expense, stamp_duty,
 #                   amount_invested, post_tax_nav, num_units, balance_units, strategy_name, amc_name, created_at)
 #                  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 #         log_sql(sql, data)
@@ -1944,9 +1946,9 @@ def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):
 # # =================== ETF ===================
 # def auto_InsertEtfData(data):
 #     try:
-#         sql = """INSERT INTO tbl_etf_action 
-#                  (entityid, order_number, order_time, trade_number, trade_time, security_description, order_type, 
-#                   quantity, gross_rate, trade_price_per_unit, brokerage_per_unit, net_rate_per_unit, closing_rate, 
+#         sql = """INSERT INTO tbl_etf_action
+#                  (entityid, order_number, order_time, trade_number, trade_time, security_description, order_type,
+#                   quantity, gross_rate, trade_price_per_unit, brokerage_per_unit, net_rate_per_unit, closing_rate,
 #                   gst, stt, net_total_before_levies, remarks, created_at, trade_date)
 #                  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 #         log_sql(sql, data)
@@ -1959,10 +1961,10 @@ def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):
 # # =================== Commodities ===================
 # def auto_insertcommoditiesDirect(data):
 #     try:
-#         sql = """INSERT INTO tbl_commodities_direct 
-#                  (entityid, contract_note_number, trade_date, client_code, client_name, order_number, order_time, 
-#                   trade_number, description, order_type, qty, trade_price, brokerage_per_unit, net_rate_per_unit, 
-#                   gst, stt, security_transaction_tax, exchange_transaction_charges, sebi_turnover_fees, stamp_duty, 
+#         sql = """INSERT INTO tbl_commodities_direct
+#                  (entityid, contract_note_number, trade_date, client_code, client_name, order_number, order_time,
+#                   trade_number, description, order_type, qty, trade_price, brokerage_per_unit, net_rate_per_unit,
+#                   gst, stt, security_transaction_tax, exchange_transaction_charges, sebi_turnover_fees, stamp_duty,
 #                   ipft, net_total, net_amount_receivable, created_at)
 #                  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 #         log_sql(sql, data)
@@ -1975,10 +1977,10 @@ def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):
 # # =================== Direct Equity ===================
 # def auto_insert_directdata(data):
 #     try:
-#         sql = """INSERT INTO tbl_direct_equity 
-#                  (entityid, contract_note_number, trade_date, client_code, client_name, order_number, order_time, 
-#                   trade_number, description, order_type, qty, trade_price, brokerage_per_unit, net_rate_per_unit, 
-#                   gst, stt, security_transaction_tax, exchange_transaction_charges, sebi_turnover_fees, stamp_duty, 
+#         sql = """INSERT INTO tbl_direct_equity
+#                  (entityid, contract_note_number, trade_date, client_code, client_name, order_number, order_time,
+#                   trade_number, description, order_type, qty, trade_price, brokerage_per_unit, net_rate_per_unit,
+#                   gst, stt, security_transaction_tax, exchange_transaction_charges, sebi_turnover_fees, stamp_duty,
 #                   ipft, net_total, net_amount_receivable, created_at)
 #                  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 #         log_sql(sql, data)
@@ -1986,7 +1988,7 @@ def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):
 #         return msg
 #     except Exception as e:
 #         print("Error in auto_insert_directdata:", e)
-#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310') 
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
 
 
 # ============================= Auto PDF Read and Insert Into DB  END queries=========================
@@ -2119,62 +2121,61 @@ def get_distinct_entityids_aif():
 
 
 
-   
 
 
 
 
 
 
-     
-
-     
-
-     
-
-     
-
-
-
-     
-     
-
-   
-              
-
-      
-
-
-            
-
-     
-
-     
-
-     
 
 
 
 
-     
-     
 
-     
 
-     
- 
-     
-  
-     
-  
-     
 
-   
 
- 
 
- 
 
- 
-# end    
-           
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# end

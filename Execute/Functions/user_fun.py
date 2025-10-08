@@ -1497,14 +1497,14 @@ def deleteAIFDetailActionTableRow():
 
         # If DELETE → get from query parameters
         if request.method == 'DELETE':
-            entity_id = request.args.get('id')
+            entity_id = request.args.get('aif_id')
 
         # If POST → get from form-data or JSON
         elif request.method == 'POST':
             if request.is_json:
-                entity_id = request.json.get('id')
+                entity_id = request.json.get('aif_id')
             else:
-                entity_id = request.form.get('id')
+                entity_id = request.form.get('aif_id')
 
         # Validate input
         if not entity_id:
@@ -3496,8 +3496,35 @@ def calculate_xirr(cashflows, dates, guess=0.1):
 
     return None
 
+# -------------------- Prepare Cashflows from Table Rows --------------------
+def prepare_cashflows_for_entity(rows):
+    cashflows = []
+    dates = []
+    isin_list = []
+    units_list = []
+    remaining_units_tracker = {}
+
+    for row in sorted(rows, key=lambda x: x['order_date']):
+        order_type = row['order_type'].lower()
+        if order_type == 'purchase':
+            cashflows.append(-float(row['purchase_amount']))
+            dates.append(row['order_date'])
+            isin_list.append(row['isin'])
+            units_list.append(row['unit'])
+            remaining_units_tracker[row['isin']] = remaining_units_tracker.get(row['isin'], 0) + row['unit']
+        elif order_type == 'sell':
+            cashflows.append(float(row['redeem_amount']))
+            dates.append(row['order_date'])
+            isin_list.append(row['isin'])
+            units_list.append(row['unit'])
+            remaining_units_tracker[row['isin']] = remaining_units_tracker.get(row['isin'], 0) - row['unit']
+
+    return cashflows, dates, isin_list, units_list, remaining_units_tracker
+
 # -------------------- IRR Response Formatter --------------------
-def format_irr_response(cashflows, dates, isin_list, units_list, remaining_units_tracker):
+def format_irr_response(rows):
+    cashflows, dates, isin_list, units_list, remaining_units_tracker = prepare_cashflows_for_entity(rows)
+
     if not cashflows or not dates:
         return {
             "annualized_irr_percent": 0.0,
@@ -3508,14 +3535,14 @@ def format_irr_response(cashflows, dates, isin_list, units_list, remaining_units
             "holding_period_days": 0
         }
 
-    # Actual IRR using real cashflows
+    # Actual IRR
     actual_irr = calculate_xirr(cashflows, dates)
 
-    # Estimated IRR using unsold units × latest NAV
+    # Estimated IRR (unsold units × latest NAV)
     est_cashflows = cashflows.copy()
     est_dates = dates.copy()
     for i, cf in enumerate(cashflows):
-        if cf < 0:  # purchase
+        if cf < 0:  # purchases
             isin = isin_list[i]
             remaining_units = remaining_units_tracker.get(isin, 0)
             if remaining_units > 0:

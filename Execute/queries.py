@@ -693,7 +693,7 @@ def updateAIFDetailActionTableRow(data):
 def deleteAIFDetailActionTableRow(entity_id):
     try:
         entity_id = int(entity_id)
-        sql = "DELETE FROM tbl_aif WHERE aif_id = %s RETURNING id"
+        sql = "DELETE FROM tbl_aif WHERE aif_id = %s RETURNING aif_id"
         data = (entity_id,)
         deleted_count = executeSql.ExecuteReturnId(sql, data)
         return deleted_count

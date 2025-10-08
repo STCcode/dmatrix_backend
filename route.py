@@ -291,6 +291,7 @@ app.add_url_rule('/getallMFDetailsEquityMCAPCount',view_func=user_fun.getallMFDe
 app.add_url_rule('/getAIFDetailsEquityMCAPCount',view_func=user_fun.getAIFDetailsEquityMCAPCount,methods=['GET','POST'])
 app.add_url_rule('/getAIFDetailsEquitySectorCount',view_func=user_fun.getAIFDetailsEquitySectorCount,methods=['GET','POST'])
 app.add_url_rule('/getAllAIFEquityUnderlyingCount',view_func=user_fun.GetallAIFEquityUnderlyingCount,methods=['GET','POST'])
+app.add_url_rule('/getAllAIFEquitySectorCount',view_func=user_fun.GetallAIFSectorUnderlyingCount,methods=['GET','POST'])
 # ======================================== Get allMfEquityUnderlyingCount End============================
 
 # ======================================Get All Home Equity======================================

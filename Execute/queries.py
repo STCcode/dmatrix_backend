@@ -240,32 +240,16 @@ def getAllAction():
 
 def updateMFDetailActionTableRow(data, record_id):
     try:
-        sql = """
-        UPDATE tbl_action_table
-        SET 
-            scrip_code=%s, mode=%s, order_type=%s, scrip_name=%s, isin=%s,
-            order_number=%s, folio_number=%s, nav=%s, stt=%s, unit=%s,
-            redeem_amount=%s, purchase_amount=%s, cgst=%s, sgst=%s, igst=%s,
-            ugst=%s, stamp_duty=%s, cess_value=%s, net_amount=%s,
-            entityid=%s, purchase_value=%s, order_date=%s, sett_no=%s,
-            updated_at=%s
-        WHERE id=%s
-        RETURNING id;
-        """
+        sql = "UPDATE tbl_action_table SET scrip_code = %s, mode = %s, order_type = %s, scrip_name = %s, isin = %s, order_number = %s, folio_number = %s,nav = NULLIF(%s, '-')::numeric,stt = NULLIF(%s, '-')::numeric,unit = NULLIF(%s, '-')::numeric,redeem_amount = NULLIF(%s, '-')::numeric,purchase_amount = NULLIF(%s, '-')::numeric,cgst = NULLIF(%s, '-')::numeric,sgst = NULLIF(%s, '-')::numeric,igst = NULLIF(%s, '-')::numeric,ugst = NULLIF(%s, '-')::numeric,stamp_duty = NULLIF(%s, '-')::numeric,cess_value = NULLIF(%s, '-')::numeric,net_amount = NULLIF(%s, '-')::numeric,entityid = %s,purchase_value = NULLIF(%s, '-')::numeric,order_date = %s,sett_no = %s,updated_at = NOW() WHERE id = %s"
 
-        final_data = list(data) + [datetime.now(), record_id]
+        final_data = [data.get('scrip_code'),data.get('mode'),data.get('order_type'),data.get('scrip_name'),data.get('isin'),data.get('order_number'),data.get('folio_number'),data.get('nav'),data.get('stt'),data.get('unit'),data.get('redeem_amount'),data.get('purchase_amount'),data.get('cgst'),data.get('sgst'),data.get('igst'),data.get('ugst'),data.get('stamp_duty'),data.get('cess_value'),data.get('net_amount'),data.get('entityid'),data.get('purchase_value'),data.get('order_date'),data.get('sett_no'),record_id]
 
-        updated_row_id = executeSql.ExecuteReturnId(sql, final_data)
-
-        # If row exists, return the id; else return None
-        if updated_row_id:
-            return updated_row_id
-        else:
-            return None
+        rows_affected = executeSql.ExecuteReturnId(sql, final_data)
+        return rows_affected
 
     except Exception as e:
         print("Error in updateMFDetailActionTableRow query ==========================", e)
-        return(responses.update_501, str(e.args), '1020501')
+        return middleware.exe_msgs(responses.update_501, str(e.args), '1020501')
 
 def deleteMFDetailActionTableRow(entity_id):
     try:

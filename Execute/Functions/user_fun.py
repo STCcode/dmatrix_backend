@@ -3508,10 +3508,13 @@ def safe_xirr(cashflows, dates):
 
 
 # -------------------- FORMAT IRR RESPONSE --------------------
-def format_irr_response(entityid, rows):
-    cashflows, dates, isin_list, units_list, remaining_units_tracker = queries.get_cashflows_action(entityid)
-
-    if not cashflows or not dates:
+def format_irr_response(entityid):
+    """
+    Prepares and calculates IRR, Estimated IRR, Simple Return for a given entity.
+    """
+    # Fetch all relevant action data
+    rows = queries.get_cashflows_action(entityid)
+    if not rows:
         return {
             "annualized_irr_percent": 0.0,
             "estimated_annualized_irr_percent": 0.0,
@@ -3520,6 +3523,30 @@ def format_irr_response(entityid, rows):
             "total_redemption": 0.0,
             "holding_period_days": 0,
         }
+
+    cashflows = []
+    dates = []
+    remaining_units_tracker = {}
+
+    for r in rows:
+        order_type = r.get("order_type", "").lower().strip()
+        purchase_amount = float(r.get("purchase_amount") or 0)
+        redeem_amount = float(r.get("redeem_amount") or 0)
+        isin = r.get("isin", "")
+        unit = float(r.get("unit") or 0)
+        order_date = r.get("order_date")
+        if isinstance(order_date, str):
+            order_date = datetime.strptime(order_date, "%Y-%m-%d").date()
+
+        if order_type == "purchase" and purchase_amount > 0:
+            cashflows.append(-purchase_amount)
+            dates.append(order_date)
+            remaining_units_tracker[isin] = remaining_units_tracker.get(isin, 0) + unit
+
+        elif order_type == "sell" and redeem_amount > 0:
+            cashflows.append(redeem_amount)
+            dates.append(order_date)
+            remaining_units_tracker[isin] = remaining_units_tracker.get(isin, 0) - unit
 
     # --- Actual IRR ---
     actual_irr = safe_xirr(cashflows, dates)
@@ -3543,7 +3570,9 @@ def format_irr_response(entityid, rows):
     total_invested = -sum(cf for cf in cashflows if cf < 0)
     total_redemption = sum(cf for cf in cashflows if cf > 0)
     simple_return_percent = (
-        ((total_redemption - total_invested) / total_invested * 100) if total_invested > 0 else 0.0
+        ((total_redemption - total_invested) / total_invested * 100)
+        if total_invested > 0
+        else 0.0
     )
     holding_period_days = (max(dates) - min(dates)).days if dates else 0
 
@@ -3559,16 +3588,15 @@ def format_irr_response(entityid, rows):
 
 # -------------------- FLASK ENDPOINT --------------------
 def getActionIRR():
+    """
+    Flask API endpoint to fetch IRR data for an entity.
+    """
     try:
         entityid = request.args.get("entityid", "").strip()
         if not entityid:
             return make_response({"error": "entityid is required"}, 400)
 
-        rows = queries.get_action_rows(entityid)
-        if not rows:
-            return make_response({"error": f"No rows found for entityid={entityid}"}, 404)
-
-        response = format_irr_response(entityid, rows)
+        response = format_irr_response(entityid)
         response["entityid"] = entityid
 
         return make_response(

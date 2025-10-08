@@ -1519,11 +1519,6 @@ def getAllActionInstrument():
 #     return cashflows, dates
 
 def get_cashflows_action(entityid):
-    """
-    Fetch all cashflows for the given entity from tbl_action_table
-    Returns:
-        cashflows, dates, isin_list, units_list, remaining_units_tracker
-    """
     sql = """
         SELECT order_date::date, TRIM(LOWER(order_type)) AS order_type,
                purchase_amount, redeem_amount, isin, unit
@@ -1531,42 +1526,7 @@ def get_cashflows_action(entityid):
         WHERE TRIM(entityid) ILIKE %s
         ORDER BY order_date;
     """
-    rows = executeSql.ExecuteAllWithHeaders(sql, (entityid,))
-
-    cashflows, dates, isin_list, units_list = [], [], [], []
-    remaining_units_tracker = {}
-
-    for r in rows:
-        order_type = (r.get("order_type") or "").strip().lower()
-        isin = r.get("isin")
-        units = float(r.get("unit") or 0)
-        purchase_amount = float(r.get("purchase_amount") or 0)
-        redeem_amount = float(r.get("redeem_amount") or 0)
-        order_date = r.get("order_date")
-
-        # --- Purchases ---
-        if order_type in ("purchase", "buy"):
-            if purchase_amount > 0:
-                cashflows.append(-purchase_amount)
-                dates.append(order_date)
-                isin_list.append(isin)
-                units_list.append(units)
-                remaining_units_tracker[isin] = remaining_units_tracker.get(isin, 0) + units
-
-        # --- Sells ---
-        elif order_type in ("sell", "redeem", "redemption"):
-            if redeem_amount <= 0 and purchase_amount > 0:
-                redeem_amount = purchase_amount
-            if redeem_amount > 0:
-                cashflows.append(redeem_amount)
-                dates.append(order_date)
-                isin_list.append(isin)
-                units_list.append(units)
-                if isin in remaining_units_tracker:
-                    remaining_units_tracker[isin] -= units
-                    remaining_units_tracker[isin] = max(remaining_units_tracker[isin], 0)
-
-    return cashflows, dates, isin_list, units_list, remaining_units_tracker
+    return executeSql.ExecuteAllWithHeaders(sql, (entityid,))
 
 
 def get_latest_nav(isin):

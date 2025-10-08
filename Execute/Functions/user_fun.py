@@ -3522,9 +3522,7 @@ def prepare_cashflows_for_entity(rows):
     return cashflows, dates, isin_list, units_list, remaining_units_tracker
 
 # -------------------- IRR Response Formatter --------------------
-def format_irr_response(rows):
-    cashflows, dates, isin_list, units_list, remaining_units_tracker = prepare_cashflows_for_entity(rows)
-
+def format_irr_response(cashflows, dates, isin_list, units_list, remaining_units_tracker):
     if not cashflows or not dates:
         return {
             "annualized_irr_percent": 0.0,

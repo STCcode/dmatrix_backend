@@ -778,8 +778,7 @@ def deleteAIFFixIncomeDetailActionTableRow(entity_id):
 
 def getAllAifFixedIncomeActionTable():
      try:
-          # sql="SELECT * FROM tbl_entity WHERE category ILIKE 'Equity' AND subcategory ILIKE 'AIF';"
-          sql="SELECT * FROM tbl_aif;"
+          sql=" SELECT e.scripname, b.* FROM tbl_entity e join tbl_aif b ON e.entityid = b.entityid where e.category ILIKE 'Fixed_Income';"
 
           data=''
           msgs=executeSql.ExecuteAllNew(sql,data)

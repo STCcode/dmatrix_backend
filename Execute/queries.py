@@ -738,22 +738,22 @@ def getAifEntity():
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
 
-def getAIFEquityDetailsById(entity_id):
-    try:
-        sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
-        data = (entity_id,)  # tuple, not set
-        msgs = executeSql.ExecuteAllNew(sql, data)
-        return msgs
-    except Exception as e:
-        print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
+# def getAIFEquityDetailsById(entity_id):
+#     try:
+#         sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
+#         data = (entity_id,)  # tuple, not set
+#         msgs = executeSql.ExecuteAllNew(sql, data)
+#         return msgs
+#     except Exception as e:
+#         print("Error in getting underlying by id query:", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
 
 # ==================================== AIF Table End====================================
 
 
-# ==================================== AIF Fix Income Table Start==================================
+# ==================================== AIF Fixed Income Table Start==================================
 
 def updateAIFFixIncomeDetailActionTableRow(data):
     try:
@@ -787,7 +787,7 @@ def getAllAifFixedIncomeActionTable():
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
-def getAifFixIncomeActionTablebyId (entity_id):
+def getAIFFixedIncomeDetailsById (entity_id):
     try:
         sql = "SELECT * FROM tbl_aif WHERE entityid = %s;"
         data = (entity_id,)  # tuple, not set
@@ -809,11 +809,11 @@ def getAllAifFixedIncomeEntity():
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
-
-
-def getAIFFixIncomeEquityDetailsById(entity_id):
+     
+     
+def getAifDetailsFixedIncomeUnderlyingTable(entity_id):
     try:
-        sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
+        sql = "SELECT u.*, e.scripname FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE u.entityid = %s;"
         data = (entity_id,)  # tuple, not set
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs
@@ -821,9 +821,19 @@ def getAIFFixIncomeEquityDetailsById(entity_id):
         print("Error in getting underlying by id query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
+# def getAIFFixIncomeDetailsById(entity_id):
+#     try:
+#         sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
+#         data = (entity_id,)  # tuple, not set
+#         msgs = executeSql.ExecuteAllNew(sql, data)
+#         return msgs
+#     except Exception as e:
+#         print("Error in getting underlying by id query:", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
-# ==================================== AIF Table End====================================
+
+# ==================================== AIF Fixed Income Table End====================================
 
 
 
@@ -873,15 +883,15 @@ def getEtfEntity():
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
-def getETFDetailsById(entity_id):
-    try:
-        sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
-        data = (entity_id,)  # tuple, not set
-        msgs = executeSql.ExecuteAllNew(sql, data)
-        return msgs
-    except Exception as e:
-        print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
+# def getETFDetailsById(entity_id):
+#     try:
+#         sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
+#         data = (entity_id,)  # tuple, not set
+#         msgs = executeSql.ExecuteAllNew(sql, data)
+#         return msgs
+#     except Exception as e:
+#         print("Error in getting underlying by id query:", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 
 # ==================================== Commodities ETF Table End====================================
@@ -909,15 +919,15 @@ def getAllActionTableOfETFEquity():
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
-def getETFDetailsEquityById (entity_id):
-    try:
-        sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
-        data = (entity_id,)  # tuple, not set
-        msgs = executeSql.ExecuteAllNew(sql, data)
-        return msgs
-    except Exception as e:
-        print("Error in getting underlying by id query==========================", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
+# def getETFDetailsEquityById (entity_id):
+#     try:
+#         sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
+#         data = (entity_id,)  # tuple, not set
+#         msgs = executeSql.ExecuteAllNew(sql, data)
+#         return msgs
+#     except Exception as e:
+#         print("Error in getting underlying by id query==========================", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 def getETFEquityDetailActionTable(entity_id):
     try:
@@ -1273,15 +1283,15 @@ def getAllActionTableOfDirectEquity():
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
-def getDirectEquityByid(entity_id):
-    try:
-        sql = "SELECT * FROM tbl_entity WHERE entityid = %s;"
-        data = (entity_id,)  # tuple, not set
-        msgs = executeSql.ExecuteAllNew(sql, data)
-        return msgs
-    except Exception as e:
-        print("Error in getting underlying by id query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
+# def getDirectEquityByid(entity_id):
+#     try:
+#         sql = "SELECT * FROM tbl_entity WHERE entityid = %s;"
+#         data = (entity_id,)  # tuple, not set
+#         msgs = executeSql.ExecuteAllNew(sql, data)
+#         return msgs
+#     except Exception as e:
+#         print("Error in getting underlying by id query:", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
 
 def getDEDetailActionTable(entity_id):
     try:

@@ -192,13 +192,13 @@ app.add_url_rule('/getAIFEquityDetailsById',view_func=user_fun.getAIFEquityDetai
 #======================================= AIF Fix Income Table Start====================================
 
 # app.add_url_rule('/InsertAifFixIncomeData' ,view_func=user_fun.InsertAifFixIncomeData,methods=['GET','POST'])
-app.add_url_rule('/getAllAifFixedIncomeActionTable',view_func=user_fun.getAllAifFixIncomeActionTable,methods=['GET','POST'])
+app.add_url_rule('/getAllAIFFixedIncomeActionTable',view_func=user_fun.getAllAifFixIncomeActionTable,methods=['GET','POST'])
 app.add_url_rule('/getAifFixIncomeActionTablebyId',view_func=user_fun.getAifFixIncomeActionTablebyId,methods=['GET','POST'])
 
 app.add_url_rule('/updateAIFFixedIncomeDetailActionTableRow',view_func=user_fun.updateAIFFixIncomeDetailActionTableRow,methods=['POST'])
 app.add_url_rule('/deleteAIFFixedIncomeDetailActionTableRow',view_func=user_fun.deleteAIFFixIncomeDetailActionTableRow,methods=['DELETE','POST'])
 
-app.add_url_rule('/getAllAIFFixedIncomeEntites',view_func=user_fun.getAllAifFixedIncomeEntity,methods=['GET','POST'])
+app.add_url_rule('/getAllAIFFixedIncomeEntities',view_func=user_fun.getAllAifFixedIncomeEntity,methods=['GET','POST'])
 
 # app.add_url_rule('/insertNavData' ,view_func=user_fun.insertNavData,methods=['GET','POST'])
 app.add_url_rule('/getAIFFixIncomeEquityDetailsById',view_func=user_fun.getAIFFixIncomeEquityDetailsById,methods=['GET','POST'])

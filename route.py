@@ -235,7 +235,7 @@ app.add_url_rule('/getETFEntity',view_func=user_fun.getEtfEntity,methods=['GET',
 app.add_url_rule('/getAllETFEquity',view_func=user_fun.getAllETFEquity,methods=['GET','POST'])
 app.add_url_rule('/getAllActionTableOfETFEquity',view_func=user_fun.getAllActionTableOfETFEquity,methods=['GET','POST'])
 app.add_url_rule('/getETFDetailsEquityById',view_func=user_fun.getETFDetailsEquityById,methods=['GET','POST'])
-# app.add_url_rule('/getETFEquityDetailActionTable',view_func=user_fun.getETFEquityDetailActionTable,methods=['GET','POST'])
+app.add_url_rule('/getETFEquityDetailActionTable',view_func=user_fun.getETFEquityDetailActionTable,methods=['GET','POST'])
 app.add_url_rule('/getETFEquityDetailUnderlyingTable',view_func=user_fun.getETFEquityDetailUnderlyingTable,methods=['GET','POST'])
 
 

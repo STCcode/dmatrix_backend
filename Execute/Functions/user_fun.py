@@ -2251,37 +2251,37 @@ def  getETFDetailsEquityById ():
 
 
 
-# def getETFEquityDetailActionTable():
-#     try:
-#         if request.method == 'GET':
-#             # Get entityid from query param and strip extra spaces
-#             entity_id = request.args.get('entityid')
-#             if not entity_id:
-#                 return make_response(
-#                     middleware.exe_msgs(responses.getAll_501, "Missing entityid in request", "1023501"),
-#                     400
-#                 )
+def getETFEquityDetailActionTable():
+    try:
+        if request.method == 'GET':
+            # Get entityid from query param and strip extra spaces
+            entity_id = request.args.get('entityid')
+            if not entity_id:
+                return make_response(
+                    middleware.exe_msgs(responses.getAll_501, "Missing entityid in request", "1023501"),
+                    400
+                )
 
-#             entity_id = entity_id.strip()
+            entity_id = entity_id.strip()
 
-#             # Pass entity_id to query function
-#             data = queries.getETFEquityDetailActionTable(entity_id)
+            # Pass entity_id to query function
+            data = queries.getETFEquityDetailActionTable(entity_id)
 
-#             if isinstance(data, list):
-#                 result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
-#                 status = 200
-#             else:
-#                 result = data
-#                 status = 500
+            if isinstance(data, list):
+                result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+                status = 200
+            else:
+                result = data
+                status = 500
 
-#             return make_response(result, status)
+            return make_response(result, status)
 
-#     except Exception as e:
-#         print("Error in getETFEquityDetailActionTable:", e)
-#         return make_response(
-#             middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
-#             500
-#         )
+    except Exception as e:
+        print("Error in getETFEquityDetailActionTable:", e)
+        return make_response(
+            middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
+            500
+        )
   
 def getETFEquityDetailUnderlyingTable():
     try:

@@ -1674,6 +1674,291 @@ def getAIFEquityDetailsById():
 #========================================AIF Table End ======================================================
 
 
+#========================================AIF Fix Income Table Start ====================================================
+# def InsertAifFixIncomeData():
+#     try:
+#         if request.method == 'POST':
+#             formData = request.get_json()
+
+#             # required_fields = ['entityid', 'trans_date', 'trans_type', 'contribution_amount', 'setup_expense', 'stamp_duty', 'amount_invested', 'post_tax_nav', 'num_units', 'balance_units', 'strategy_name', 'amc_name', 'created_at']
+#             # missing = [f for f in required_fields if f not in formData]
+
+#             # if missing:
+#             #     return make_response(
+#             #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
+#             #         400
+#             #     )
+
+#             formlist = (formData['entityid'],formData['trans_date'],formData['trans_type'],formData['contribution_amount'],formData['setup_expense'],formData['stamp_duty'],formData['amount_invested'],formData['post_tax_nav'],formData['num_units'],formData['balance_units'],formData['strategy_name'],formData['amc_name'], datetime.now(),formData['isin']
+#             )
+
+#             insert_msg = queries.InsertAifFixIncomeData(formlist)
+
+#             # Always return 200 if insert succeeds
+#             return make_response(
+#                 middleware.exs_msgs(insert_msg, responses.insert_200, '1020200'),
+#                 200
+#             )
+
+#     except Exception as e:
+#         print("Error in insertNavData:", e)
+#         return make_response(
+#             middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
+#             500
+#         )
+   
+
+# def insertNavData():
+#     try:
+#         if request.method == 'POST':
+#             formData = request.get_json()
+
+#             # required_fields = ['entityid', 'trans_date', 'trans_type', 'contribution_amount', 'setup_expense', 'stamp_duty', 'amount_invested', 'post_tax_nav', 'num_units', 'balance_units', 'strategy_name', 'amc_name', 'created_at']
+#             # missing = [f for f in required_fields if f not in formData]
+
+#             # if missing:
+#             #     return make_response(
+#             #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
+#             #         400
+#             #     )
+
+#             formlist = (formData['entityid'],formData['pre_tax_nav'],formData['post_tax_nav'],formData['nav_date'], datetime.now(),formData['isin']
+#             )
+
+#             insert_msg = queries.insertNavData(formlist)
+
+            
+#             return make_response(
+#                 middleware.exs_msgs(insert_msg, responses.insert_200, '1020200'),
+#                 200
+#             )
+
+#     except Exception as e:
+#         print("Error in insertNavData:", e)
+#         return make_response(
+#             middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
+#             500
+#         )
+    
+def updateAIFFixIncomeDetailActionTableRow():
+    try:
+        if request.method == 'POST':   # changed from PUT → POST
+            formData = request.get_json()
+
+            # Get ID from params instead of body
+            record_id = request.args.get("aif_id")   # Example: /updateMFAction?id=241
+            if not record_id:
+                return make_response(
+                    middleware.exe_msgs(responses.update_404, "ID parameter is required", '1020405'),
+                    400
+                )
+
+            formlist = (formData.get('trans_date'),formData.get('trans_type'),formData.get('contribution_amount'),formData.get('setup_expense'),formData.get('stamp_duty'),formData.get('amount_invested'),formData.get('post_tax_nav'),formData.get('num_units'),formData.get('balance_units'),formData.get('strategy_name'),formData.get('amc_name'),formData.get('isin'),datetime.now(),record_id)
+
+            updated_rows = queries.updateAIFFixIncomeDetailActionTableRow(formlist)
+
+            if type(updated_rows).__name__ != "int":
+                return make_response(updated_rows, 500)
+
+            if updated_rows == 0:
+                return make_response(
+                    middleware.exe_msgs(responses.update_404, "No record found to update", '1020404'),
+                    404
+                )
+
+            result = middleware.exs_msgs(updated_rows, responses.update_200, '1020400')
+            return make_response(result, 200)
+
+    except Exception as e:
+        print("Error in update_entity_table:", e)
+        return make_response(
+            middleware.exe_msgs(responses.update_501, str(e.args), '1020501'),
+            500
+        )
+
+def deleteAIFFixIncomeDetailActionTableRow():
+    try:
+        entity_id = None
+
+        # If DELETE → get from query parameters
+        if request.method == 'DELETE':
+            entity_id = request.args.get('aif_id')
+
+        # If POST → get from form-data or JSON
+        elif request.method == 'POST':
+            if request.is_json:
+                entity_id = request.json.get('aif_id')
+            else:
+                entity_id = request.form.get('aif_id')
+
+        # Validate input
+        if not entity_id:
+            return make_response(
+                middleware.exe_msgs(responses.delete_501, "Missing id parameter", '1024501'),
+                400
+            )
+
+        # Perform deletion
+        deleted_rows = queries.deleteAIFFixIncomeDetailActionTableRow(entity_id)
+
+        if isinstance(deleted_rows, int):
+            if deleted_rows > 0:
+                result = middleware.exs_msgs(deleted_rows, responses.delete_200, '1024200')
+                status = 200
+            else:
+                result = middleware.exe_msgs(responses.delete_404, "No record found to delete", '1024504')
+                status = 404
+        else:
+            # Query returned error message object
+            result = deleted_rows
+            status = 500
+
+        return make_response(result, status)
+
+    except Exception as e:
+        print("Error in delete_entity:", e)
+        return make_response(
+            middleware.exe_msgs(responses.delete_501, str(e.args), '1024500'),
+            500
+        )
+   
+
+
+
+def getAllAifFixIncomeActionTable():
+     if request.method == 'GET':
+        try:
+            data=queries.getAllAifFixedIncomeActionTable()
+            if type(data).__name__  != "list":
+                if data.json:
+                    result=data
+                    status=500
+            else:
+                result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
+                status=200
+                        
+            return make_response(result,status)
+        except Exception as e:
+            print("Error in getting role data=============================", e)
+            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)  
+
+
+def  getAifFixIncomeActionTablebyId ():
+    try:
+        entity_id = None
+
+        # Handle GET → from query params
+        if request.method == 'GET':
+            entity_id = request.args.get('entityid')
+
+        # Handle POST → from JSON or form-data
+        elif request.method == 'POST':
+            if request.is_json:
+                entity_id = request.json.get('entityid')
+            else:
+                entity_id = request.form.get('entityid')
+
+        if not entity_id:
+            return make_response(
+                middleware.exe_msgs(responses.getAll_501, "Missing entityid parameter", '1023501'),
+                400
+            )
+
+        data = queries.getAifFixIncomeActionTablebyId (entity_id)
+
+        # Return proper response
+        if isinstance(data, list):
+            result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+            status = 200
+        else:
+            result = data
+            status = 500
+
+        return make_response(result, status)
+
+    except Exception as e:
+        print("Error in getting underlying by id:", e)
+        return make_response(
+            middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
+            500
+        )
+
+
+
+
+
+def getAllAifFixedIncomeEntity():
+     if request.method == 'GET':
+        try:
+            data=queries.getAllAifFixedIncomeEntity()
+            # if type(data).__name__  != "list":
+            #     if data.json:
+            #         result=data
+            #         status=500
+            # else:
+            #     result=middleware.exs_msgs(data,responses.getAll_200,'1023200')
+            #     status=200
+            if isinstance(data, list):
+                result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+                status = 200
+            else:
+                result = data
+                status = 500
+
+            return make_response(result, status)
+     
+        except Exception as e:
+            print("Error in getting role data=============================", e)
+            return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)            
+
+def getAIFFixIncomeEquityDetailsById():
+    try:
+        entity_id = None
+
+        # Handle GET → from query params
+        if request.method == 'GET':
+            entity_id = request.args.get('entityid')
+
+        # Handle POST → from JSON or form-data
+        elif request.method == 'POST':
+            if request.is_json:
+                entity_id = request.json.get('entityid')
+            else:
+                entity_id = request.form.get('entityid')
+
+        # Validate entity_id
+        if not entity_id:
+            return make_response(
+                middleware.exe_msgs(responses.getAll_501, "Missing entityid parameter", '1023501'),
+                400
+            )
+
+        # Query the database
+        data = queries.getAIFFixIncomeEquityDetailsById(entity_id)
+
+        # Return proper response
+        if isinstance(data, list):
+            result = middleware.exs_msgs(data, responses.getAll_200, '1023200')
+            status = 200
+        else:
+            result = data
+            status = 500
+
+        return make_response(result, status)
+
+    except Exception as e:
+        print("Error in getting underlying by id:", e)
+        return make_response(
+            middleware.exe_msgs(responses.getAll_501, str(e.args), '1023500'),
+            500
+        )
+
+
+
+
+#========================================AIF  Fix Income Table End ======================================================
+
+
 
 
 

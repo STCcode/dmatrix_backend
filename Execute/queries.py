@@ -753,6 +753,80 @@ def getAIFEquityDetailsById(entity_id):
 # ==================================== AIF Table End====================================
 
 
+# ==================================== AIF Fix Income Table Start==================================
+
+def updateAIFFixIncomeDetailActionTableRow(data):
+    try:
+        sql = "UPDATE tbl_aif SET trans_date = %s,trans_type = %s,contribution_amount = %s,setup_expense = %s,stamp_duty = %s,amount_invested = %s,post_tax_nav =%s,num_units =%s,balance_units =%s,strategy_name=%s,amc_name=%s,isin=%s,updated_at = %s WHERE aif_id = %s"
+        msg = executeSql.ExecuteReturnId(sql, data)
+        return msg
+    except Exception as e:
+        print("Error in update_entity_table query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020311')
+
+def deleteAIFFixIncomeDetailActionTableRow(entity_id):
+    try:
+        entity_id = int(entity_id)
+        sql = "DELETE FROM tbl_aif WHERE aif_id = %s RETURNING aif_id"
+        data = (entity_id,)
+        deleted_count = executeSql.ExecuteReturnId(sql, data)
+        return deleted_count
+    except Exception as e:
+        print("Error in DeleteEntityByid query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1024310')
+
+
+def getAllAifFixedIncomeActionTable():
+     try:
+          # sql="SELECT * FROM tbl_entity WHERE category ILIKE 'Equity' AND subcategory ILIKE 'AIF';"
+          sql="SELECT * FROM tbl_aif;"
+
+          data=''
+          msgs=executeSql.ExecuteAllNew(sql,data)
+          return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
+def getAifFixIncomeActionTablebyId (entity_id):
+    try:
+        sql = "SELECT * FROM tbl_aif WHERE entityid = %s;"
+        data = (entity_id,)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
+
+
+def getAllAifFixedIncomeEntity():
+     try:
+        sql=" SELECT * FROM tbl_entity WHERE category ILIKE 'Fixed_Income' AND subcategory ILIKE 'Alternative Investment Funds';"
+        #   sql="SELECT e.*, a.* FROM tbl_entity e LEFT JOIN tbl_aif a ON e.entityid = a.entityid  WHERE e.category ILIKE 'Equity' AND e.subcategory ILIKE 'Alternative Investment Funds';"
+
+        data=''
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
+
+def getAIFFixIncomeEquityDetailsById(entity_id):
+    try:
+        sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
+        data = (entity_id,)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
+
+
+
+# ==================================== AIF Table End====================================
+
+
 
 # ====================================Commodities ETF Table Start==================================
 def InsertEtfData(data):

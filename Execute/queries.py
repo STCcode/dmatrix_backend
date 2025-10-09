@@ -1541,10 +1541,10 @@ def GetallAIFFixedIncomeSectorCount():
 
 
 
-def getAIFDetailsFixedIncomeSectorCount():
+def getAIFDetailsFixedIncomeSectorCount(entity_id):
      try:
         sql="WITH entity_weights AS (SELECT u.sector,COUNT(*) AS sector_count,SUM(u.weightage::numeric) AS sector_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Fixed_Income' AND e.subcategory = 'Alternative Investment Funds' AND u.entityid = %s AND u.sector IS NOT NULL GROUP BY u.sector),total AS (SELECT COUNT(*) AS total_sector_count,SUM(u.weightage::numeric) AS total_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Fixed_Income' AND e.subcategory = 'Alternative Investment Funds' AND u.entityid = %s  AND u.sector IS NOT NULL)  SELECT ew.sector,ew.sector_count,total.total_sector_count,ew.sector_weight,total.total_weight,(ew.sector_weight * 100.0 / total.total_weight)::numeric(7,2) AS sector_percent FROM entity_weights ew CROSS JOIN total ORDER BY sector_percent DESC;"     
-        data=''
+        data=(entity_id,entity_id)
         msgs=executeSql.ExecuteAllNew(sql,data)
         return msgs
      except Exception as e:

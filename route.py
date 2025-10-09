@@ -173,7 +173,7 @@ app.add_url_rule('/getCamByid',view_func=user_fun.getCamByid_route,methods=['GET
 
 #=======================================AIF Table Start====================================
 
-app.add_url_rule('/insertAifData' ,view_func=user_fun.InsertAifData,methods=['GET','POST'])
+app.add_url_rule('/insertAifActionData' ,view_func=user_fun.InsertAifData,methods=['GET','POST'])
 app.add_url_rule('/getAllAif',view_func=user_fun.getAllAif,methods=['GET','POST'])
 app.add_url_rule('/getAifActionTablebyId',view_func=user_fun.getAifActionTablebyId,methods=['GET','POST'])
 

@@ -1504,7 +1504,42 @@ def GetallAIFSectorUnderlyingCount():
         return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')        
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')   
+
+
+
+def getAIFDetailsFixedIncomeMCAPCount(entity_id):
+    try:
+        sql="WITH all_tags AS (SELECT DISTINCT tag FROM tbl_underlying WHERE tag IS NOT NULL),entity_weights AS (SELECT u.tag, COUNT(*) AS tag_count,SUM(u.weightage::numeric) AS tag_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Fixed_Income' AND e.subcategory = 'Alternative Investment Funds' AND u.entityid = %s AND u.tag IS NOT NULL GROUP BY u.tag),total AS (SELECT COUNT(*) AS total_tag_count,SUM(u.weightage::numeric) AS total_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Fixed_Income' AND e.subcategory = 'Alternative Investment Funds' AND u.entityid = %s AND u.tag IS NOT NULL) SELECT t.tag,COALESCE(ew.tag_count, 0) AS tag_count,total.total_tag_count,COALESCE(ew.tag_weight, 0) AS tag_weight,total.total_weight,COALESCE((ew.tag_weight * 100.0 / total.total_weight)::numeric(7,2), 0.00) AS tag_percent FROM all_tags t LEFT JOIN entity_weights ew ON t.tag = ew.tag CROSS JOIN total ORDER BY tag_weight DESC;"
+
+        data = (entity_id, entity_id)  # tuple, not set
+        msgs = executeSql.ExecuteAllNew(sql, data)
+        return msgs
+    except Exception as e:
+        print("Error in getting underlying by id query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
+    
+def GetallFixedIncomeUnderlyingCount():
+    try:
+        sql="WITH latest_nav AS (SELECT DISTINCT ON (isin)	isin,	post_tax_nav AS nav FROM tbl_aif_nav ORDER BY isin, nav_date DESC),entity_values AS (SELECT	a.entityid,	SUM(a.num_units * COALESCE(nav.nav, 1)) AS entity_total_value FROM tbl_aif a LEFT JOIN latest_nav nav ON a.isin = nav.isin JOIN tbl_entity e ON a.entityid = e.entityid WHERE e.category = 'Fixed_Income'  AND e.subcategory = 'Alternative Investment Funds' GROUP BY a.entityid),total_value AS (SELECT SUM(entity_total_value) AS total_all_entities FROM entity_values),entity_mf_percent AS (SELECT	ev.entityid,	ev.entity_total_value,	(ev.entity_total_value / tv.total_all_entities) AS mf_weight_fraction,	ROUND((ev.entity_total_value / tv.total_all_entities) * 100, 2) AS mf_weight_percent FROM entity_values ev CROSS JOIN total_value tv),entity_weights AS (SELECT	u.entityid,	u.tag,	COUNT(*) AS tag_count,	SUM(u.weightage::numeric) AS tag_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE u.tag IS NOT NULL  AND e.category = 'Fixed_Income'  AND e.subcategory = 'Alternative Investment Funds' GROUP BY u.entityid, u.tag),entity_totals AS (SELECT entityid, SUM(tag_weight) AS total_tag_weight FROM entity_weights GROUP BY entityid),entity_tag_breakdown AS (SELECT	ew.entityid,	ew.tag,	ew.tag_count,	ew.tag_weight,	et.total_tag_weight,	emp.mf_weight_percent,	(ew.tag_weight / et.total_tag_weight) * emp.mf_weight_fraction AS tag_fraction FROM entity_weights ew JOIN entity_totals et ON ew.entityid = et.entityid JOIN entity_mf_percent emp ON ew.entityid = emp.entityid),tag_totals AS (SELECT	tag,	SUM(tag_count) AS total_tag_count,	ROUND(SUM(tag_fraction) * 100, 2) AS overall_tag_percent FROM entity_tag_breakdown GROUP BY tag),grand_total AS (SELECT SUM(total_tag_count) AS overall_tag_count FROM tag_totals)SELECT tt.tag,tt.total_tag_count,gt.overall_tag_count,tt.overall_tag_percent FROM tag_totals tt CROSS JOIN grand_total gt ORDER BY tt.overall_tag_percent DESC;"      
+        data=''       
+        msgs=executeSql.ExecuteAllNew(sql,data)        
+        return msgs    
+    except Exception as e:
+        print("Error in getingroleRecord query==========================",e)
+        return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')    
+
+
+
+def getAIFDetailsFixedIncomeSectorCount():
+     try:
+        sql="WITH latest_nav AS (SELECT DISTINCT ON (isin)    isin,  post_tax_nav AS nav FROM tbl_aif_nav ORDER BY isin, nav_date DESC),entity_values AS (SELECT    a.entityid,    SUM(a.num_units * COALESCE(nav.nav, 1)) AS entity_total_value FROM tbl_aif a LEFT JOIN latest_nav nav ON a.isin = nav.isin JOIN tbl_entity e ON a.entityid = e.entityid WHERE e.category = 'Fixed_Income'  AND e.subcategory = 'Alternative Investment Funds' GROUP BY a.entityid),total_value AS (SELECT SUM(entity_total_value) AS total_all_entities FROM entity_values),entity_mf_percent AS (SELECT    ev.entityid,    ev.entity_total_value,    (ev.entity_total_value / tv.total_all_entities) AS mf_weight_fraction,    ROUND((ev.entity_total_value / tv.total_all_entities) * 100, 2) AS mf_weight_percent FROM entity_values ev CROSS JOIN total_value tv), entity_weights AS (SELECT    u.entityid,    u.sector,    COUNT(*) AS tag_count,    SUM(u.weightage::numeric) AS tag_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE u.sector IS NOT NULL  AND e.category = 'Fixed_Income'  AND e.subcategory = 'Alternative Investment Funds'GROUP BY u.entityid, u.sector),entity_totals AS (SELECT entityid, SUM(tag_weight) AS total_tag_weight FROM entity_weights GROUP BY entityid),entity_tag_breakdown AS (SELECT    ew.entityid,    ew.sector,    ew.tag_count,    ew.tag_weight,    et.total_tag_weight,    emp.mf_weight_percent,    (ew.tag_weight / et.total_tag_weight) * emp.mf_weight_fraction AS tag_fraction FROM entity_weights ew JOIN entity_totals et ON ew.entityid = et.entityid JOIN entity_mf_percent emp ON ew.entityid = emp.entityid),tag_totals AS (SELECT    sector,    SUM(tag_count) AS total_tag_count,    ROUND(SUM(tag_fraction) * 100, 2) AS overall_tag_percent FROM entity_tag_breakdown GROUP BY sector),grand_total AS (SELECT SUM(total_tag_count) AS overall_tag_count FROM tag_totals)SELECT tt.sector,tt.total_tag_count,gt.overall_tag_count,tt.overall_tag_percent FROM tag_totals tt CROSS JOIN grand_total gt ORDER BY tt.overall_tag_percent DESC;"    
+        data=''
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')                
 
 
 # ======================================== Get allMfEquityUnderlyingCount END ============================

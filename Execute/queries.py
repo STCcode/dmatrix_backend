@@ -151,25 +151,55 @@ def entity_table(data):
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
 
 
-def getAllentity():
-     try:
+# def getAllentity():
+#      try:
           
+#         role = session.get('role')
+#         email = session.get('email')
+
+#         if role =='admin':
+#           sql="SELECT * FROM tbl_entity"
+#           data=''
+
+#         else:
+#             sql = "SELECT * FROM tbl_entity WHERE created_by = %s ORDER BY id DESC"
+#             # data = (email,)
+#             data = (session['email'],)
+#         msgs=executeSql.ExecuteAllNew(sql,data)
+#         return msgs
+     
+#      except Exception as e:
+#           print("Error in getingroleRecord query==========================",e)
+#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
+def getAllentity():
+    try:
+        # Get role and email from session
         role = session.get('role')
         email = session.get('email')
 
-        if role =='admin':
-          sql="SELECT * FROM tbl_entity"
-          data=''
+        # Check if user is logged in
+        if not role or not email:
+            return middleware.exe_msgs(responses.queryError_501, "Unauthorized: No active session", '1023311')
 
+        # Admin can see all entities
+        if role == 'admin':
+            sql = "SELECT * FROM tbl_entity ORDER BY id DESC"
+            data = ()
+
+        # Normal users only see their own
         else:
             sql = "SELECT * FROM tbl_entity WHERE created_by = %s ORDER BY id DESC"
             data = (email,)
-        msgs=executeSql.ExecuteAllNew(sql,data)
+
+        print(f"[DEBUG] Running query: {sql} with {data}")  # optional debug line
+
+        msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs
-     
-     except Exception as e:
-          print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
+    except Exception as e:
+        print("Error in getAllentity query==========================", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1023310')
 
 
 

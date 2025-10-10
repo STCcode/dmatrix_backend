@@ -3,7 +3,7 @@ from Execute import executeSql,responses,middleware
 import platform
 import psycopg2
 import pandas as pd
-from flask import jsonify, request
+from flask import session,jsonify, request
 import numpy as np
 import json
 #getting all user data
@@ -153,10 +153,20 @@ def entity_table(data):
 
 def getAllentity():
      try:
+          
+        role = session.get('role')
+        email = session.get('email')
+
+        if role =='admin':
           sql="SELECT * FROM tbl_entity"
           data=''
-          msgs=executeSql.ExecuteAllNew(sql,data)
-          return msgs
+
+        else:
+            sql = "SELECT * FROM tbl_entity WHERE created_by = %s ORDER BY id DESC"
+            data = (email,)
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
+     
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')

@@ -295,8 +295,16 @@ def entity_table():
     try:
         if request.method == 'POST':
             formData = request.get_json()
+            created_by = session.get('email',None)
 
-            formlist = (formData['scripname'],formData.get('scripcode'),None,formData.get('benchmark_name'),formData['category'],formData.get('subcategory'),formData.get('nickname'),datetime.now(),formData.get('isin'),formData.get('aif_category'),formData.get('aif_class'))
+
+            if not created_by:
+                return make_response(
+                    middleware.exe_msgs(responses.insert_501, "Unauthorized: Please log in first", '1020501'),
+                    401
+                )
+
+            formlist = (formData['scripname'],formData.get('scripcode'),None,formData.get('benchmark_name'),formData['category'],formData.get('subcategory'),formData.get('nickname'),datetime.now(),formData.get('isin'),formData.get('aif_category'),formData.get('aif_class'),created_by)
 
             insert_id = queries.entity_table(formlist)
 

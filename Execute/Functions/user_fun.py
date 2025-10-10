@@ -73,6 +73,9 @@ def stop_nav_scheduler():
 #         except Exception as e:
 #             print("Error in getting role data=============================", e)
 #             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)
+# getAllUsers(): Observable<any> {
+#     return this.http.get(`${this.apiUrl}/users`);
+#   }
 
 def get_all_users():
     try:

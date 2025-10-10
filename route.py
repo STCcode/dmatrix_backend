@@ -314,7 +314,7 @@ app.add_url_rule('/getAllAIFEquityUnderlyingCount',view_func=user_fun.GetallAIFE
 app.add_url_rule('/getAllAIFEquitySectorCount',view_func=user_fun.GetallAIFSectorUnderlyingCount,methods=['GET','POST'])
 
 app.add_url_rule('/getAIFDetailsFixedIncomeMCAPCount',view_func=user_fun.getAIFDetailsFixedIncomeMCAPCount,methods=['GET','POST'])
-app.add_url_rule('/GetallFixedIncomeUnderlyingCount',view_func=user_fun.GetallFixedIncomeUnderlyingCount,methods=['GET','POST'])
+app.add_url_rule('/getallFixedIncomeUnderlyingCount',view_func=user_fun.GetallFixedIncomeUnderlyingCount,methods=['GET','POST'])
 app.add_url_rule('/getAIFDetailsFixedIncomeSectorCount',view_func=user_fun.getAIFDetailsFixedIncomeSectorCount,methods=['GET','POST'])
 app.add_url_rule('/getallAIFFixedIncomeSectorCount',view_func=user_fun.GetallAIFFixedIncomeSectorCount,methods=['GET','POST'])
 # ======================================== Get allMfEquityUnderlyingCount End============================

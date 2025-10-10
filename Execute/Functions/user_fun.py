@@ -77,27 +77,27 @@ def stop_nav_scheduler():
 #     return this.http.get(`${this.apiUrl}/users`);
 #   }
 
-def get_all_users():
-    try:
-        if 'role' not in session or session['role'] != 'admin':
-            return make_response(
-                middleware.exe_msgs(responses.getAll_501, "Unauthorized access", '1023401'),
-                403
-            )
+# def get_all_users():
+#     try:
+#         if 'role' not in session or session['role'] != 'admin':
+#             return make_response(
+#                 middleware.exe_msgs(responses.getAll_501, "Unauthorized access", '1023401'),
+#                 403
+#             )
 
-        data = queries.get_all_users()
-        if isinstance(data, list):
-            result = middleware.exs_msgs(data, responses.getAll_200, '1023400')
-            return make_response(result, 200)
-        else:
-            return make_response(data, 500)
+#         data = queries.get_all_users()
+#         if isinstance(data, list):
+#             result = middleware.exs_msgs(data, responses.getAll_200, '1023400')
+#             return make_response(result, 200)
+#         else:
+#             return make_response(data, 500)
 
-    except Exception as e:
-        print("Error in get_all_users:", e)
-        return make_response(
-            middleware.exe_msgs(responses.getAll_501, str(e.args), '1023402'),
-            500
-        )
+#     except Exception as e:
+#         print("Error in get_all_users:", e)
+#         return make_response(
+#             middleware.exe_msgs(responses.getAll_501, str(e.args), '1023402'),
+#             500
+#         )
 
 # old get all user function
 
@@ -155,15 +155,7 @@ def save_user():
             role = formData.get('role', 'user')
             created_by = formData.get('created_by', None)
 
-            formlist = (
-                formData['name'],
-                formData['email'],
-                password_hash,
-                role,
-                created_by,
-                datetime.now(),
-                datetime.now()
-            )
+            formlist = ( formData['name'], formData['email'], password_hash, role, created_by, datetime.now(), datetime.now())
 
             insert_id = queries.save_user(formlist)
 

@@ -131,6 +131,61 @@ bcrypt = Bcrypt()
 #             500
 #         )
 
+# def login_user():
+#     try:
+#         if request.method == 'POST':
+#             data = request.get_json()
+            
+#             # Check if email and password are provided
+#             if 'email' not in data or 'password' not in data:
+#                 return make_response(
+#                     middleware.exe_msgs(responses.getAll_501, "Missing email or password", '1023201'),
+#                     400
+#                 )
+
+#             email = data['email']
+#             password = data['password']
+#             formdata = (email,)
+
+#             # Fetch user data from DB
+#             user_data = queries.login_user(formdata)
+#             if not isinstance(user_data, list) or len(user_data) == 0:
+#                 return make_response(
+#                     middleware.exe_msgs(responses.getAll_501, "Invalid email or password", '1023202'),
+#                     401
+#                 )
+
+#             user = user_data[0]
+
+#             # Check password using MD5 (current database)
+#             hashed_input_password = hashlib.md5(password.encode()).hexdigest()
+#             if hashed_input_password != user['password']:
+#                 return make_response(
+#                     middleware.exe_msgs(responses.getAll_501, "Invalid password", '1023202'),
+#                     401
+#                 )
+
+#             # Set session data
+#             session['email'] = user['email']
+#             session['role'] = user['role']
+
+#             # Return success response
+#             result = middleware.exs_msgs(user, responses.getAll_200, '1023200')
+#             return make_response(result, 200)
+
+#     except Exception as e:
+#         print("Error in login_user:", e)
+#         return make_response(
+#             middleware.exe_msgs(responses.getAll_501, str(e.args), '1023203'),
+#             500
+#         )
+
+import hashlib
+from flask import request, make_response, session
+import middleware
+import responses
+import queries
+
 def login_user():
     try:
         if request.method == 'POST':
@@ -169,8 +224,16 @@ def login_user():
             session['email'] = user['email']
             session['role'] = user['role']
 
+            # Fetch data based on role
+            if user['role'] == 'admin':
+                # Admin sees all users
+                users_list = queries.get_all_users()
+            else:
+                # Normal user sees only their own data
+                users_list = [user]
+
             # Return success response
-            result = middleware.exs_msgs(user, responses.getAll_200, '1023200')
+            result = middleware.exs_msgs(users_list, responses.getAll_200, '1023200')
             return make_response(result, 200)
 
     except Exception as e:
@@ -179,6 +242,7 @@ def login_user():
             middleware.exe_msgs(responses.getAll_501, str(e.args), '1023203'),
             500
         )
+
 
 def home():
     if 'username' in session:

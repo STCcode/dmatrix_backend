@@ -180,11 +180,6 @@ bcrypt = Bcrypt()
 #             500
 #         )
 
-import hashlib
-from flask import request, make_response, session
-import middleware
-import responses
-import queries
 
 def login_user():
     try:

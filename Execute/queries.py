@@ -21,23 +21,43 @@ def getAllUserData():
 #for login
 # postgres query
 
+# old
+# def login_user(data):
+#     try:
+#         sql = "SELECT id, name, email FROM tbl_users WHERE email = %s AND password = md5(%s)"
+#         return executeSql.ExecuteAllNew(sql, data)
+#     except Exception as e:
+#         print("Error in login_user query==========================", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020320')
+# old
+
 def login_user(data):
     try:
-        sql = "SELECT id, name, email FROM tbl_users WHERE email = %s AND password = md5(%s)"
+        sql = "SELECT id, name, email, password, role FROM tbl_users WHERE email = %s"
         return executeSql.ExecuteAllNew(sql, data)
     except Exception as e:
-        print("Error in login_user query==========================", e)
+        print("Error in login_user query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020320')
 
+
 # postgres query
+# def save_user(data):
+#     try:
+#      #    sql = " INSERT INTO tbl_users (name, email, password, created_by, created_date, updated_date) VALUES (%s, %s, md5(%s), %s, %s, %s)"
+#         sql = " INSERT INTO tbl_users (name, email, password, created_date, updated_date) VALUES (%s, %s, md5(%s), %s, %s)"
+#         msg = executeSql.ExecuteReturnId(sql, data)
+#         return msg
+#     except Exception as e:
+#         print("Error in save_user query==========================", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
+
 def save_user(data):
     try:
-     #    sql = " INSERT INTO tbl_users (name, email, password, created_by, created_date, updated_date) VALUES (%s, %s, md5(%s), %s, %s, %s)"
-        sql = " INSERT INTO tbl_users (name, email, password, created_date, updated_date) VALUES (%s, %s, md5(%s), %s, %s)"
+        sql = " INSERT INTO tbl_users (name, email, password, role, created_by, created_date, updated_date) VALUES (%s, %s, %s, %s, %s, %s, %s)"
         msg = executeSql.ExecuteReturnId(sql, data)
         return msg
     except Exception as e:
-        print("Error in save_user query==========================", e)
+        print("Error in save_user query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
 # Check Username
 
@@ -52,15 +72,23 @@ def checkusername(id):
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1022310')
 #get all users
 
-def getAlluser():
-     try:
-          sql="SELECT *,getrolename(s_role) as role_name FROM tbl_user_master"
-          data=''
-          msgs=executeSql.ExecuteAllNew(sql,data)
-          return msgs
-     except Exception as e:
-          print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+# def getAlluser():
+#      try:
+#           sql="SELECT *,getrolename(s_role) as role_name FROM tbl_user_master"
+#           data=''
+#           msgs=executeSql.ExecuteAllNew(sql,data)
+#           return msgs
+#      except Exception as e:
+#           print("Error in getingroleRecord query==========================",e)
+#           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
+def get_all_users():
+    try:
+        sql = "SELECT id, name, email, role, created_date FROM tbl_users ORDER BY id DESC"
+        return executeSql.ExecuteAllNew(sql)
+    except Exception as e:
+        print("Error in get_all_users query:", e)
+        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020330')
 
 #getting area data by id
 def getAllUserById(id):

@@ -1,5 +1,6 @@
 from flask import session, redirect, url_for, request, render_template,flash,jsonify,make_response
 #from route import app
+from flask_bcrypt import Bcrypt
 from Execute import queries,responses,middleware
 
 def index():
@@ -7,6 +8,8 @@ def index():
 
 def emailhtml():
     return render_template('emailHtml.html')
+
+bcrypt = Bcrypt()
 
 # def login():
 #     try:
@@ -39,50 +42,93 @@ def emailhtml():
 
 ############# postgres querty#######################3
 
+# old login user function
+# def login_user():
+#     try:
+#         if request.method == 'POST':
+#             data = request.get_json()
+
+#             # Input validation
+#             if 'email' not in data or 'password' not in data:
+#                 return make_response(
+#                     middleware.exe_msgs(responses.getAll_501, "Missing useremail or password", '1023201'),
+#                     400
+#                 )
+
+#             # name = data['name']
+#             email = data['email']
+#             password = data['password']
+#             formdata = (email, password)
+
+#             # Fetch user from DB
+#             user_data = queries.login_user(formdata)
+
+#             # Check response type
+#             if type(user_data).__name__ != "list":
+#                 if hasattr(user_data, 'json'):
+#                     result = user_data
+#                     status = 500
+#             else:
+#                 if len(user_data) > 0:
+#                     session['emial'] = email  # Set session
+#                     result = middleware.exs_msgs(user_data, responses.getAll_200, '1023200')
+#                     status = 200
+#                 else:
+#                     result = middleware.exe_msgs(responses.getAll_501, "Invalid credentials", '1023202')
+#                     status = 401
+
+#             return make_response(result, status)
+
+#     except Exception as e:
+#         print("Error in login Data ========================", e)
+#         return make_response(
+#             middleware.exe_msgs(responses.getAll_501, str(e.args), '1023203'),
+#             500
+#         )
+    
+#  old logn user function end
+
 def login_user():
     try:
         if request.method == 'POST':
             data = request.get_json()
-
-            # Input validation
             if 'email' not in data or 'password' not in data:
                 return make_response(
-                    middleware.exe_msgs(responses.getAll_501, "Missing useremail or password", '1023201'),
+                    middleware.exe_msgs(responses.getAll_501, "Missing email or password", '1023201'),
                     400
                 )
 
-            # name = data['name']
             email = data['email']
             password = data['password']
-            formdata = (email, password)
+            formdata = (email,)
 
-            # Fetch user from DB
             user_data = queries.login_user(formdata)
+            if not isinstance(user_data, list) or len(user_data) == 0:
+                return make_response(
+                    middleware.exe_msgs(responses.getAll_501, "Invalid email or password", '1023202'),
+                    401
+                )
 
-            # Check response type
-            if type(user_data).__name__ != "list":
-                if hasattr(user_data, 'json'):
-                    result = user_data
-                    status = 500
-            else:
-                if len(user_data) > 0:
-                    session['emial'] = email  # Set session
-                    result = middleware.exs_msgs(user_data, responses.getAll_200, '1023200')
-                    status = 200
-                else:
-                    result = middleware.exe_msgs(responses.getAll_501, "Invalid credentials", '1023202')
-                    status = 401
+            user = user_data[0]
 
-            return make_response(result, status)
+            if not bcrypt.check_password_hash(user['password'], password):
+                return make_response(
+                    middleware.exe_msgs(responses.getAll_501, "Invalid password", '1023202'),
+                    401
+                )
+
+            session['email'] = user['email']
+            session['role'] = user['role']
+
+            result = middleware.exs_msgs(user, responses.getAll_200, '1023200')
+            return make_response(result, 200)
 
     except Exception as e:
-        print("Error in login Data ========================", e)
+        print("Error in login_user:", e)
         return make_response(
             middleware.exe_msgs(responses.getAll_501, str(e.args), '1023203'),
             500
         )
-    
-# end
 
 
 def home():

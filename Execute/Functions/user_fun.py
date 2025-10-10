@@ -9,6 +9,7 @@ import numpy as np
 import threading
 import schedule
 import os
+from flask_bcrypt import Bcrypt
 import json 
 from scipy.optimize import newton 
 from email.utils import parsedate_to_datetime   # <-- new import
@@ -19,6 +20,7 @@ from nav_scheduler_flask import daily_nav_update, run_scheduler
 
 scheduler_thread = None
 stop_scheduler = False
+bcrypt = Bcrypt()
 
 def start_nav_scheduler():
     global scheduler_thread, stop_scheduler
@@ -54,7 +56,7 @@ def stop_nav_scheduler():
 #             print("Error in getting role data=============================", e)
 #             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)
 
-
+# old get all user function
 # def getAlluser():
 #      if request.method == 'POST':
 #         try:
@@ -72,23 +74,92 @@ def stop_nav_scheduler():
 #             print("Error in getting role data=============================", e)
 #             return  make_response(middleware.exe_msgs(responses.getAll_501,str(e.args),'1023500'),500)
 
+def get_all_users():
+    try:
+        if 'role' not in session or session['role'] != 'admin':
+            return make_response(
+                middleware.exe_msgs(responses.getAll_501, "Unauthorized access", '1023401'),
+                403
+            )
+
+        data = queries.get_all_users()
+        if isinstance(data, list):
+            result = middleware.exs_msgs(data, responses.getAll_200, '1023400')
+            return make_response(result, 200)
+        else:
+            return make_response(data, 500)
+
+    except Exception as e:
+        print("Error in get_all_users:", e)
+        return make_response(
+            middleware.exe_msgs(responses.getAll_501, str(e.args), '1023402'),
+            500
+        )
+
+# old get all user function
+
 # postgres query
+
+# old save user function
+# def save_user():
+#     try:
+#         if request.method == 'POST':
+#             formData = request.get_json()
+
+#             # required_fields = ['name', 'email', 'password', 'created_by']
+#             # missing = [f for f in required_fields if f not in formData]
+
+#             # if missing:
+#             #     return make_response(
+#             #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
+#             #         400
+#             #     )
+
+#             formlist = (formData['name'],formData['email'],formData['password'], datetime.now(),datetime.now()
+#             )
+
+#             insert_id = queries.save_user(formlist)
+
+#             if type(insert_id).__name__ != "int":
+#                 return make_response(insert_id, 500)
+
+#             result = middleware.exs_msgs(insert_id, responses.insert_200, '1020200')
+#             return make_response(result, 200)
+
+#     except Exception as e:
+#         print("Error in save_user:", e)
+#         return make_response(
+#             middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
+#             500
+#         )
+# old save user function
+
 
 def save_user():
     try:
         if request.method == 'POST':
             formData = request.get_json()
 
-            # required_fields = ['name', 'email', 'password', 'created_by']
-            # missing = [f for f in required_fields if f not in formData]
+            required_fields = ['name', 'email', 'password']
+            missing = [f for f in required_fields if f not in formData]
+            if missing:
+                return make_response(
+                    middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
+                    400
+                )
 
-            # if missing:
-            #     return make_response(
-            #         middleware.exe_msgs(responses.insert_501, f"Missing fields: {', '.join(missing)}", '1020501'),
-            #         400
-            #     )
+            password_hash = bcrypt.generate_password_hash(formData['password']).decode('utf-8')
+            role = formData.get('role', 'user')
+            created_by = formData.get('created_by', None)
 
-            formlist = (formData['name'],formData['email'],formData['password'], datetime.now(),datetime.now()
+            formlist = (
+                formData['name'],
+                formData['email'],
+                password_hash,
+                role,
+                created_by,
+                datetime.now(),
+                datetime.now()
             )
 
             insert_id = queries.save_user(formlist)
@@ -105,7 +176,6 @@ def save_user():
             middleware.exe_msgs(responses.insert_501, str(e.args), '1020500'),
             500
         )
-
 
 
 def checkusername():

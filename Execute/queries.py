@@ -191,22 +191,22 @@ def entity_table(data):
 def getAllentity():
     try:
         # Get role and email from session
-        role = session.get('role')
-        email = session.get('email')
+        # role = session.get('role')
+        # email = session.get('email')
 
         # Check if user is logged in
-        if not role or not email:
-            return middleware.exe_msgs(responses.queryError_501, "Unauthorized: No active session", '1023311')
+        # if not role or not email:
+        #     return middleware.exe_msgs(responses.queryError_501, "Unauthorized: No active session", '1023311')
 
         # Admin can see all entities
-        if role == 'admin':
-            sql = "SELECT * FROM tbl_entity ORDER BY id DESC"
-            data = ()
+        # if role == 'admin':
+        sql = "SELECT * FROM tbl_entity ORDER BY id DESC"
+        data = ''
 
         # Normal users only see their own
-        else:
-            sql = "SELECT * FROM tbl_entity WHERE created_by = %s ORDER BY id DESC"
-            data = (email,)
+        # else:
+        #     sql = "SELECT * FROM tbl_entity WHERE created_by = %s ORDER BY id DESC"
+        #     data = (email,)
 
         print(f"[DEBUG] Running query: {sql} with {data}")  # optional debug line
 
@@ -402,10 +402,20 @@ def deleteMFDetailActionTableRow(entity_id):
 
 def getActionByentId(entity_id):
     try:
+        role = session.get('role')
+        email = session.get('email')
         # sql = "SELECT * FROM tbl_action_table WHERE entityid = %s;"
         # sql ="SELECT COALESCE(redeem_amount::text, '-') AS redeem_amount,COALESCE(purchase_amount::text, '-') AS purchase_amount,COALESCE(purchase_value::text, '-') AS purchase_value FROM tbl_action_table WHERE entityid = %s;"
-        sql="SELECT id::text,COALESCE(scrip_code::text, '-') AS scrip_code,COALESCE(mode, '-') AS mode,COALESCE(order_type, '-') AS order_type,COALESCE(scrip_name, '-') AS scrip_name,COALESCE(isin::text, '-') AS isin,COALESCE(order_number::text, '-') AS order_number,COALESCE(folio_number::text, '-') AS folio_number,COALESCE(nav::text, '-') AS nav,COALESCE(stt::text, '-') AS stt,COALESCE(unit::text, '-') AS unit,COALESCE(redeem_amount::text, '-') AS redeem_amount,COALESCE(purchase_amount::text, '-') AS purchase_amount,COALESCE(purchase_value::text, '-') AS purchase_value,COALESCE(cgst::text, '-') AS cgst,COALESCE(sgst::text, '-') AS sgst,COALESCE(igst::text, '-') AS igst,COALESCE(ugst::text, '-') AS ugst,COALESCE(stamp_duty::text, '-') AS stamp_duty,COALESCE(cess_value::text, '-') AS cess_value,COALESCE(net_amount::text, '-') AS net_amount,COALESCE(created_at::text, '-') AS created_at,COALESCE(entityid, '-') AS entityid,COALESCE(order_date::text, '-') AS order_date,COALESCE(sett_no::text, '-') AS sett_no,COALESCE(updated_at::text, '-') AS updated_at FROM tbl_action_table WHERE entityid = %s;"
-        data = (entity_id,)  # tuple, not set
+        if not role or not email:
+            return middleware.exe_msgs(responses.queryError_501, "Unauthorized: No active session", '1023311')
+
+
+        if role == 'admin':
+            sql="SELECT id::text,COALESCE(scrip_code::text, '-') AS scrip_code,COALESCE(mode, '-') AS mode,COALESCE(order_type, '-') AS order_type,COALESCE(scrip_name, '-') AS scrip_name,COALESCE(isin::text, '-') AS isin,COALESCE(order_number::text, '-') AS order_number,COALESCE(folio_number::text, '-') AS folio_number,COALESCE(nav::text, '-') AS nav,COALESCE(stt::text, '-') AS stt,COALESCE(unit::text, '-') AS unit,COALESCE(redeem_amount::text, '-') AS redeem_amount,COALESCE(purchase_amount::text, '-') AS purchase_amount,COALESCE(purchase_value::text, '-') AS purchase_value,COALESCE(cgst::text, '-') AS cgst,COALESCE(sgst::text, '-') AS sgst,COALESCE(igst::text, '-') AS igst,COALESCE(ugst::text, '-') AS ugst,COALESCE(stamp_duty::text, '-') AS stamp_duty,COALESCE(cess_value::text, '-') AS cess_value,COALESCE(net_amount::text, '-') AS net_amount,COALESCE(created_at::text, '-') AS created_at,COALESCE(entityid, '-') AS entityid,COALESCE(order_date::text, '-') AS order_date,COALESCE(sett_no::text, '-') AS sett_no,COALESCE(updated_at::text, '-') AS updated_at FROM tbl_action_table WHERE entityid = %s;"
+            data = (entity_id,)
+        else:
+            sql="SELECT id::text,COALESCE(scrip_code::text, '-') AS scrip_code,COALESCE(mode, '-') AS mode,COALESCE(order_type, '-') AS order_type,COALESCE(scrip_name, '-') AS scrip_name,COALESCE(isin::text, '-') AS isin,COALESCE(order_number::text, '-') AS order_number,COALESCE(folio_number::text, '-') AS folio_number,COALESCE(nav::text, '-') AS nav,COALESCE(stt::text, '-') AS stt,COALESCE(unit::text, '-') AS unit,COALESCE(redeem_amount::text, '-') AS redeem_amount,COALESCE(purchase_amount::text, '-') AS purchase_amount,COALESCE(purchase_value::text, '-') AS purchase_value,COALESCE(cgst::text, '-') AS cgst,COALESCE(sgst::text, '-') AS sgst,COALESCE(igst::text, '-') AS igst,COALESCE(ugst::text, '-') AS ugst,COALESCE(stamp_duty::text, '-') AS stamp_duty,COALESCE(cess_value::text, '-') AS cess_value,COALESCE(net_amount::text, '-') AS net_amount,COALESCE(created_at::text, '-') AS created_at,COALESCE(entityid, '-') AS entityid,COALESCE(order_date::text, '-') AS order_date,COALESCE(sett_no::text, '-') AS sett_no,COALESCE(updated_at::text, '-') AS updated_at FROM tbl_action_table WHERE entityid = %s AND created_by = %s;"    
+        data = (entity_id, email)  # tuple, not set
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs
     except Exception as e:
@@ -446,11 +456,17 @@ def insert_MF_NavData(data):
 
 def getAll_Mutual_Fund_Nav(isin):
      try:
+        role = session.get('role')
+        email = session.get('email')
         #   sql="SELECT * FROM tbl_mutual_fund_nav"
+        if role == 'admin':
           sql="SELECT * FROM tbl_mutual_fund_nav where isin= %s order by nav_date ASC;"
           data=(isin,)
-          msgs=executeSql.ExecuteAllNew(sql,data)
-          return msgs
+        else:
+            sql="SELECT * FROM tbl_mutual_fund_nav where isin= %s AND create_by = %s ORDER by nav_date ASC;"
+            data=(isin, email)
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
@@ -458,10 +474,17 @@ def getAll_Mutual_Fund_Nav(isin):
 
 def getAllMFEquitytotalValue():
     try:
+        role = session.get('role')
+        email = session.get('email')
 
-        sql="WITH latest_nav AS (SELECT DISTINCT ON (isin) isin, nav FROM tbl_mutual_fund_nav ORDER BY isin, nav_date DESC),entity_values AS (SELECT a.entityid, SUM(a.unit * nav.nav) AS entity_total_value FROM tbl_action_table a JOIN latest_nav nav ON a.isin = nav.isin JOIN tbl_entity e ON a.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' GROUP BY a.entityid),total_value AS ( SELECT SUM(entity_total_value) AS total_all_entities FROM entity_values), entity_mf_percent AS ( SELECT ev.entityid,ev.entity_total_value, (ev.entity_total_value / tv.total_all_entities) AS mf_weight_fraction,ROUND((ev.entity_total_value / tv.total_all_entities) * 100, 2) AS mf_weight_percent FROM entity_values ev CROSS JOIN total_value tv), entity_weights AS ( SELECT u.entityid, u.tag, COUNT(*) AS tag_count, SUM(u.weightage::numeric) AS tag_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' AND u.tag IS NOT NULL GROUP BY u.entityid, u.tag), entity_totals AS ( SELECT entityid, SUM(tag_weight) AS total_tag_weight FROM entity_weights GROUP BY entityid ), entity_tag_breakdown AS ( SELECT ew.entityid, ew.tag, ew.tag_count, ew.tag_weight, et.total_tag_weight, ev.entity_total_value,emp.mf_weight_percent, (ew.tag_weight / et.total_tag_weight) * emp.mf_weight_fraction AS tag_fraction, ROUND((ew.tag_weight / et.total_tag_weight) * emp.mf_weight_percent, 2) AS total_tag_percent FROM entity_weights ew JOIN entity_totals et ON ew.entityid = et.entityid JOIN entity_values ev ON ew.entityid = ev.entityid JOIN entity_mf_percent emp ON ew.entityid = emp.entityid), tag_totals AS ( SELECT tag, ROUND(SUM(tag_fraction) * 100, 2) AS overall_tag_percent FROM entity_tag_breakdown GROUP BY tag) SELECT etb.entityid, etb.tag, etb.tag_count, etb.tag_weight, etb.total_tag_weight, etb.entity_total_value, etb.mf_weight_percent, etb.total_tag_percent, CASE  WHEN ROW_NUMBER() OVER (PARTITION BY etb.tag ORDER BY etb.entityid) = 1 THEN tt.overall_tag_percent END AS overall_tag_percent FROM entity_tag_breakdown etb JOIN tag_totals tt ON etb.tag = tt.tag ORDER BY etb.tag, etb.entityid;"
+        if role == 'admin':
+            sql="WITH latest_nav AS (SELECT DISTINCT ON (isin) isin, nav FROM tbl_mutual_fund_nav ORDER BY isin, nav_date DESC),entity_values AS (SELECT a.entityid, SUM(a.unit * nav.nav) AS entity_total_value FROM tbl_action_table a JOIN latest_nav nav ON a.isin = nav.isin JOIN tbl_entity e ON a.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' GROUP BY a.entityid),total_value AS ( SELECT SUM(entity_total_value) AS total_all_entities FROM entity_values), entity_mf_percent AS ( SELECT ev.entityid,ev.entity_total_value, (ev.entity_total_value / tv.total_all_entities) AS mf_weight_fraction,ROUND((ev.entity_total_value / tv.total_all_entities) * 100, 2) AS mf_weight_percent FROM entity_values ev CROSS JOIN total_value tv), entity_weights AS ( SELECT u.entityid, u.tag, COUNT(*) AS tag_count, SUM(u.weightage::numeric) AS tag_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' AND u.tag IS NOT NULL GROUP BY u.entityid, u.tag), entity_totals AS ( SELECT entityid, SUM(tag_weight) AS total_tag_weight FROM entity_weights GROUP BY entityid ), entity_tag_breakdown AS ( SELECT ew.entityid, ew.tag, ew.tag_count, ew.tag_weight, et.total_tag_weight, ev.entity_total_value,emp.mf_weight_percent, (ew.tag_weight / et.total_tag_weight) * emp.mf_weight_fraction AS tag_fraction, ROUND((ew.tag_weight / et.total_tag_weight) * emp.mf_weight_percent, 2) AS total_tag_percent FROM entity_weights ew JOIN entity_totals et ON ew.entityid = et.entityid JOIN entity_values ev ON ew.entityid = ev.entityid JOIN entity_mf_percent emp ON ew.entityid = emp.entityid), tag_totals AS ( SELECT tag, ROUND(SUM(tag_fraction) * 100, 2) AS overall_tag_percent FROM entity_tag_breakdown GROUP BY tag) SELECT etb.entityid, etb.tag, etb.tag_count, etb.tag_weight, etb.total_tag_weight, etb.entity_total_value, etb.mf_weight_percent, etb.total_tag_percent, CASE  WHEN ROW_NUMBER() OVER (PARTITION BY etb.tag ORDER BY etb.entityid) = 1 THEN tt.overall_tag_percent END AS overall_tag_percent FROM entity_tag_breakdown etb JOIN tag_totals tt ON etb.tag = tt.tag ORDER BY etb.tag, etb.entityid;"
         # data = (entity_id,)  # tuple, not set
-        data = ''
+        
+            data = ()
+        else:
+            sql = "WITH latest_nav AS (SELECT DISTINCT ON (isin) isin, nav FROM tbl_mutual_fund_nav ORDER BY isin, nav_date DESC),entity_values AS (SELECT a.entityid, SUM(a.unit * nav.nav) AS entity_total_value FROM tbl_action_table a JOIN latest_nav nav ON a.isin = nav.isin JOIN tbl_entity e ON a.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' AND e.created_by = %s GROUP BY a.entityid),total_value AS ( SELECT SUM(entity_total_value) AS total_all_entities FROM entity_values), entity_mf_percent AS ( SELECT ev.entityid,ev.entity_total_value, (ev.entity_total_value / tv.total_all_entities) AS mf_weight_fraction,ROUND((ev.entity_total_value / tv.total_all_entities) * 100, 2) AS mf_weight_percent FROM entity_values ev CROSS JOIN total_value tv), entity_weights AS ( SELECT u.entityid, u.tag, COUNT(*) AS tag_count, SUM(u.weightage::numeric) AS tag_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND e.subcategory = 'Mutual Fund' AND e.created_by = %s AND u.tag IS NOT NULL GROUP BY u.entityid, u.tag), entity_totals AS ( SELECT entityid, SUM(tag_weight) AS total_tag_weight FROM entity_weights GROUP BY entityid ), entity_tag_breakdown AS ( SELECT ew.entityid, ew.tag, ew.tag_count, ew.tag_weight, et.total_tag_weight, ev.entity_total_value,emp.mf_weight_percent, (ew.tag_weight / et.total_tag_weight) * emp.mf_weight_fraction AS tag_fraction, ROUND((ew.tag_weight / et.total_tag_weight) * emp.mf_weight_percent, 2) AS total_tag_percent FROM entity_weights ew JOIN entity_totals et ON ew.entityid = et.entityid JOIN entity_values ev ON ew.entityid = ev.entityid JOIN entity_mf_percent emp ON ew.entityid = emp.entityid), tag_totals AS ( SELECT tag, ROUND(SUM(tag_fraction) * 100, 2) AS overall_tag_percent FROM entity_tag_breakdown GROUP BY tag) SELECT etb.entityid, etb.tag, etb.tag_count, etb.tag_weight, etb.total_tag_weight, etb.entity_total_value, etb.mf_weight_percent, etb.total_tag_percent, CASE  WHEN ROW_NUMBER() OVER (PARTITION BY etb.tag ORDER BY etb.entityid) = 1 THEN tt.overall_tag_percent END AS overall_tag_percent FROM entity_tag_breakdown etb JOIN tag_totals tt ON etb.tag = tt.tag ORDER BY etb.tag, etb.entityid;"
+            data = (email,)
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs
     except Exception as e:

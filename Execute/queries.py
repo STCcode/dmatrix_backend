@@ -220,21 +220,47 @@ def getAllentity():
 
 
 def getAllMutualFund():
-     try:
-          sql="SELECT * FROM tbl_entity WHERE category = 'Equity' AND subcategory = 'Mutual Fund';"
-          data=''
-          msgs=executeSql.ExecuteAllNew(sql,data)
-          return msgs
-     except Exception as e:
+    try:
+        role = session.get('role')
+        email = session.get('email')
+
+        if not role or not email:
+              return middleware.exe_msgs(responses.queryError_501,"Unauthorized: No Active session", '1023311')
+          
+        if role =='admin':
+            sql="SELECT * FROM tbl_entity WHERE category = 'Equity' AND subcategory = 'Mutual Fund';"
+
+            data = ()
+        else:
+             sql = "select * From tbl_entity WHERE category ='Equit' AND subcategory ='Mutual Fund' AND created_by = %s;"
+             data = (email,)
+
+        print(f"[DEBUG] Running query: {sql} with {data}")  # optional debug line
+          
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
+    except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
 def getMutualFundDataById(entity_id):
     try:
-        sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
-        data = (entity_id,)  # tuple, not set
+        role = session.get('role')
+        email = session.get('email')
+
+        if not role or not email:
+            return middleware.exe_msgs(responses.queryError_501,"Unauthorized: No Active session",'1023311')
+        if role == 'admin':
+            sql = "SELECT * FROM tbl_entity  WHERE entityid = %s;"
+            data = (entity_id,)
+
+        else:
+            sql ='SELECT * FROM tbl_entity WHERE entityid = %s AND created_by = %s;'  
+            data = (entity_id, email)  
+
         msgs = executeSql.ExecuteAllNew(sql, data)
         return msgs
+    
     except Exception as e:
         print("Error in getting underlying by id query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
@@ -274,8 +300,19 @@ def DeleteEntityByid(entity_id):
 
 def getCountOfAllEntity():
      try:
-          sql=" SELECT subcategory,category,COUNT(*) AS total FROM tbl_entity WHERE category ILIKE 'Equity' GROUP BY subcategory, category ORDER BY subcategory;"
-          data=''
+        role = session.get('role')
+        email = session.get('email')
+
+        if not role or not email:
+            return middleware.exe_msgs(responses.queryError_501,"Unauthorized: No Active session",'1023311')
+
+        if role == 'admin':
+            sql=" SELECT subcategory,category,COUNT(*) AS total FROM tbl_entity WHERE category ILIKE 'Equity' GROUP BY subcategory, category ORDER BY subcategory;"
+            data=()
+        else:
+          sql ="SELECT subcategory, category, COUNT(*) AS total FROM    tbl_entity where category ILIKE 'Equity' GROUPE BY subcategory, category ORDER by subcategory" 
+          data=(email,)   
+
           msgs=executeSql.ExecuteAllNew(sql,data)
           return msgs
      except Exception as e:

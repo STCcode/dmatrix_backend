@@ -296,23 +296,28 @@ def action_table(data):
 
 
 def getAllAction():
+    try:
      
-     role = session.get('role')
-     email = session.get('email')
-      
-     try:
+        role = session.get('role')
+        email = session.get('email')
+
+        if not role or not email:
+            return middleware.exe_msgs(responses.queryError_501, "Unauthorized: No active session", '1023311')
+
         if role =='admin':
           sql="SELECT * FROM tbl_action_table"
           data=''
         else:
             sql = "SELECT * FROM tbl_action_table WHERE created_by = %s ORDER BY id DESC"
             data = (email,)  
+        print(f"[DEBUG] Running query: {sql} with {data}")  # optional debug line
+
 
         msgs=executeSql.ExecuteAllNew(sql,data)
         return msgs
-     except Exception as e:
-          print("Error in getingroleRecord query==========================",e)
-          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+    except Exception as e:
+        print("Error in getingroleRecord query==========================",e)
+        return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
 
 def updateMFDetailActionTableRow(data, record_id):

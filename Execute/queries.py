@@ -313,8 +313,8 @@ def getCountOfAllEntity():
         #   sql ="SELECT subcategory, category, COUNT(*) AS total FROM    tbl_entity where category ILIKE 'Equity' GROUPE BY subcategory, category ORDER by subcategory" 
         #   data=(email,)   
 
-          msgs=executeSql.ExecuteAllNew(sql,data)
-          return msgs
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')

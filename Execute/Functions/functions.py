@@ -223,6 +223,8 @@ def login_user():
             if user['role'] == 'admin':
                 # Admin sees all users
                 users_list = queries.get_all_users()
+                if not isinstance(users_list, list):
+                    users_list = []
             else:
                 # Normal user sees only their own data
                 users_list = [user]

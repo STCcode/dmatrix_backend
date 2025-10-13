@@ -82,13 +82,29 @@ def checkusername(id):
 #           print("Error in getingroleRecord query==========================",e)
 #           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
+# def get_all_users():
+#     try:
+#         sql = "SELECT id, name, email, role, created_date FROM tbl_users ORDER BY id DESC"
+#         return executeSql.ExecuteAllNew(sql)
+#     except Exception as e:
+#         print("Error in get_all_users query:", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020330')
 def get_all_users():
     try:
         sql = "SELECT id, name, email, role, created_date FROM tbl_users ORDER BY id DESC"
-        return executeSql.ExecuteAllNew(sql)
+        data = executeSql.ExecuteAllNew(sql)
+
+        # Ensure result is a list, not Response
+        if not isinstance(data, list):
+            print(" Warning: get_all_users() returned non-list:", type(data))
+            return []
+
+        return data
+
     except Exception as e:
         print("Error in get_all_users query:", e)
-        return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020330')
+        return []
+
 
 #getting area data by id
 def getAllUserById(id):

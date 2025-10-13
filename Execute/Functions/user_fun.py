@@ -521,6 +521,13 @@ def action_table():
     try:
         if request.method == 'POST':
             formData = request.get_json()
+            created_by = session.get('email',None)
+
+            if not created_by:
+                return make_response(
+                    middleware.exe_msgs(responses.insert_501, "Unauthorized: Please log in first", '1020501'),
+                    401
+                )
 
             # required_fields = ['scrip_code', 'mode', 'order_type', 'scrip_name',isin, order_number, folio_number, nav, stt, unit, redeem_amount, purchase_amount, cgst, sgst, igst, ugst, stamp_duty, cess_value, net_amount]
             # missing = [f for f in required_fields if f not in formData]
@@ -531,8 +538,7 @@ def action_table():
             #         400
             #     )
 
-            formlist = (formData['scrip_code'],formData['mode'],formData['order_type'],formData['scrip_name'],formData['isin'],formData['order_number'],formData['folio_number'],formData['nav'],formData['stt'],formData['unit'],formData['redeem_amount'],formData['purchase_amount'],formData['cgst'],formData['sgst'],formData['igst'],formData['ugst'],formData['stamp_duty'],formData['cess_value'],formData['net_amount'], datetime.now(),formData['entityid'],formData['purchase_value'],formData['order_date'],formData['sett_no']
-            )
+            formlist = (formData['scrip_code'],formData['mode'],formData['order_type'],formData['scrip_name'],formData['isin'],formData['order_number'],formData['folio_number'],formData['nav'],formData['stt'],formData['unit'],formData['redeem_amount'],formData['purchase_amount'],formData['cgst'],formData['sgst'],formData['igst'],formData['ugst'],formData['stamp_duty'],formData['cess_value'],formData['net_amount'], datetime.now(),formData['entityid'],formData['purchase_value'],formData['order_date'],formData['sett_no'], created_by)
 
             insert_id = queries.action_table(formlist)
 

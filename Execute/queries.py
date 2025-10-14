@@ -1548,6 +1548,18 @@ def getAllEntityBenchMark(category):
 
 
 # ======================================== Get allMfEquityUnderlyingCount Start============================
+def getAllEquityUnderlyingCount():
+     try:
+        sql="WITH equity_subcategories AS (SELECT DISTINCT subcategory FROM tbl_entity WHERE category = 'Equity'),mf_nav AS (SELECT DISTINCT ON (mf.isin)'Mutual Fund' AS subcategory,    mf.isin, mf.nav AS nav_value FROM tbl_mutual_fund_nav mf WHERE EXISTS (SELECT 1 FROM pg_catalog.pg_class WHERE relname='tbl_mutual_fund_nav') ORDER BY mf.isin, mf.nav_date DESC),aif_nav AS (SELECT DISTINCT ON (aif.isin) 'AIF' AS subcategory, aif.isin, aif.post_tax_nav AS nav_value FROM tbl_aif_nav aif WHERE EXISTS (SELECT 1 FROM pg_catalog.pg_class WHERE relname='tbl_aif_nav') ORDER BY aif.isin, aif.nav_date DESC),latest_nav AS (SELECT * FROM mf_nav UNION ALL SELECT * FROM aif_nav),entity_values AS (SELECT    e.entityid, e.subcategory, COALESCE(SUM(a.unit * COALESCE(nav.nav_value,1)),0) AS entity_total_value FROM tbl_entity e LEFT JOIN tbl_action_table a ON e.entityid = a.entityid LEFT JOIN latest_nav nav ON a.isin = nav.isin AND e.subcategory = nav.subcategory WHERE e.category = 'Equity' GROUP BY e.entityid, e.subcategory),total_value AS (SELECT SUM(entity_total_value) AS total_all_entities FROM entity_values),entity_weight AS (SELECT    ev.entityid,    ev.subcategory,    ev.entity_total_value,    (ev.entity_total_value / tv.total_all_entities) AS weight_fraction,    ROUND((ev.entity_total_value / tv.total_all_entities) * 100, 2) AS weight_percent FROM entity_values ev CROSS JOIN total_value tv),entity_weights AS (SELECT    u.entityid,    e.subcategory,    u.tag,    COUNT(*) AS tag_count,    SUM(u.weightage::numeric) AS tag_weight FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity' AND u.tag IS NOT NULL GROUP BY u.entityid, e.subcategory, u.tag),entity_totals AS (SELECT    entityid,    SUM(tag_weight) AS total_tag_weight FROM entity_weights GROUP BY entityid),entity_tag_breakdown AS (SELECT    ew.entityid,    ew.subcategory,    ew.tag,    ew.tag_count,    ew.tag_weight,    et.total_tag_weight,    COALESCE(emp.weight_fraction,0) AS entity_weight_fraction,    (ew.tag_weight / et.total_tag_weight) * COALESCE(emp.weight_fraction,0) AS tag_fraction FROM entity_weights ew JOIN entity_totals et ON ew.entityid = et.entityid LEFT JOIN entity_weight emp ON ew.entityid = emp.entityid),tag_totals AS (SELECT    subcategory,    tag,    SUM(tag_count) AS total_tag_count,    ROUND(SUM(tag_fraction)*100,2) AS overall_tag_percent FROM entity_tag_breakdown GROUP BY subcategory, tag),grand_total AS (SELECT SUM(total_tag_count) AS overall_tag_count FROM tag_totals),total_equity_underlyings AS (SELECT COUNT(*) AS total_equity_underlyings FROM tbl_underlying u JOIN tbl_entity e ON u.entityid = e.entityid WHERE e.category = 'Equity')SELECT tt.subcategory,tt.tag,tt.total_tag_count,gt.overall_tag_count,tt.overall_tag_percent,teu.total_equity_underlyings FROM tag_totals tt CROSS JOIN grand_total gt CROSS JOIN total_equity_underlyings teu ORDER BY tt.subcategory, tt.overall_tag_percent DESC;"
+
+        data=''
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+
+
 
 def GetallMfEquityUnderlyingCount():
      try:

@@ -1167,6 +1167,18 @@ def getFixIncomeETFDetailUnderlyingTable(entity_id):
     except Exception as e:
         print("Error in getting underlying by id query:", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1022310')
+    
+def getCountOfAllFixedIncome():
+     try:
+       
+        sql=" SELECT subcategory,category,COUNT(*) AS total FROM tbl_entity WHERE category ILIKE 'Fixed_Income' GROUP BY subcategory, category ORDER BY subcategory;"
+        data=''
+       
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
 
 # ==================================== Fix Income Fund ETF Table End====================================
 

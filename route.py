@@ -247,6 +247,7 @@ app.add_url_rule('/getAllActionTableOfFixIncomeETF',view_func=user_fun.getAllAct
 app.add_url_rule('/getFixIncomeETFById',view_func=user_fun.getFixIncomeDetailsETFById,methods=['GET','POST'])
 app.add_url_rule('/getFixIncomeETFDetailActionTable',view_func=user_fun.getFixIncomeETFDetailActionTable,methods=['GET','POST'])
 app.add_url_rule('/getFixIncomeEquityDetailUnderlyingTable',view_func=user_fun.getFixIncomeETFDetailUnderlyingTable,methods=['GET','POST'])
+app.add_url_rule('/getCountOfAllFixedIncome',view_func=user_fun.getCountOfAllFixedIncome,methods=['GET','POST'])
 
 
 

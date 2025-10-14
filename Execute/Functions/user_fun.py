@@ -298,11 +298,11 @@ def entity_table():
             created_by = session.get('email',None)
 
 
-            if not created_by:
-                return make_response(
-                    middleware.exe_msgs(responses.insert_501, "Unauthorized: Please log in first", '1020501'),
-                    401
-                )
+            # if not created_by:
+            #     return make_response(
+            #         middleware.exe_msgs(responses.insert_501, "Unauthorized: Please log in first", '1020501'),
+            #         401
+            #     )
 
             formlist = (formData['scripname'],formData.get('scripcode'),None,formData.get('benchmark_name'),formData['category'],formData.get('subcategory'),formData.get('nickname'),datetime.now(),formData.get('isin'),formData.get('aif_category'),formData.get('aif_class'),created_by)
 
@@ -523,11 +523,11 @@ def action_table():
             formData = request.get_json()
             created_by = session.get('email',None)
 
-            if not created_by:
-                return make_response(
-                    middleware.exe_msgs(responses.insert_501, "Unauthorized: Please log in first", '1020501'),
-                    401
-                )
+            # if not created_by:
+            #     return make_response(
+            #         middleware.exe_msgs(responses.insert_501, "Unauthorized: Please log in first", '1020501'),
+            #         401
+            #     )
 
             # required_fields = ['scrip_code', 'mode', 'order_type', 'scrip_name',isin, order_number, folio_number, nav, stt, unit, redeem_amount, purchase_amount, cgst, sgst, igst, ugst, stamp_duty, cess_value, net_amount]
             # missing = [f for f in required_fields if f not in formData]

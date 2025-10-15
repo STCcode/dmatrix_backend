@@ -4534,6 +4534,171 @@ def getDirectEquityCommodityIRR():
 #         )
 
 
+# def upload_and_save():
+#     try:
+#         if request.method != "POST":
+#             return make_response({"error": "Method not allowed"}, 405)
+
+#         now = datetime.now()
+#         inserted_records = []
+#         skipped_records = []
+
+#         files = request.files.getlist("files") if "files" in request.files else []
+#         json_data = None
+
+#         # Case 1️: multipart/form-data (files + optional jsonData)
+#         if files:
+#             json_raw = request.form.get("jsonData")
+
+#             if json_raw:  # jsonData explicitly sent
+#                 try:
+#                     json_data = json.loads(json_raw)
+#                 except Exception as e:
+#                     return make_response({"error": f"Invalid JSON in form: {str(e)}"}, 400)
+
+#             else:  # Case 2️: files only → parse PDF directly
+#                 password = request.form.get("password", "")
+#                 all_parsed = []
+#                 for file in files:
+#                     file.seek(0)
+#                 try:
+#                     broker, parsed_json = process_pdf(
+#                     file,
+#                     request.form.get("category"),
+#                     request.form.get("subcategory"),
+#                     password=password
+#                     )
+#                     if parsed_json:
+#                         all_parsed.extend(parsed_json)
+#                 except ValueError as ve:
+#                  # Handles PDF password errors
+#                     return make_response({"error": str(ve), "code": "1020500"}, 400)
+#                 except Exception as e:
+#                     import traceback
+#                     tb = traceback.format_exc()
+#                     print("PDF parsing failed:\n", tb)
+#                     return make_response({"error": f"Failed to parse PDF: {str(e)}", "code": "1020500"}, 500)
+
+#                 json_data = all_parsed
+
+#         # Case 3️: application/json (raw JSON, no files)
+#         else:
+#             if request.is_json:
+#                 json_data = request.get_json()
+#             else:
+#                 return make_response({"error": "Expected JSON body or files"}, 400)
+
+#         # Normalize json_data
+#         if isinstance(json_data, dict):
+#             json_data = [json_data]
+#         if not json_data:
+#             return make_response({"error": "No data to process"}, 400)
+
+#         #  Loop through parsed items
+#         for item in json_data:
+#             entity_info = item.get("entityTable", {})
+#             actions = item.get("actionTable", [])
+#             if isinstance(actions, dict):
+#                 actions = [actions]
+
+#             #  Step 1: Check for duplicates before creating entity
+#             duplicate_found = False
+#             for action in actions:
+#                 if queries.order_exists(action.get("order_number")):
+#                     skipped_records.append({
+#                         "entityid": None,
+#                         "order_number": action.get("order_number"),
+#                         "pdf": files[0].filename if files else None,
+#                         "status": "skipped (duplicate order_number)"
+#                     })
+#                     duplicate_found = True
+#             if duplicate_found:
+#                 continue  # skip entity creation
+
+#             #  Step 2: Create entity
+#             entityid = queries.create_entity(
+#                 entity_info.get("scripname"),
+#                 entity_info.get("scripcode"),
+#                 entity_info.get("benchmark"),
+#                 entity_info.get("category") or request.form.get("category"),
+#                 entity_info.get("subcategory") or request.form.get("subcategory"),
+#                 entity_info.get("nickname"),
+#                 entity_info.get("isin"),
+#                 now
+#             )
+#             if not entityid:
+#                 continue
+
+#             #  Step 3: Save PDF if uploaded
+#             if files:
+#                 for file in files:
+#                     filename = secure_filename(file.filename)
+#                     file_bytes = file.read()
+#                     file.seek(0)
+#                     queries.insert_pdf_file(entityid, filename, file_bytes, now)
+
+#             #  Step 4: Insert actions
+#             for action in actions:
+#                 inserted = queries.auto_action_table((
+#                     action.get("scrip_code"),
+#                     action.get("mode"),
+#                     action.get("order_type"),
+#                     action.get("scrip_name"),
+#                     action.get("isin"),
+#                     action.get("order_number"),
+#                     action.get("folio_number"),
+#                     action.get("nav"),
+#                     action.get("stt"),
+#                     action.get("unit"),
+#                     action.get("redeem_amount"),
+#                     action.get("purchase_amount"),
+#                     action.get("cgst"),
+#                     action.get("sgst"),
+#                     action.get("igst"),
+#                     action.get("ugst"),
+#                     action.get("stamp_duty"),
+#                     action.get("cess_value"),
+#                     action.get("net_amount"),
+#                     now,
+#                     entityid,
+#                     action.get("purchase_value"),
+#                     action.get("order_date"),
+#                     action.get("sett_no")
+#                 ))
+
+#                 if inserted:
+#                     inserted_records.append({
+#                         "entityid": entityid,
+#                         "order_number": action.get("order_number"),
+#                         "pdf": files[0].filename if files else None,
+#                         "status": "inserted"
+#                     })
+#                 else:
+#                     skipped_records.append({
+#                         "entityid": entityid,
+#                         "order_number": action.get("order_number"),
+#                         "pdf": files[0].filename if files else None,
+#                         "status": "skipped (duplicate at DB-level)"
+#                     })
+
+#         #  Summary response
+#         summary = {
+#             "inserted_count": len(inserted_records),
+#             "skipped_count": len(skipped_records),
+#             "total_processed": len(inserted_records) + len(skipped_records)
+#         }
+
+#         return make_response({
+#             "inserted": inserted_records,
+#             "skipped": skipped_records,
+#             "summary": summary,
+#             "code": "1020200"
+#         }, 200)
+
+#     except Exception as e:
+#         print("Error in upload_and_save:", e)
+#         return make_response({"error": str(e), "code": "1020500"}, 500)
+
 def upload_and_save():
     try:
         if request.method != "POST":
@@ -4546,90 +4711,104 @@ def upload_and_save():
         files = request.files.getlist("files") if "files" in request.files else []
         json_data = None
 
-        # Case 1️: multipart/form-data (files + optional jsonData)
+        # -------------------------
+        # Handle files + optional JSON
+        # -------------------------
         if files:
             json_raw = request.form.get("jsonData")
-
-            if json_raw:  # jsonData explicitly sent
+            if json_raw:
                 try:
                     json_data = json.loads(json_raw)
                 except Exception as e:
                     return make_response({"error": f"Invalid JSON in form: {str(e)}"}, 400)
-
-            else:  # Case 2️: files only → parse PDF directly
-                password = request.form.get("password", "")
+            else:
+                # Parse PDFs directly
                 all_parsed = []
                 for file in files:
                     file.seek(0)
-                try:
-                    broker, parsed_json = process_pdf(
-                    file,
-                    request.form.get("category"),
-                    request.form.get("subcategory"),
-                    password=password
-                    )
-                    if parsed_json:
-                        all_parsed.extend(parsed_json)
-                except ValueError as ve:
-                 # Handles PDF password errors
-                    return make_response({"error": str(ve), "code": "1020500"}, 400)
-                except Exception as e:
-                    import traceback
-                    tb = traceback.format_exc()
-                    print("PDF parsing failed:\n", tb)
-                    return make_response({"error": f"Failed to parse PDF: {str(e)}", "code": "1020500"}, 500)
+                    try:
+                        broker, parsed_json = process_pdf(
+                            file,
+                            request.form.get("category"),
+                            request.form.get("subcategory"),
+                            password=request.form.get("password", "")
+                        )
+                        if parsed_json:
+                            all_parsed.extend(parsed_json)
+                    except ValueError as ve:
+                        return make_response({"error": str(ve), "code": "1020500"}, 400)
+                    except Exception as e:
+                        import traceback
+                        tb = traceback.format_exc()
+                        print("PDF parsing failed:\n", tb)
+                        return make_response({"error": f"Failed to parse PDF: {str(e)}", "code": "1020500"}, 500)
 
                 json_data = all_parsed
 
-        # Case 3️: application/json (raw JSON, no files)
+        # -------------------------
+        # Handle raw JSON body
+        # -------------------------
         else:
             if request.is_json:
                 json_data = request.get_json()
             else:
                 return make_response({"error": "Expected JSON body or files"}, 400)
 
-        # Normalize json_data
+        # Normalize to list
         if isinstance(json_data, dict):
             json_data = [json_data]
         if not json_data:
             return make_response({"error": "No data to process"}, 400)
 
-        #  Loop through parsed items
+        # -------------------------
+        # Process each item
+        # -------------------------
         for item in json_data:
             entity_info = item.get("entityTable", {})
             actions = item.get("actionTable", [])
             if isinstance(actions, dict):
                 actions = [actions]
 
-            #  Step 1: Check for duplicates before creating entity
-            duplicate_found = False
-            for action in actions:
-                if queries.order_exists(action.get("order_number")):
+            # -------------------------
+            # Step 1: Check for existing entity
+            # -------------------------
+            entityid = None
+            scripcode = entity_info.get("scripcode")
+            isin = entity_info.get("isin")
+
+            if scripcode:
+                entityid = queries.get_entity_by_scripcode(scripcode)
+            if not entityid and isin:
+                entityid = queries.get_entity_by_isin(isin)
+
+            # -------------------------
+            # Step 2: Create entity if not exists
+            # -------------------------
+            if not entityid:
+                entityid = queries.create_entity(
+                    entity_info.get("scripname"),
+                    scripcode,
+                    entity_info.get("benchmark"),
+                    entity_info.get("category") or request.form.get("category"),
+                    entity_info.get("subcategory") or request.form.get("subcategory"),
+                    entity_info.get("nickname"),
+                    isin,
+                    now
+                )
+            if not entityid:
+                # Failed to create entity; skip this item
+                for action in actions:
                     skipped_records.append({
                         "entityid": None,
                         "order_number": action.get("order_number"),
                         "pdf": files[0].filename if files else None,
-                        "status": "skipped (duplicate order_number)"
+                        "status": "skipped (entity creation failed)"
                     })
-                    duplicate_found = True
-            if duplicate_found:
-                continue  # skip entity creation
-
-            #  Step 2: Create entity
-            entityid = queries.create_entity(
-                entity_info.get("scripname"),
-                entity_info.get("scripcode"),
-                entity_info.get("benchmark"),
-                entity_info.get("category") or request.form.get("category"),
-                entity_info.get("subcategory") or request.form.get("subcategory"),
-                entity_info.get("nickname"),
-                entity_info.get("isin"),
-                now
-            )
-            if not entityid:
                 continue
 
-            #  Step 3: Save PDF if uploaded
+            # -------------------------
+            # Step 3: Save PDF files
+            # -------------------------
             if files:
                 for file in files:
                     filename = secure_filename(file.filename)
@@ -4637,15 +4816,29 @@ def upload_and_save():
                     file.seek(0)
                     queries.insert_pdf_file(entityid, filename, file_bytes, now)
 
-            #  Step 4: Insert actions
+            # -------------------------
+            # Step 4: Insert actions
+            # -------------------------
             for action in actions:
+                order_number = action.get("order_number")
+
+                # Skip duplicates
+                if queries.order_exists(order_number):
+                    skipped_records.append({
+                        "entityid": entityid,
+                        "order_number": order_number,
+                        "pdf": files[0].filename if files else None,
+                        "status": "skipped (duplicate order_number)"
+                    })
+                    continue
+
                 inserted = queries.auto_action_table((
                     action.get("scrip_code"),
                     action.get("mode"),
                     action.get("order_type"),
                     action.get("scrip_name"),
                     action.get("isin"),
-                    action.get("order_number"),
+                    order_number,
                     action.get("folio_number"),
                     action.get("nav"),
                     action.get("stt"),
@@ -4669,19 +4862,21 @@ def upload_and_save():
                 if inserted:
                     inserted_records.append({
                         "entityid": entityid,
-                        "order_number": action.get("order_number"),
+                        "order_number": order_number,
                         "pdf": files[0].filename if files else None,
                         "status": "inserted"
                     })
                 else:
                     skipped_records.append({
                         "entityid": entityid,
-                        "order_number": action.get("order_number"),
+                        "order_number": order_number,
                         "pdf": files[0].filename if files else None,
-                        "status": "skipped (duplicate at DB-level)"
+                        "status": "skipped (DB-level duplicate)"
                     })
 
-        #  Summary response
+        # -------------------------
+        # Summary response
+        # -------------------------
         summary = {
             "inserted_count": len(inserted_records),
             "skipped_count": len(skipped_records),
@@ -4698,8 +4893,7 @@ def upload_and_save():
     except Exception as e:
         print("Error in upload_and_save:", e)
         return make_response({"error": str(e), "code": "1020500"}, 500)
-
-
+    
 # ============================= Auto PDF Read and Insert Into DB =========================
 
 

@@ -2200,6 +2200,23 @@ def auto_action_table(action_tuple):
             return False  # ⚠️ Skipped due to duplicate
         print("Error in auto_action_table:", e)
         return False
+    
+def get_entity_by_scripcode(scripcode):
+    try:
+        sql = "SELECT entityid FROM tbl_entity WHERE scripcode = %s LIMIT 1"
+        result = executeSql.ExecuteAllNew(sql, (scripcode,))
+        return result[0]["entityid"] if result else None
+    except:
+        return None
+
+def get_entity_by_isin(isin):
+    try:
+        sql = "SELECT entityid FROM tbl_entity WHERE isin = %s LIMIT 1"
+        result = executeSql.ExecuteAllNew(sql, (isin,))
+        return result[0]["entityid"] if result else None
+    except:
+        return None
+
 
 
 

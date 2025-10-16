@@ -1743,10 +1743,11 @@ def getAIFDetailsFixedIncomeSectorCount(entity_id):
 # ======================================Get All Home instrument_counts of Equity======================================
 def getAllHomeData():
      try:
-          sql="WITH instrument_counts AS (SELECT 'Equity' AS instrument, (SELECT COUNT(*) FROM tbl_action_table) + (SELECT COUNT(*) FROM tbl_aif) + (SELECT COUNT(*) FROM tbl_direct_equity) AS instrument_total_count UNION ALL SELECT 'Fixed Income', 0 UNION ALL SELECT 'Commodities', 0)SELECT * FROM instrument_counts;"
-          data=''
-          msgs=executeSql.ExecuteAllNew(sql,data)
-          return msgs
+        #   sql="WITH instrument_counts AS (SELECT 'Equity' AS instrument, (SELECT COUNT(*) FROM tbl_action_table) + (SELECT COUNT(*) FROM tbl_aif) + (SELECT COUNT(*) FROM tbl_direct_equity) AS instrument_total_count UNION ALL SELECT 'Fixed Income', 0 UNION ALL SELECT 'Commodities', 0)SELECT * FROM instrument_counts;"
+        sql ="WITH instruments AS ( SELECT unnest(ARRAY['Equity', 'Fixed_Income', 'Commodities']) AS instrument),counts AS ( SELECT  category AS instrument, COUNT(*) AS instrument_total_count FROM  tbl_entity GROUP BY  category)SELECT  i.instrument, COALESCE(c.instrument_total_count, 0) AS instrument_total_count FROM  instruments i LEFT JOIN  counts c ON i.instrument = c.instrument ORDER BY  i.instrument;"
+        data=''
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')

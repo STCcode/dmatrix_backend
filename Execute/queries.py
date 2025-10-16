@@ -1751,6 +1751,17 @@ def getAllHomeData():
      except Exception as e:
           print("Error in getingroleRecord query==========================",e)
           return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+     
+def getAllInstrumentCountChart():
+     try:
+        sql ="WITH instruments AS (SELECT unnest(ARRAY['Equity', 'Fixed_Income', 'Commodities']) AS instrument ), counts AS (SELECT category AS instrument, COUNT(*) AS instrument_total_count FROM tbl_entity GROUP BY category ),totals AS ( SELECT SUM(instrument_total_count) AS total_count FROM counts ) SELECT i.instrument, COALESCE(c.instrument_total_count, 0) AS instrument_total_count, t.total_count AS all_instruments_total_count, ROUND( COALESCE(c.instrument_total_count, 0)::numeric / t.total_count * 100,2) AS percentage FROM instruments i LEFT JOIN counts c ON i.instrument = c.instrument CROSS JOIN totals t ORDER BY ARRAY_POSITION(ARRAY['Equity', 'Fixed_Income', 'Commodities'], i.instrument);"
+        data=''
+        msgs=executeSql.ExecuteAllNew(sql,data)
+        return msgs
+     except Exception as e:
+          print("Error in getingroleRecord query==========================",e)
+          return middleware.exe_msgs(responses.queryError_501,str(e.args),'1023310')
+          
 # ======================================Get All Home instrument_counts of Equity======================================
 
 

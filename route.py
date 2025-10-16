@@ -323,6 +323,8 @@ app.add_url_rule('/getAllAIFFixedIncomeSectorCount',view_func=user_fun.GetallAIF
 
 # ======================================Get All Home Equity======================================
 app.add_url_rule('/getAllHomeData',view_func=user_fun.getAllHomeData,methods=['GET','POST'])
+app.add_url_rule('/getAllInstrumentCountChart',view_func=user_fun.getAllInstrumentCountChart,methods=['GET','POST'])
+
 # ======================================Get All Home Equity======================================
 
 # ======================================Get All Action instrument (MutualFund)======================================

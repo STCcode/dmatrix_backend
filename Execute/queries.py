@@ -2312,17 +2312,11 @@ def insert_pdf_file(entityid, pdf_name, pdf_file, uploaded_at):
 
 # =======================# new compare weight API Start========================
 def compare_entity_weights(entity1, entity2):
-    """
-    Compare two entities (mutual funds or portfolios) by holdings and weights.
-    - Returns all holdings of each entity
-    - Overlap details, counts, and percentages
-    - Uses scrip_name as keys
-    - Handles missing data gracefully
-    """
+  
     try:
         # Fetch holdings along with scrip_name
         sql = """
-            SELECT u.entityid, e.scripname, u.company_name u.isin_code, u.weightage::numeric AS weight
+            SELECT u.entityid, e.scripname, u.company_name, u.isin_code, u.weightage::numeric AS weight
             FROM tbl_underlying u
             JOIN tbl_entity e ON u.entityid = e.entityid
             WHERE u.entityid IN (%s, %s)

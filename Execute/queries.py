@@ -41,24 +41,24 @@ def login_user(data):
 
 
 # postgres query
-# def save_user(data):
-#     try:
-#      #    sql = " INSERT INTO tbl_users (name, email, password, created_by, created_date, updated_date) VALUES (%s, %s, md5(%s), %s, %s, %s)"
-#         sql = " INSERT INTO tbl_users (name, email, password, created_date, updated_date) VALUES (%s, %s, md5(%s), %s, %s)"
-#         msg = executeSql.ExecuteReturnId(sql, data)
-#         return msg
-#     except Exception as e:
-#         print("Error in save_user query==========================", e)
-#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
-
 def save_user(data):
     try:
-        sql = " INSERT INTO tbl_users (name, email, password, role, created_by, created_date, updated_date) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+     #    sql = " INSERT INTO tbl_users (name, email, password, created_by, created_date, updated_date) VALUES (%s, %s, md5(%s), %s, %s, %s)"
+        sql = " INSERT INTO tbl_users (name, email, password, created_date, updated_date) VALUES (%s, %s, md5(%s), %s, %s)"
         msg = executeSql.ExecuteReturnId(sql, data)
         return msg
     except Exception as e:
-        print("Error in save_user query:", e)
+        print("Error in save_user query==========================", e)
         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
+
+# def save_user(data):
+#     try:
+#         sql = " INSERT INTO tbl_users (name, email, password, role, created_by, created_date, updated_date) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+#         msg = executeSql.ExecuteReturnId(sql, data)
+#         return msg
+#     except Exception as e:
+#         print("Error in save_user query:", e)
+#         return middleware.exe_msgs(responses.queryError_501, str(e.args), '1020310')
 # Check Username
 
 def checkusername(id):

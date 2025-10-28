@@ -71,7 +71,7 @@ app.add_url_rule('/login', view_func=functions.login_user,methods=['GET','POST']
 
 app.add_url_rule('/emailhtml', view_func=functions.emailhtml)
 app.add_url_rule('/landingpage', view_func=functions.landingpage)
-app.add_url_rule('/main', view_func=functions.home)
+# app.add_url_rule('/main', view_func=functions.home)
 app.add_url_rule('/logout', view_func=functions.logout)
 
 #User Master 

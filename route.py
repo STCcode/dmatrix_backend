@@ -13,7 +13,7 @@ import os
 print(os.getcwd())
 
 # app = Flask(__name__)
-# CORS(app)
+CORS(app)
 init_json(app)  # enable custom JSON globally
 app.secret_key = 'super secret key'
 

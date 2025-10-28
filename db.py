@@ -21,8 +21,8 @@ def get_db_connection():
         print("Connecting via db.yaml (local dev)...")
         db = yaml.safe_load(open('db.yaml'))
         return psycopg2.connect(
-            host=db['postgres_host'],
-            user=db['postgres_user'],
-            password=db['postgres_password'],
-            dbname=db['postgres_db']
+            host=db['localhost'],
+            user=db['postgres'],
+            password=db['Admin@123'],
+            dbname=db['db_dmatrix']
         )

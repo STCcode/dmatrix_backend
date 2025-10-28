@@ -2,6 +2,7 @@ from flask import Flask,session
 from flask_cors import CORS,cross_origin
 import psycopg2
 import schedule
+from app import app 
 import time
 from datetime import datetime as dt,date
 import yaml
@@ -11,9 +12,9 @@ import os
 
 print(os.getcwd())
 
-app = Flask(__name__)
-CORS(app)
-init_json(app)  # ✅ enable custom JSON globally
+# app = Flask(__name__)
+# CORS(app)
+init_json(app)  # enable custom JSON globally
 app.secret_key = 'super secret key'
 
 db = yaml.full_load(open('db.yaml'))

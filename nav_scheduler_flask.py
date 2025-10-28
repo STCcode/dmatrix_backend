@@ -106,22 +106,22 @@ def fetch_latest_navs():
     """
 
     df = pd.read_sql(query, engine)
-    print(f"✅ Latest NAVs for {len(df)} schemes:")
+    print(f" Latest NAVs for {len(df)} schemes:")
     print(df.to_string(index=False))
 
 # -----------------------------
 # Step 2: Scheduler Task
 # -----------------------------
 def daily_nav_update():
-    print(f"⏰ Running NAV update: {datetime.now()}")
+    print(f" Running NAV update: {datetime.now()}")
     try:
         df = download_amfi_nav()
-        print("✅ Downloaded rows:", len(df))
+        print(" Downloaded rows:", len(df))
         save_to_postgres(df)
         fetch_latest_navs()
-        print("✅ NAV update completed successfully.\n")
+        print(" NAV update completed successfully.\n")
     except Exception as e:
-        print(f"❌ Error during NAV update: {e}")
+        print(f" Error during NAV update: {e}")
 
 def run_scheduler():
     global stop_scheduler
